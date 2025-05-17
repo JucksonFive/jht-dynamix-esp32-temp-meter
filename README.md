@@ -10,6 +10,7 @@ jht-dynamix-esp32-temp-meter/
 │   ├── cdk/                  # AWS CDK infrastructure definitions
 │   ├── lambdas/              # Lambda function source code
 │   └── package.json          # CDK project metadata
+├── board/                    # Firmware for esp32
 └── README.md
 ```
 
