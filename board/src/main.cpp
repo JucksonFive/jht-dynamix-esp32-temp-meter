@@ -1,9 +1,8 @@
 #include <Arduino.h>
 #include <DHT.h>
 
-// 🟡 Määritä käytetty GPIO-pin (esim. DHT22 signaalijohto)
-#define DHTPIN 5        // GPIO4 (voi vaihtaa tarpeen mukaan)
-#define DHTTYPE DHT11   // Muuta DHT11:ksi jos käytät sitä
+#define DHTPIN 5        
+#define DHTTYPE DHT11   
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -25,5 +24,5 @@ void loop() {
     Serial.printf("Temperature: %.1f °C\tHumidity: %.1f %%\n", temperature, humidity);
   }
 
-  delay(2000);  // Lue dataa 2 sekunnin välein
+  delay(2000);
 }
