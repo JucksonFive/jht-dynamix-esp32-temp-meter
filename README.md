@@ -25,7 +25,7 @@ jht-dynamix-esp32-temp-meter/
 
 ## 🛠️ Technologies Used
 
-- ESP32 (or Node.js-based MQTT simulator)
+- ESP32
 - TypeScript
 - AWS CDK
 - AWS IoT Core
