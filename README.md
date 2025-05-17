@@ -53,5 +53,3 @@ All requests require an API key in the headers:
 ```bash
 curl -H "x-api-key: <YOUR_API_KEY>" https://mrcc16s8zk.execute-api.eu-north-1.amazonaws.com/prod/readings
 ```
-
-Replace <YOUR_API_KEY> with your actual key.
