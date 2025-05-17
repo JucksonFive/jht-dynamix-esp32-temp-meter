@@ -39,3 +39,19 @@ The simulator publishes random temperature/humidity values to the `sensors/tempe
 
 - **SaveToDynamoFunction**: Stores MQTT payloads into DynamoDB
 - **FetchFromDynamoFunction**: Retrieves all or filtered readings from DynamoDB
+
+## API Usage
+
+All API requests are made through the following base path: https://mrcc16s8zk.execute-api.eu-north-1.amazonaws.com/prod
+
+### 🔹 Endpoints
+
+- `GET /readings` — Fetch all readings
+
+All requests require an API key in the headers:
+
+```bash
+curl -H "x-api-key: <YOUR_API_KEY>" https://mrcc16s8zk.execute-api.eu-north-1.amazonaws.com/prod/readings
+```
+
+Replace <YOUR_API_KEY> with your actual key.
