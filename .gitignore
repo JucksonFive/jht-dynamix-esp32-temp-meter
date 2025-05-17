@@ -1,0 +1,16 @@
+simulator/*
+certs/*
+event.json
+certs_output.json
+response.json
+backend/.env
+backend/cdk/*.js
+backend/cdk/!jest.config.js
+backend/cdk/*.d.ts
+backend/node_modules
+
+# CDK asset staging directory
+backend/cdk/.cdk.staging
+backend/cdk/cdk.out
+backend/dist
+board/.pio
