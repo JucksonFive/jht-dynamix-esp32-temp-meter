@@ -49,7 +49,7 @@ export class BackendStack extends cdk.Stack {
         "../../lambdas/postToDynamoDb/postToDynamo.ts"
       ),
       handler: "handler",
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_LATEST,
       environment: {
         TABLE_NAME: table.tableName,
       },
@@ -68,7 +68,7 @@ export class BackendStack extends cdk.Stack {
           "../../lambdas/getFromDynamoDb/getAllTemperatures.ts"
         ),
         handler: "handler",
-        runtime: lambda.Runtime.NODEJS_18_X,
+        runtime: lambda.Runtime.NODEJS_LATEST,
         environment: {
           TABLE_NAME: table.tableName,
         },
