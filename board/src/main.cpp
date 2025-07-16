@@ -1,28 +1,48 @@
 #include <Arduino.h>
-#include <DHT.h>
+#include "wifi_helper.h"
+#include "mqtt_helper.h"
+#include "temperature_sensor.h"
+#include <wifi_helper.h>
 
-#define DHTPIN 5        
-#define DHTTYPE DHT11   
+const char *ssid = "Villa Papanizzio";
+const char *password = "Gonzales";
 
-DHT dht(DHTPIN, DHTTYPE);
+const char *mqtt_server = "broker.hivemq.com";
+const int mqtt_port = 1883;
+const char *mqtt_topic = "esp32/temperature";
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  delay(2000);
-  Serial.println("Starting DHT22 sensor...");
-  dht.begin();
+  delay(1000);
+
+  WifiHelper::connect(ssid, password);
+
+  TempSensor::setup();
+  MQTT::setup(mqtt_server, mqtt_port);
+  MQTT::ensureConnection("ESP32Client");
 }
 
-void loop() {
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-  Serial.printf("Humidity: %.1f %%\tTemperature: %.1f °C\n", humidity, temperature);
+void loop()
+{
+  if (!MQTT::client.connected())
+  {
+    MQTT::ensureConnection("ESP32Client");
+  }
+  MQTT::loop();
 
-  if (isnan(temperature)) {
-    Serial.println("Failed to read from DHT sensor!");
-  } else {
-    Serial.printf("Temperature: %.1f °C\tHumidity: %.1f %%\n", temperature, humidity);
+  float temp = TempSensor::readCelsius();
+  if (temp == DEVICE_DISCONNECTED_C)
+  {
+    Serial.println("Sensor error");
+  }
+  else
+  {
+    char payload[16];
+    snprintf(payload, sizeof(payload), "%.2f", temp);
+    MQTT::publish(mqtt_topic, payload);
+    Serial.printf("Published: %s °C\n", payload);
   }
 
-  delay(2000);
+  delay(5000);
 }
