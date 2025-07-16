@@ -2,7 +2,6 @@
 #include "wifi_helper.h"
 #include "mqtt_helper.h"
 #include "temperature_sensor.h"
-#include <wifi_helper.h>
 
 const char *ssid = "Villa Papanizzio";
 const char *password = "Gonzales";
@@ -25,7 +24,7 @@ void setup()
 
 void loop()
 {
-  if (!MQTT::client.connected())
+  if (!MQTT::isConnected())
   {
     MQTT::ensureConnection("ESP32Client");
   }
