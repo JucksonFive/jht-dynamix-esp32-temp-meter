@@ -22,7 +22,6 @@ void MQTT::ensureConnection(const char *clientId)
     {
         Serial.print("Connecting to MQTT...");
 
-        // Tärkeä: clientId pitää olla String → c_str()
         if (client.connect(clientId))
         {
             Serial.println(" ✅ connected");
@@ -30,7 +29,7 @@ void MQTT::ensureConnection(const char *clientId)
         else
         {
             Serial.print(" ❌ failed, rc=");
-            Serial.print(client.state()); // Tulostaa virhekoodin
+            Serial.print(client.state());
             Serial.println(" try again in 5 seconds");
             delay(5000);
         }

@@ -9,7 +9,7 @@ const char *password = "Gonzales";
 
 const char *mqtt_server = "a2ig9dwsqscl2t-ats.iot.eu-north-1.amazonaws.com";
 const int mqtt_port = 8883;
-const char *mqtt_topic = "devices/esp32-1/temperature";
+const char *mqtt_topic = "sensors/temperature";
 String clientId = "esp32-" + String(WiFi.macAddress());
 
 void setup()
@@ -39,9 +39,13 @@ void loop()
   }
   else
   {
-    char payload[16];
-    snprintf(payload, sizeof(payload), "%.2f", temp);
+    char payload[128];
+    snprintf(payload, sizeof(payload),
+             "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"2025-07-17T13:37:00Z\"}",
+             temp);
+
     MQTT::publish(mqtt_topic, payload);
+
     Serial.printf("Published: %s °C\n", payload);
   }
 
