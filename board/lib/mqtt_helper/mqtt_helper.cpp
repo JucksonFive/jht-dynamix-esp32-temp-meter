@@ -2,15 +2,17 @@
 #include <PubSubClient.h>
 #include <WiFiClient.h>
 #include <Arduino.h>
+#include <cert_helper.h>
 
 namespace
 {
-    WiFiClient espClient;
-    PubSubClient client(espClient); // käytetään WiFiClient:ia
+    WiFiClientSecure secureClient;
+    PubSubClient client(secureClient);
 }
 
 void MQTT::setup(const char *server, int port)
 {
+    CertHelper::loadCerts(secureClient); 
     client.setServer(server, port);
 }
 
@@ -19,14 +21,18 @@ void MQTT::ensureConnection(const char *clientId)
     while (!client.connected())
     {
         Serial.print("Connecting to MQTT...");
+
+        // Tärkeä: clientId pitää olla String → c_str()
         if (client.connect(clientId))
         {
             Serial.println(" ✅ connected");
         }
         else
         {
-            Serial.print(".");
-            delay(1000);
+            Serial.print(" ❌ failed, rc=");
+            Serial.print(client.state()); // Tulostaa virhekoodin
+            Serial.println(" try again in 5 seconds");
+            delay(5000);
         }
     }
 }
@@ -45,3 +51,4 @@ bool MQTT::isConnected()
 {
     return client.connected();
 }
+

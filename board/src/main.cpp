@@ -2,13 +2,15 @@
 #include "wifi_helper.h"
 #include "mqtt_helper.h"
 #include "temperature_sensor.h"
+#include <WiFi.h>
 
 const char *ssid = "Villa Papanizzio";
 const char *password = "Gonzales";
 
-const char *mqtt_server = "broker.hivemq.com";
-const int mqtt_port = 1883;
-const char *mqtt_topic = "esp32/temperature";
+const char *mqtt_server = "a2ig9dwsqscl2t-ats.iot.eu-north-1.amazonaws.com";
+const int mqtt_port = 8883;
+const char *mqtt_topic = "devices/esp32-1/temperature";
+String clientId = "esp32-" + String(WiFi.macAddress());
 
 void setup()
 {
@@ -19,14 +21,14 @@ void setup()
 
   TempSensor::setup();
   MQTT::setup(mqtt_server, mqtt_port);
-  MQTT::ensureConnection("ESP32Client");
+  MQTT::ensureConnection(clientId.c_str());
 }
 
 void loop()
 {
   if (!MQTT::isConnected())
   {
-    MQTT::ensureConnection("ESP32Client");
+    MQTT::ensureConnection(clientId.c_str());
   }
   MQTT::loop();
 
