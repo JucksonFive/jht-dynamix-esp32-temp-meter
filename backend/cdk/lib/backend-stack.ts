@@ -12,7 +12,7 @@ export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    new cdk.aws_iot.CfnThing(this, "Esp32Thing", {
+    new iot.CfnThing(this, "Esp32Thing", {
       thingName: "esp32-sensor",
     });
 
