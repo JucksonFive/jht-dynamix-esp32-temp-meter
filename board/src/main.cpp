@@ -3,6 +3,7 @@
 #include "mqtt_helper.h"
 #include "temperature_sensor.h"
 #include <WiFi.h>
+#include <time_helper.h>
 
 const char *ssid = "Villa Papanizzio";
 const char *password = "Gonzales";
@@ -16,9 +17,8 @@ void setup()
 {
   Serial.begin(115200);
   delay(1000);
-
   WifiHelper::connect(ssid, password);
-
+  TimeHelper::setup();
   TempSensor::setup();
   MQTT::setup(mqtt_server, mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
@@ -40,15 +40,15 @@ void loop()
   else
   {
     char payload[128];
-    unsigned long ts = millis();
+    const char *ts = TimeHelper::getLocalTimestamp();
+    
     snprintf(payload, sizeof(payload),
-      "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%lu\"}", 
-      temp, ts);
-
+             "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%s\"}",
+             temp, ts);
 
     MQTT::publish(mqtt_topic, payload);
 
-    Serial.printf("Published: %s °C\n", payload);
+    Serial.printf("Published: %s \n", payload);
   }
 
   delay(5000);
