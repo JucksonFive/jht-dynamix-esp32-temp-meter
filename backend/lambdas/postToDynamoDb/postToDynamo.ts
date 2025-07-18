@@ -1,18 +1,22 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { IoTEvent } from "./types";
 
 const client = new DynamoDBClient({});
 
-export const handler = async (event: IoTEvent): Promise<void> => {
-  const payload = JSON.parse(event.payload);
-  const { deviceId, temperature, humidity, timestamp } = payload;
+export const handler = async (event: any): Promise<void> => {
+  console.log("Received event:", JSON.stringify(event));
+
+  const { deviceId, temperature, timestamp } = event;
+
+  if (!deviceId || temperature === undefined || !timestamp) {
+    console.error("Missing required fields");
+    return;
+  }
 
   const command = new PutItemCommand({
-    TableName: process.env.TABLE_NAME,
+    TableName: process.env.TABLE_NAME!,
     Item: {
       deviceId: { S: deviceId },
       temperature: { N: temperature.toString() },
-      humidity: { N: humidity.toString() },
       timestamp: { S: timestamp },
     },
   });
