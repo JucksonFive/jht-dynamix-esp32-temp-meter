@@ -40,9 +40,11 @@ void loop()
   else
   {
     char payload[128];
+    unsigned long ts = millis();
     snprintf(payload, sizeof(payload),
-             "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"2025-07-17T13:37:00Z\"}",
-             temp);
+      "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%lu\"}", 
+      temp, ts);
+
 
     MQTT::publish(mqtt_topic, payload);
 
