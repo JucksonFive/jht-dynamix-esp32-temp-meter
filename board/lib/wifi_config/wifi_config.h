@@ -1,14 +1,14 @@
-#pragma  once
+#pragma once
 #include <Arduino.h>
 
-struct WifiConfig {
-    String ssid;
-    String password;
-    String deviceId;
+struct WifiCredentials {
+  String ssid;
+  String password;
 };
 
-namespace WifiConfigManager {
-    bool load(WifiConfig& config);
-    bool save(const WifiConfig& config);
-    void clear(); 
-}
+bool loadWifiCredentials(WifiCredentials &creds);
+bool saveWifiCredentials(const String &ssid, const String &password);
+bool wifiCredentialsExist();
+
+bool connectToWifi(uint32_t timeoutMs = 10000);
+bool isWifiConnected();

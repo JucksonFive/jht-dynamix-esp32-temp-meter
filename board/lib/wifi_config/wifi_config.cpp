@@ -1,39 +1,49 @@
-#include "wifi_config_manager.h"
-#include <LittleFS.h>
-#include <ArduinoJson.h>
+#include "wifi_config.h"
+#include <WiFi.h>
+#include "wifi_config.h"
+#include "../wifi_config_manager/wifi_config_manager.h"
 
-const char* CONFIG_FILE = "/wifi_config.json";
+bool connectToWifi(uint32_t timeoutMs) {
+  WifiCredentials creds;
+  if (!loadWifiCredentials(creds)) {
+    Serial.println("[WiFi] Failed to load credentials");
+    return false;
+  }
 
-bool WifiConfigManager::load(WifiConfig& config) {
-  if (!LittleFS.exists(CONFIG_FILE)) return false;
+  Serial.printf("[WiFi] Connecting to %s...\n", creds.ssid.c_str());
 
-  File file = LittleFS.open(CONFIG_FILE, "r");
-  if (!file) return false;
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(creds.ssid.c_str(), creds.password.c_str());
 
-  StaticJsonDocument<256> doc;
-  DeserializationError error = deserializeJson(doc, file);
-  file.close();
-  if (error) return false;
+  uint32_t start = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start < timeoutMs) {
+    delay(500);
+    Serial.print(".");
+  }
 
-  config.ssid = doc["ssid"].as<String>();
-  config.password = doc["password"].as<String>();
-  config.deviceId = doc["deviceId"].as<String>();
-  return true;
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\n[WiFi] Connected!");
+    Serial.println(WiFi.localIP());
+    return true;
+  } else {
+    Serial.println("\n[WiFi] Connection failed.");
+    return false;
+  }
 }
 
-bool WifiConfigManager::save(const WifiConfig& config) {
-  File file = LittleFS.open(CONFIG_FILE, "w");
-  if (!file) return false;
-
-  StaticJsonDocument<256> doc;
-  doc["ssid"] = config.ssid;
-  doc["password"] = config.password;
-  doc["deviceId"] = config.deviceId;
-  bool ok = serializeJson(doc, file) > 0;
-  file.close();
-  return ok;
+bool isWifiConnected() {
+  return WiFi.status() == WL_CONNECTED;
 }
 
-void WifiConfigManager::clear() {
-  LittleFS.remove(CONFIG_FILE);
+bool loadWifiCredentials(WifiCredentials &creds) {
+  return wifi_config_manager::readCredentials(creds);
+}
+
+bool saveWifiCredentials(const String &ssid, const String &password) {
+  WifiCredentials creds{ssid, password};
+  return wifi_config_manager::writeCredentials(creds);
+}
+
+bool wifiCredentialsExist() {
+  return wifi_config_manager::credentialsExist();
 }

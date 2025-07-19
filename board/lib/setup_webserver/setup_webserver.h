@@ -1,2 +1,4 @@
 #pragma once
-void startSetupPortal();
+
+void startSetupWebServer();
+bool isSetupComplete();

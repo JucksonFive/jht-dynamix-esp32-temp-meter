@@ -1,31 +1,45 @@
 #include <Arduino.h>
-#include "wifi_helper.h"
+#include "wifi_config.h"
+#include "setup_webserver.h"
 #include "mqtt_helper.h"
 #include "temperature_sensor.h"
+#include "time_helper.h"
+#include <LittleFS.h>
 #include <WiFi.h>
-#include <time_helper.h>
-
-const char *ssid = "Villa Papanizzio";
-const char *password = "Gonzales";
 
 const char *mqtt_server = "a2ig9dwsqscl2t-ats.iot.eu-north-1.amazonaws.com";
 const int mqtt_port = 8883;
 const char *mqtt_topic = "sensors/temperature";
-String clientId = "esp32-" + String(WiFi.macAddress());
+
+String clientId;
 
 void setup()
 {
   Serial.begin(115200);
   delay(1000);
-  WifiHelper::connect(ssid, password);
+  LittleFS.begin();
+
+  if (wifiCredentialsExist() && connectToWifi()) {
+    Serial.println("[WiFi] Connected");
+  } else {
+    Serial.println("[WiFi] Starting setup wizard");
+    startSetupWebServer();
+    return;
+  }
+
+  clientId = "esp32-" + String(WiFi.macAddress());
   TimeHelper::setup();
   TempSensor::setup();
   MQTT::setup(mqtt_server, mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
 }
 
+
 void loop()
 {
+  if (!isSetupComplete() && WiFi.getMode() == WIFI_AP) {
+    return;
+  }
   if (!MQTT::isConnected())
   {
     MQTT::ensureConnection(clientId.c_str());
