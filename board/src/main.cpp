@@ -19,6 +19,13 @@ void setup()
   delay(1000);
   LittleFS.begin();
 
+
+  if (LittleFS.exists("/wifi.json")) {
+    Serial.println("[DEBUG] wifi.json found.");
+  } else {
+    Serial.println("[DEBUG] wifi.json MISSING.");
+  }
+
   if (wifiCredentialsExist() && connectToWifi()) {
     Serial.println("[WiFi] Connected");
   } else {
