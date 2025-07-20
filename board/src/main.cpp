@@ -17,13 +17,10 @@ void setup()
 {
   Serial.begin(115200);
   delay(1000);
-  LittleFS.begin();
 
-
-  if (LittleFS.exists("/wifi.json")) {
-    Serial.println("[DEBUG] wifi.json found.");
-  } else {
-    Serial.println("[DEBUG] wifi.json MISSING.");
+  if (!LittleFS.begin()) {
+    Serial.println("LittleFS mount failed");
+    while (true);
   }
 
   if (wifiCredentialsExist() && connectToWifi()) {
@@ -34,12 +31,18 @@ void setup()
     return;
   }
 
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("[WiFi] Still not connected, aborting init.");
+    return;
+  }
+
   clientId = "esp32-" + String(WiFi.macAddress());
   TimeHelper::setup();
   TempSensor::setup();
   MQTT::setup(mqtt_server, mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
 }
+
 
 
 void loop()

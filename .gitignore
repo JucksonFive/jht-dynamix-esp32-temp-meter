@@ -12,6 +12,7 @@ backend/node_modules
 # CDK asset staging directory
 backend/cdk/.cdk.staging
 backend/cdk/cdk.out
-board/data/*
+board/data/config
+board/data/certs
 backend/dist
 board/.pio

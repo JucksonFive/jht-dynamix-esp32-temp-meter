@@ -38,8 +38,23 @@ void startSetupWebServer() {
   }
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-  request->send(LittleFS, "/html/index.html", "text/html");
-});
+    request->send(LittleFS, "/html/index.html", "text/html");
+  });
+
+  // Serve style.css
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/html/style.css", "text/css");
+  });
+
+  // Serve router.svg
+  server.on("/router.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/html/router.svg", "image/svg+xml");
+  });
+
+  // Serve globe.svg
+  server.on("/globe.svg", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/html/globe.svg", "image/svg+xml");
+  });
 
 
   server.on("/submit", HTTP_POST, handleFormSubmission);
