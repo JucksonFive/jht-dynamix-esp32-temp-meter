@@ -16,3 +16,24 @@ board/data/config
 board/data/certs
 backend/dist
 board/.pio
+dashboard/node_modules/
+dashboard/.pnp
+dashboard/.pnp.js
+
+# testing
+dashboard//coverage
+
+# production
+dashboard//build
+
+# misc
+dashboard/.DS_Store
+dashboard/.env.local
+dashboard/.env.development.local
+dashboard/.env.test.local
+dashboard/.env.production.local
+
+dashboard/npm-debug.log*
+dashboard/yarn-debug.log*
+dashboard/yarn-error.log*
+dashboard/.env
