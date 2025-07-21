@@ -1,9 +1,9 @@
 import axios from "axios";
-import { supabase } from "../supabase";
+import { fetchAuthSession } from "@aws-amplify/auth";
 
 export const fetchTemperatureData = async () => {
-  const session = await supabase.auth.getSession();
-  const token = session.data.session?.access_token;
+  const session = await fetchAuthSession();
+  const token = session.tokens?.accessToken.toString();
 
   const res = await axios.get(
     "https://your-api.execute-api.amazonaws.com/prod/temperatures",
