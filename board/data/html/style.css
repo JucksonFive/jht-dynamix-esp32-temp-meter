@@ -27,12 +27,6 @@ body {
   margin-bottom: 1rem;
 }
 
-.logo {
-  width: 48px;
-  height: 48px;
-  filter: drop-shadow(0 0 4px #a64dff);
-}
-
 h1 {
   color: #d9b3ff;
   margin-bottom: 1.5rem;
