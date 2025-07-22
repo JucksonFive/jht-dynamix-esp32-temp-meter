@@ -24,7 +24,7 @@ function App() {
     setUser(null);
   };
 
-  if (!user) return <Login />;
+  if (!user) return <Login setUser={setUser} />;
 
   return (
     <div className="min-h-screen bg-white p-6">

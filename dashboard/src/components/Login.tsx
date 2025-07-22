@@ -1,23 +1,25 @@
 
 import { useState } from "react";
-import { signIn, signUp } from "@aws-amplify/auth";
+import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
 
 
-export const Login = () => {
+export const Login = ({setUser}: {setUser: (user: any) => void}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAuth = async () => {
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
     try {
-      if (mode === "signin") {
-        await signIn({ username: email, password });
-      } else {
-        await signUp({ username: email, password });
-      }
-    } catch (err) {
-      console.error(err);
-      alert((err as Error).message);
+      await signIn({ username: email, password });
+      const user = await getCurrentUser();
+      setUser(user);
+    } catch (err: any) {
+      console.error("Login failed", err);
+      setError(err.message || "Login failed");
     }
   };
 
