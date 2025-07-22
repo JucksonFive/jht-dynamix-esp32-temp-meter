@@ -9,7 +9,7 @@ export class AuthStack extends Stack {
     super(scope, id, props);
 
     const userPool = new cognito.UserPool(this, "UserPool", {
-      selfSignUpEnabled: true,
+      selfSignUpEnabled: false,
       signInAliases: { email: true },
       autoVerify: { email: true },
     });
