@@ -1,5 +1,6 @@
 import { getCurrentUser, signOut } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
+import "./App.css";
 import { Login } from "./components/Login";
 import { TemperatureChart } from "./components/TemperatureChart";
 import { fetchTemperatureData } from "./services/api";
