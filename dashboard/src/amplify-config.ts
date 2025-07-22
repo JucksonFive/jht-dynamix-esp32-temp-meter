@@ -1,19 +1,16 @@
-import { Amplify } from "aws-amplify";
-
-Amplify.configure({
+export default {
   Auth: {
     Cognito: {
-      userPoolId: "eu-north-1_LJrEgFlXO",
-      userPoolClientId: "3v99vd33m6f2ersb3th0f1lro1",
+      userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
+      userPoolClientId: import.meta.env.VITE_COGNITO_USER_POOL_CLIENT_ID,
     },
   },
   API: {
     REST: {
       JTApi: {
-        endpoint:
-          "https://ipxyulr5we.execute-api.eu-north-1.amazonaws.com/prod",
-        region: "eu-north-1",
+        endpoint: import.meta.env.VITE_API_URL,
+        region: import.meta.env.VITE_REGION,
       },
     },
   },
-});
+};
