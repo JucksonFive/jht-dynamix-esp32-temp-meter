@@ -1,18 +1,36 @@
-import { getCurrentUser, signOut } from "aws-amplify/auth";
+// Uber-auth-aware App.tsx for JT-DYNAMIX Dashboard (multi-device)
+
 import { useEffect, useState } from "react";
-import "./App.css";
+import { getCurrentUser, signOut } from "aws-amplify/auth";
 import { Login } from "./components/Login";
-import { TemperatureChart } from "./components/TemperatureChart";
 import { fetchTemperatureData } from "./services/api";
+import { Dashboard } from "./components/Dashboard";
+
+interface DeviceData {
+  id: string;
+  temperature: number;
+  humidity: number;
+  timestamp: string;
+}
 
 function App() {
   const [user, setUser] = useState<any>(null);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DeviceData[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCurrentUser()
-      .then(setUser)
-      .catch(() => setUser(null));
+    const checkUser = async () => {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkUser();
   }, []);
 
   useEffect(() => {
@@ -24,19 +42,23 @@ function App() {
     setUser(null);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading...
+      </div>
+    );
+  }
+
   if (!user) return <Login setUser={setUser} />;
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <h1 className="text-2xl font-bold mb-4">JT-DYNAMIX Dashboard</h1>
-      <button
-        className="text-blue-600 underline text-sm mb-4"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
-      <TemperatureChart data={data} />
-    </div>
+    <Dashboard
+      data={data}
+      selectedDeviceId={selectedDeviceId}
+      setSelectedDeviceId={setSelectedDeviceId}
+      handleLogout={handleLogout}
+    />
   );
 }
 
