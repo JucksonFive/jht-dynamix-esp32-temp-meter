@@ -34,12 +34,19 @@ export class BackendStack extends cdk.Stack {
         ],
       },
     });
-    const table = new dynamoDb.Table(this, "TemperaturesTable", {
+    const temperaturesTable = new dynamoDb.Table(this, "TemperaturesTable", {
       tableName: "Temperatures",
       partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
       sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
       billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // Dev environment only. Removes all the data!
+    });
+
+    const deviceUserTable = new dynamoDb.Table(this, "DeviceUserMapping", {
+      tableName: "Devices",
+      partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
+      billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     const saveToDynamoFn = new NodejsFunction(this, "SaveToDynamoFunction", {
@@ -51,12 +58,12 @@ export class BackendStack extends cdk.Stack {
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
       environment: {
-        TABLE_NAME: table.tableName,
+        TABLE_NAME: temperaturesTable.tableName,
       },
     });
 
-    table.grantWriteData(saveToDynamoFn);
-
+    temperaturesTable.grantWriteData(saveToDynamoFn);
+    deviceUserTable.grantReadData(saveToDynamoFn);
     // Lambda that fetches the data from DynamoDB
     const fetchfromDynamoFn = new NodejsFunction(
       this,
@@ -70,14 +77,14 @@ export class BackendStack extends cdk.Stack {
         handler: "handler",
         runtime: lambda.Runtime.NODEJS_22_X,
         environment: {
-          TABLE_NAME: table.tableName,
+          TABLE_NAME: temperaturesTable.tableName,
         },
       }
     );
 
     // Grant the Lambda function read access to the DynamoDB table
     // This is necessary for the Lambda function to be able to read from the DynamoDB table
-    table.grantReadData(fetchfromDynamoFn);
+    temperaturesTable.grantReadData(fetchfromDynamoFn);
 
     // API Gateway REST API
     const api = new apigateway.RestApi(this, "TemperatureApi", {

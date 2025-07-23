@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
+  QueryCommand,
   ScanCommand,
-  GetCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
@@ -14,44 +14,43 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const deviceId = event.queryStringParameters?.deviceId;
 
-  if (deviceId) {
-    return getTemp(deviceId);
-  }
-
-  const result = await client.send(new ScanCommand({ TableName: TABLE_NAME }));
-  return {
-    statusCode: 200,
-    body: JSON.stringify(result.Items),
-  };
-};
-
-async function getTemp(deviceId: string): Promise<APIGatewayProxyResult> {
   try {
-    const result = await client.send(
-      new GetCommand({
-        TableName: TABLE_NAME,
-        Key: {
-          deviceId,
-        },
-      })
-    );
+    if (deviceId) {
+      const result = await client.send(
+        new QueryCommand({
+          TableName: TABLE_NAME,
+          KeyConditionExpression: "deviceId = :deviceId",
+          ExpressionAttributeValues: {
+            ":deviceId": deviceId,
+          },
+        })
+      );
 
-    if (!result.Item) {
       return {
-        statusCode: 404,
-        body: JSON.stringify({ message: "Reading not found" }),
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify(result.Items),
       };
     }
 
+    const result = await client.send(
+      new ScanCommand({ TableName: TABLE_NAME })
+    );
+
     return {
       statusCode: 200,
-      body: JSON.stringify(result.Item),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify(result.Items),
     };
   } catch (err) {
-    console.error("Error reading from DynamoDB", err);
+    console.error("Error fetching data:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ message: "Failed to fetch data" }),
+      body: JSON.stringify({ message: "Server error" }),
     };
   }
-}
+};
