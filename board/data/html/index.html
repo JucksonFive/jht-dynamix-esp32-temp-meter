@@ -13,15 +13,43 @@
     <div class="header">
       <img src="globe.svg" alt="Globe Logo" class="logo" />
     </div>
-    <h1>WiFi Configuration</h1>
-    <form method="POST" action="/submit">
-      <input type="text" name="ssid" placeholder="WiFi SSID" required />
-      <input type="password" name="password" placeholder="WiFi Password" required />
-      <button type="submit">Connect</button>
+    <h1>Device Configuration</h1>
+
+    <!-- WiFi Configuration -->
+    <form id="setupForm">
+      <!-- Step 1: WiFi -->
+      <div class="step" id="step-1">
+        <h2>1. WiFi Settings</h2>
+        <input type="text" name="ssid" placeholder="WiFi SSID" required />
+        <input type="password" name="password" placeholder="WiFi Password" required />
+        <button type="button" onclick="nextStep()">Next</button>
+      </div>
+
+      <!-- Step 2: Login -->
+      <div class="step hidden" id="step-2">
+        <h2>2. JT-Credentials</h2>
+        <input type="text" name="username" placeholder="Username" required />
+        <input type="password" name="userPassword" placeholder="Password" required />
+        <div class="button-group">
+          <button type="button" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Confirm & Submit -->
+      <div class="step hidden" id="step-3">
+        <h2>3. Confirm Settings</h2>
+        <pre id="summaryBox"></pre>
+        <div class="button-group">
+          <button type="button" onclick="prevStep()">Back</button>
+          <button type="submit">Save Configuration</button>
+        </div>
+      </div>
     </form>
     <footer class="footer">
       <p>JT-Dynamix &copy; 2025</p>
     </footer>
+    <script src="wizard.js"></script>
   </div>
 </body>
 
