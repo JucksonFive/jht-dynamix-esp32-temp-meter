@@ -90,3 +90,35 @@ button:hover {
   gap: 10px;
   margin-top: 15px;
 }
+
+.spinner {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.status {
+  margin-top: 1rem;
+}
+
+.status.success {
+  color: green;
+}
+
+.status.error {
+  color: red;
+}
+
+.continue-btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}

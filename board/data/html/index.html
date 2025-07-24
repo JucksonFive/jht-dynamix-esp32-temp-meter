@@ -50,6 +50,66 @@
       <p>JT-Dynamix &copy; 2025</p>
     </footer>
     <script src="wizard.js"></script>
+    <script>
+      const form = document.querySelector("form");
+      const button = form.querySelector("button[type='submit']");
+      const spinner = document.createElement("div");
+      const statusText = document.createElement("p");
+      const continueButton = document.createElement("button");
+
+      // Spinner setup
+      spinner.className = "spinner hidden"; // sinun .spinner-tyyli
+      spinner.innerText = "Connecting...";
+      statusText.className = "status hidden"; // tyylitä värit (esim. .error/.success)
+
+      // Continue button setup
+      continueButton.innerText = "Continue";
+      continueButton.className = "hidden continue-btn";
+      continueButton.addEventListener("click", () => {
+        // Siirrytään seuraavaan vaiheeseen
+        window.location.href = "/next-step"; // tai muuta logiikka
+      });
+
+      form.appendChild(spinner);
+      form.appendChild(statusText);
+      form.appendChild(continueButton);
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        button.disabled = true;
+        spinner.classList.remove("hidden");
+        statusText.classList.add("hidden");
+        continueButton.classList.add("hidden");
+
+        try {
+          const formData = new FormData(form);
+          const res = await fetch("/submit", {
+            method: "POST",
+            body: formData,
+          });
+
+          spinner.classList.add("hidden");
+
+          if (res.ok) {
+            statusText.innerText = "✅ Device connected to WiFi!";
+            statusText.className = "status success";
+            continueButton.classList.remove("hidden");
+          } else {
+            statusText.innerText = "❌ Failed to connect. Please check credentials.";
+            statusText.className = "status error";
+            button.disabled = false;
+          }
+        } catch (err) {
+          spinner.classList.add("hidden");
+          statusText.innerText = "❌ Unexpected error. Try again.";
+          statusText.className = "status error";
+          button.disabled = false;
+        }
+
+        statusText.classList.remove("hidden");
+      });
+    </script>
+
   </div>
 </body>
 
