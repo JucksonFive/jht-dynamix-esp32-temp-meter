@@ -49,8 +49,39 @@
     <footer class="footer">
       <p>JT-Dynamix &copy; 2025</p>
     </footer>
-    <script src="wizard.js"></script>
     <script>
+      let currentStep = 1;
+
+      function showStep(step) {
+        document.querySelectorAll(".step").forEach((el, index) => {
+          el.classList.toggle("hidden", index !== step - 1);
+        });
+
+        if (step === 3) {
+          const form = document.getElementById("setupForm");
+          const formData = new FormData(form);
+          const summary = [...formData.entries()]
+            .map(([k, v]) => `${k}: ${v}`)
+            .join("\n");
+          document.getElementById("summaryBox").textContent = summary;
+        }
+      }
+
+      function nextStep() {
+        if (currentStep < 3) {
+          currentStep++;
+          showStep(currentStep);
+        }
+      }
+
+      function prevStep() {
+        if (currentStep > 1) {
+          currentStep--;
+          showStep(currentStep);
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => showStep(currentStep));
       const form = document.querySelector("form");
       const button = form.querySelector("button[type='submit']");
       const spinner = document.createElement("div");
