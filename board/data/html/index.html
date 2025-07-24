@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WiFi Setup - JT-DYNAMIX</title>
   <link href="style.css" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 
 <body>
@@ -22,7 +23,14 @@
         <h2>1. WiFi Settings</h2>
         <input type="text" name="ssid" placeholder="WiFi SSID" required />
         <input type="password" name="password" placeholder="WiFi Password" required />
-        <button type="button" onclick="nextStep()">Next</button>
+        <button type="button" onclick="handleWifiSubmit()">Connect</button>
+        <div id="wifi-feedback">
+          <div id="wifi-spinner" class="spinner hidden">
+            <img src="favicon.svg" alt="Loading" class="spinner-icon" />
+            <span>Connecting...</span>
+          </div>
+          <p id="wifi-status" class="status hidden"></p>
+        </div>
       </div>
 
       <!-- Step 2: Login -->
@@ -49,99 +57,8 @@
     <footer class="footer">
       <p>JT-Dynamix &copy; 2025</p>
     </footer>
-    <script>
-      let currentStep = 1;
-
-      function showStep(step) {
-        document.querySelectorAll(".step").forEach((el, index) => {
-          el.classList.toggle("hidden", index !== step - 1);
-        });
-
-        if (step === 3) {
-          const form = document.getElementById("setupForm");
-          const formData = new FormData(form);
-          const summary = [...formData.entries()]
-            .map(([k, v]) => `${k}: ${v}`)
-            .join("\n");
-          document.getElementById("summaryBox").textContent = summary;
-        }
-      }
-
-      function nextStep() {
-        if (currentStep < 3) {
-          currentStep++;
-          showStep(currentStep);
-        }
-      }
-
-      function prevStep() {
-        if (currentStep > 1) {
-          currentStep--;
-          showStep(currentStep);
-        }
-      }
-
-      document.addEventListener("DOMContentLoaded", () => showStep(currentStep));
-      const form = document.querySelector("form");
-      const button = form.querySelector("button[type='submit']");
-      const spinner = document.createElement("div");
-      const statusText = document.createElement("p");
-      const continueButton = document.createElement("button");
-
-      // Spinner setup
-      spinner.className = "spinner hidden"; // sinun .spinner-tyyli
-      spinner.innerText = "Connecting...";
-      statusText.className = "status hidden"; // tyylitä värit (esim. .error/.success)
-
-      // Continue button setup
-      continueButton.innerText = "Continue";
-      continueButton.className = "hidden continue-btn";
-      continueButton.addEventListener("click", () => {
-        // Siirrytään seuraavaan vaiheeseen
-        window.location.href = "/next-step"; // tai muuta logiikka
-      });
-
-      form.appendChild(spinner);
-      form.appendChild(statusText);
-      form.appendChild(continueButton);
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        button.disabled = true;
-        spinner.classList.remove("hidden");
-        statusText.classList.add("hidden");
-        continueButton.classList.add("hidden");
-
-        try {
-          const formData = new FormData(form);
-          const res = await fetch("/submit", {
-            method: "POST",
-            body: formData,
-          });
-
-          spinner.classList.add("hidden");
-
-          if (res.ok) {
-            statusText.innerText = "✅ Device connected to WiFi!";
-            statusText.className = "status success";
-            continueButton.classList.remove("hidden");
-          } else {
-            statusText.innerText = "❌ Failed to connect. Please check credentials.";
-            statusText.className = "status error";
-            button.disabled = false;
-          }
-        } catch (err) {
-          spinner.classList.add("hidden");
-          statusText.innerText = "❌ Unexpected error. Try again.";
-          statusText.className = "status error";
-          button.disabled = false;
-        }
-
-        statusText.classList.remove("hidden");
-      });
-    </script>
-
   </div>
+  <script src="wizard.js"></script>
 </body>
 
 </html>
