@@ -4,9 +4,15 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 
+export interface AuthStackProps extends StackProps {
+  authProtectedFn: lambda.Function;
+}
+
 export class AuthStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: AuthStackProps) {
     super(scope, id, props);
+
+    const { authProtectedFn } = props;
 
     const userPool = new cognito.UserPool(this, "UserPool", {
       selfSignUpEnabled: false,
@@ -17,12 +23,6 @@ export class AuthStack extends Stack {
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
       userPool,
       generateSecret: false,
-    });
-
-    const authLambda = new lambda.Function(this, "AuthProtectedLambda", {
-      runtime: lambda.Runtime.NODEJS_22_X,
-      code: lambda.Code.fromAsset("../lambdas/protected"),
-      handler: "index.handler",
     });
 
     const api = new apigateway.RestApi(this, "AuthApi");
@@ -38,7 +38,7 @@ export class AuthStack extends Stack {
     const protectedRoute = api.root.addResource("protected");
     protectedRoute.addMethod(
       "GET",
-      new apigateway.LambdaIntegration(authLambda),
+      new apigateway.LambdaIntegration(authProtectedFn),
       {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,

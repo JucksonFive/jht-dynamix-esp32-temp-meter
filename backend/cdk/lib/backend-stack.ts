@@ -4,13 +4,19 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as iot from "aws-cdk-lib/aws-iot";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
-import * as path from "path";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 
+export interface BackendStackProps extends cdk.StackProps {
+  saveToDynamoFn: NodejsFunction;
+  fetchFromDynamoFn: NodejsFunction;
+}
+
 export class BackendStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
+
+    const { saveToDynamoFn, fetchFromDynamoFn } = props;
 
     new iot.CfnThing(this, "Esp32Thing", {
       thingName: "esp32-sensor",
@@ -34,57 +40,6 @@ export class BackendStack extends cdk.Stack {
         ],
       },
     });
-    const temperaturesTable = new dynamoDb.Table(this, "TemperaturesTable", {
-      tableName: "Temperatures",
-      partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
-      sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
-      billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // Dev environment only. Removes all the data!
-    });
-
-    const deviceUserTable = new dynamoDb.Table(this, "DeviceUserMapping", {
-      tableName: "Devices",
-      partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
-      billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-    });
-
-    const saveToDynamoFn = new NodejsFunction(this, "SaveToDynamoFunction", {
-      functionName: "SaveToDynamoFunction",
-      entry: path.join(
-        __dirname,
-        "../../lambdas/postToDynamoDb/postToDynamo.ts"
-      ),
-      handler: "handler",
-      runtime: lambda.Runtime.NODEJS_22_X,
-      environment: {
-        TABLE_NAME: temperaturesTable.tableName,
-      },
-    });
-
-    temperaturesTable.grantWriteData(saveToDynamoFn);
-    deviceUserTable.grantReadData(saveToDynamoFn);
-    // Lambda that fetches the data from DynamoDB
-    const fetchfromDynamoFn = new NodejsFunction(
-      this,
-      "FetchFromDynamoFunction",
-      {
-        functionName: "FetchFromDynamoFunction",
-        entry: path.join(
-          __dirname,
-          "../../lambdas/getFromDynamoDb/getAllTemperatures.ts"
-        ),
-        handler: "handler",
-        runtime: lambda.Runtime.NODEJS_22_X,
-        environment: {
-          TABLE_NAME: temperaturesTable.tableName,
-        },
-      }
-    );
-
-    // Grant the Lambda function read access to the DynamoDB table
-    // This is necessary for the Lambda function to be able to read from the DynamoDB table
-    temperaturesTable.grantReadData(fetchfromDynamoFn);
 
     // API Gateway REST API
     const api = new apigateway.RestApi(this, "TemperatureApi", {
@@ -94,7 +49,7 @@ export class BackendStack extends cdk.Stack {
 
     api.root
       .addResource("readings")
-      .addMethod("GET", new apigateway.LambdaIntegration(fetchfromDynamoFn), {
+      .addMethod("GET", new apigateway.LambdaIntegration(fetchFromDynamoFn), {
         apiKeyRequired: true,
       });
 
