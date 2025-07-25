@@ -4,6 +4,7 @@ import { BackendStack } from "../lib/backend-stack";
 import { AuthStack } from "../lib/auth-stack";
 import { LambdaStack } from "../lib/lambda-stack";
 import { InfrastructureStack } from "../lib/infrastructure-stack";
+import { EspAuthStack } from "../lib/esp-auth-stack";
 
 const app = new cdk.App();
 
@@ -27,6 +28,7 @@ const authStack = new AuthStack(app, "AuthStack", {
   authProtectedFn: lambdaStack.authProtectedFn,
 });
 
+new EspAuthStack(app, "EspAuthStack");
 // Add dependencies
 lambdaStack.addDependency(infraStack);
 backendStack.addDependency(lambdaStack);

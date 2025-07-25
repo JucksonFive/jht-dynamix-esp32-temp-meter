@@ -14,22 +14,25 @@ export class EspAuthStack extends Stack {
     const loginLambda = new lambda.Function(this, "EspLoginLambda", {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "index.handler",
-      code: lambda.Code.fromAsset(path.join(__dirname, "../lambdas/auth")),
+      code: lambda.Code.fromAsset(path.join(__dirname, "../../lambdas/auth")),
       environment: {
         USER_POOL_ID: process.env.USER_POOL_ID!,
-        CLIENT_ID: process.env.CLIENT_ID!
-      }
+        CLIENT_ID: process.env.CLIENT_ID!,
+      },
     });
 
     const api = new apigateway.RestApi(this, "EspAuthApi", {
       restApiName: "EspAuthApi",
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS
-      }
+        allowMethods: apigateway.Cors.ALL_METHODS,
+      },
     });
 
     const loginResource = api.root.addResource("auth").addResource("login");
-    loginResource.addMethod("POST", new apigateway.LambdaIntegration(loginLambda));
+    loginResource.addMethod(
+      "POST",
+      new apigateway.LambdaIntegration(loginLambda)
+    );
   }
 }
