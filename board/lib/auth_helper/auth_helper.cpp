@@ -2,8 +2,9 @@
 #include <HTTPClient.h>
 #include "cert_helper.h"
 #include "auth_helper.h"
+#include <LittleFS.h>
 
-void authenticateUser(const String &username, const String &password)
+bool AuthHelper::authenticateUser(const String &username, const String &password)
 {
     WiFiClientSecure client;
     CertHelper::attachRootCA(client);
@@ -14,18 +15,18 @@ void authenticateUser(const String &username, const String &password)
 
     String payload = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
     int httpCode = https.POST(payload);
-    Serial.println("Payload: " + payload);
 
     if (httpCode == 200)
     {
         String response = https.getString();
-        Serial.println("✅ Auth success: " + response);
-    }
-    else
-    {
-        Serial.printf("❌ Auth failed: %d\n", httpCode);
-        Serial.println("Response: " + https.getString());
+        File file = LittleFS.open("/user.json", "w");
+        if (file)
+        {
+            file.print(response);
+            file.close();
+            return true;
+        }
     }
 
-    https.end();
+    return false;
 }

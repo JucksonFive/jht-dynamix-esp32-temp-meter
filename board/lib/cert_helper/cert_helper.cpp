@@ -39,11 +39,6 @@ void CertHelper::loadCerts(WiFiClientSecure &client)
 
 void CertHelper::attachRootCA(WiFiClientSecure &client)
 {
-    if (!LittleFS.begin())
-    {
-        Serial.println("❌ LittleFS mount failed");
-        return;
-    }
-
+    LittleFS.begin();
     loadPem(client, "/certs/AmazonRootCA1.pem", &WiFiClientSecure::setCACert);
 }

@@ -18,20 +18,26 @@ void setup()
   Serial.begin(115200);
   delay(1000);
 
-  if (!LittleFS.begin()) {
+  if (!LittleFS.begin())
+  {
     Serial.println("LittleFS mount failed");
-    while (true);
+    while (true)
+      ;
   }
 
-  if (wifiCredentialsExist() && connectToWifi()) {
+  if (wifiCredentialsExist() && connectToWifi())
+  {
     Serial.println("[WiFi] Connected");
-  } else {
+  }
+  else
+  {
     Serial.println("[WiFi] Starting setup wizard");
     startSetupWebServer();
     return;
   }
 
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
     Serial.println("[WiFi] Still not connected, aborting init.");
     return;
   }
@@ -43,11 +49,10 @@ void setup()
   MQTT::ensureConnection(clientId.c_str());
 }
 
-
-
 void loop()
 {
-  if (!isSetupComplete() && WiFi.getMode() == WIFI_AP) {
+  if (!isSetupComplete())
+  {
     return;
   }
   if (!MQTT::isConnected())
@@ -65,7 +70,7 @@ void loop()
   {
     char payload[128];
     const char *ts = TimeHelper::getLocalTimestamp();
-    
+
     snprintf(payload, sizeof(payload),
              "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%s\"}",
              temp, ts);

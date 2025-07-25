@@ -2,5 +2,5 @@
 
 namespace AuthHelper
 {
-    void authenticateUser(const char *username, const char *password);
+    bool authenticateUser(const String &username, const String &password);
 }

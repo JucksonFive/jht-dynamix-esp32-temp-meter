@@ -4,6 +4,7 @@
 #include <LittleFS.h>
 #include "wifi_config.h"
 #include <wifi_config_manager.h>
+#include <auth_helper.h>
 
 namespace
 {
@@ -97,6 +98,34 @@ void startSetupWebServer()
     request->send(500, "text/plain", "WiFi connection failed");
     Serial.println("[WiFi] Test connection failed");
     WiFi.mode(WIFI_AP); // Fall back to AP mode only
+  } });
+
+  server.on("/link-device", HTTP_POST, [](AsyncWebServerRequest *request)
+            {
+  if (!request->hasParam("username", true) ||
+      !request->hasParam("userPassword", true)) {
+    request->send(400, "text/plain", "Missing parameters");
+    return;
+  }
+
+  String username = request->getParam("username", true)->value();
+  String password = request->getParam("userPassword", true)->value();
+
+  Serial.printf("[Setup] Authenticating user '%s'\n", username.c_str());
+
+  bool authSuccess = AuthHelper::authenticateUser(username, password);
+  if (!authSuccess) {
+    request->send(401, "text/plain", "Authentication failed");
+    return;
+  }
+
+  // Simuloi laitteen ja käyttäjän linkitystä tallentamalla tiedosto
+  File f = LittleFS.open("/device.json", "w");
+  if (f) {
+    f.close();
+    request->send(200, "text/plain", "Device linked successfully");
+  } else {
+    request->send(500, "text/plain", "Failed to save device link");
   } });
 
   // Add endpoint to complete setup
