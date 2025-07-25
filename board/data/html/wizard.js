@@ -64,7 +64,7 @@ function handleWifiSubmit() {
   formData.append("ssid", ssid);
   formData.append("password", password);
 
-  fetch("/submit", {
+  fetch("/connect-to-wifi", {
     method: "POST",
     body: formData,
   })

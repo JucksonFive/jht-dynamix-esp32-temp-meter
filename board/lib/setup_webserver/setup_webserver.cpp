@@ -65,7 +65,7 @@ void startSetupWebServer()
   server.on("/favicon.svg", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/html/favicon.svg", "image/svg+xml"); });
 
-  server.on("/submit", HTTP_POST, [](AsyncWebServerRequest *request)
+  server.on("/connect-to-wifi", HTTP_POST, [](AsyncWebServerRequest *request)
             {
   if (!request->hasParam("ssid", true) || !request->hasParam("password", true)) {
     request->send(400, "text/plain", "Missing parameters");
