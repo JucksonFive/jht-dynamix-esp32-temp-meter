@@ -60,10 +60,10 @@ export class LambdaStack extends cdk.Stack {
     temperaturesTable.grantReadData(this.fetchFromDynamoFn);
 
     // Auth protected Lambda function
-    this.authProtectedFn = new lambda.Function(this, "AuthProtectedLambda", {
+    this.authProtectedFn = new NodejsFunction(this, "AuthProtectedLambda", {
+      entry: path.join(__dirname, "../../lambdas/protected/index.ts"),
+      handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
-      code: lambda.Code.fromAsset("../lambdas/protected"),
-      handler: "index.handler",
       functionName: "AuthProtectedLambda",
     });
   }

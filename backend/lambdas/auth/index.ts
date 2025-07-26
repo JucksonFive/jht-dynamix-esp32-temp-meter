@@ -9,6 +9,7 @@ export const handler = async (event: any) => {
   try {
     const body = JSON.parse(event.body || "{}");
     const { username, password } = body;
+    console.log("Auth input", { username, password: "****" });
 
     if (!username || !password) {
       return {
@@ -28,7 +29,7 @@ export const handler = async (event: any) => {
 
     const response = await client.send(command);
     const authResult = response.AuthenticationResult;
-
+    console.log("Auth success:", authResult);
     return {
       statusCode: 200,
       body: JSON.stringify({
