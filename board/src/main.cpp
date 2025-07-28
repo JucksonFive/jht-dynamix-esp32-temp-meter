@@ -41,6 +41,7 @@ void setup()
     Serial.println("[WiFi] Still not connected, aborting init.");
     return;
   }
+  Serial.println("MQTT::SETUP");
 
   clientId = "esp32-" + String(WiFi.macAddress());
   TimeHelper::setup();
@@ -51,10 +52,14 @@ void setup()
 
 void loop()
 {
+  // If setup is not complete, don't run MQTT operations
   if (!isSetupComplete())
   {
+    Serial.println("[DEBUG] Setup not complete, skipping MQTT operations");
+    delay(1000);
     return;
   }
+
   if (!MQTT::isConnected())
   {
     MQTT::ensureConnection(clientId.c_str());
@@ -74,6 +79,8 @@ void loop()
     snprintf(payload, sizeof(payload),
              "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%s\"}",
              temp, ts);
+
+    delay(10000);
 
     MQTT::publish(mqtt_topic, payload);
 

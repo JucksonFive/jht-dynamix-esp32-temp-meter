@@ -142,5 +142,34 @@ void startSetupWebServer()
 
 bool isSetupComplete()
 {
-  return setupComplete;
+  // Cache the result to avoid repeated file system calls
+  static bool setupChecked = false;
+  static bool setupResult = false;
+
+  if (setupChecked)
+  {
+    return setupResult;
+  }
+
+  // Check if setup is complete by looking for setup completion marker files
+  if (!LittleFS.begin())
+  {
+    Serial.println("[Setup] LittleFS mount failed");
+    setupChecked = true;
+    setupResult = false;
+    return false;
+  }
+
+  // Check if both WiFi credentials and device linking are complete
+  bool wifiConfigExists = LittleFS.exists("/wifi.json");
+  bool deviceLinked = LittleFS.exists("/device.json");
+
+  Serial.printf("[Setup] WiFi config exists: %s, Device linked: %s\n",
+                wifiConfigExists ? "YES" : "NO",
+                deviceLinked ? "YES" : "NO");
+
+  setupResult = wifiConfigExists && deviceLinked;
+  setupChecked = true;
+
+  return setupResult;
 }
