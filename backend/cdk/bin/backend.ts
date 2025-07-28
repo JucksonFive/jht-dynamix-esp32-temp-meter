@@ -30,7 +30,10 @@ const authStack = new AuthStack(app, "AuthStack", {
   authProtectedFn: lambdaStack.authProtectedFn,
 });
 
-new EspAuthStack(app, "EspAuthStack");
+new EspAuthStack(app, "EspAuthStack", {
+  userPoolId: authStack.userPool.userPoolId,
+  clientId: authStack.userPoolClient.userPoolClientId,
+});
 // Add dependencies
 lambdaStack.addDependency(infraStack);
 backendStack.addDependency(lambdaStack);

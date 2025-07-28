@@ -3,20 +3,24 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as path from "path";
-
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+
+interface EspAuthStackProps extends StackProps {
+  userPoolId: string;
+  clientId: string;
+}
+
 export class EspAuthStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: EspAuthStackProps) {
     super(scope, id, props);
-    console.log("CLIENT_ID", process.env.CLIENT_ID);
-    console.log("USER_POOL_ID", process.env.USER_POOL_ID);
+
     const loginLambda = new NodejsFunction(this, "EspLoginLambda", {
       runtime: lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, "../../lambdas/auth/index.ts"),
       handler: "handler",
       environment: {
-        USER_POOL_ID: process.env.USER_POOL_ID!,
-        CLIENT_ID: process.env.CLIENT_ID!,
+        USER_POOL_ID: props.userPoolId,
+        CLIENT_ID: props.clientId,
       },
     });
 

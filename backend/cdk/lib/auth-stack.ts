@@ -9,6 +9,8 @@ export interface AuthStackProps extends StackProps {
 }
 
 export class AuthStack extends Stack {
+  public readonly userPool!: cognito.UserPool;
+  public readonly userPoolClient!: cognito.UserPoolClient;
   constructor(scope: Construct, id: string, props: AuthStackProps) {
     super(scope, id, props);
 
@@ -18,11 +20,21 @@ export class AuthStack extends Stack {
       selfSignUpEnabled: false,
       signInAliases: { email: true },
       autoVerify: { email: true },
+      passwordPolicy: {
+        minLength: 8,
+        requireLowercase: true,
+        requireUppercase: true,
+        requireDigits: true,
+        requireSymbols: false,
+      },
     });
 
     const userPoolClient = new cognito.UserPoolClient(this, "UserPoolClient", {
       userPool,
       generateSecret: false,
+      authFlows: {
+        userPassword: true,
+      },
     });
 
     const api = new apigateway.RestApi(this, "AuthApi");
@@ -50,5 +62,8 @@ export class AuthStack extends Stack {
       value: userPoolClient.userPoolClientId,
     });
     new CfnOutput(this, "ApiUrl", { value: api.url });
+
+    this.userPool = userPool;
+    this.userPoolClient = userPoolClient;
   }
 }
