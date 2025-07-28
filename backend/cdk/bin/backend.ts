@@ -5,7 +5,9 @@ import { AuthStack } from "../lib/auth-stack";
 import { LambdaStack } from "../lib/lambda-stack";
 import { InfrastructureStack } from "../lib/infrastructure-stack";
 import { EspAuthStack } from "../lib/esp-auth-stack";
+import * as dotenv from "dotenv";
 
+dotenv.config();
 const app = new cdk.App();
 
 // Create infrastructure stack with DynamoDB tables first
