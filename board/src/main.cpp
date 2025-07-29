@@ -9,9 +9,9 @@
 #include <WiFi.h>
 #include <wifi_config_manager.h>
 
-const char *mqtt_server;
+String mqtt_server_str;
+String mqtt_topic_str;
 int mqtt_port;
-const char *mqtt_topic;
 
 String clientId;
 
@@ -73,18 +73,24 @@ void setup()
 
   Serial.println("MQTT::SETUP");
 
-  String mqttServerStr = StorageHelper::getConfigValue("/config/config.json", "mqtt_server");
-  String mqttPortStr = StorageHelper::getConfigValue("/config/config.json", "mqtt_port");
-  String mqttTopicStr = StorageHelper::getConfigValue("/config/config.json", "mqtt_topic");
+  mqtt_server_str = StorageHelper::getConfigValue("/config/config.json", "mqtt_server");
+  mqtt_topic_str = StorageHelper::getConfigValue("/config/config.json", "mqtt_topic");
+  mqtt_port = StorageHelper::getConfigValue("/config/config.json", "mqtt_port").toInt();
 
-  mqtt_server = mqttServerStr.c_str();
-  mqtt_port = mqttPortStr.toInt();
-  mqtt_topic = mqttTopicStr.c_str();
+  if (mqtt_server_str.length() == 0)
+  {
+    Serial.println("[ERROR] mqtt_server missing or invalid");
+    while (true)
+      ;
+  }
+
+  MQTT::setup(mqtt_server_str.c_str(), mqtt_port);
+  MQTT::ensureConnection(clientId.c_str());
 
   clientId = "esp32-" + String(WiFi.macAddress());
   TimeHelper::setup();
   TempSensor::setup();
-  MQTT::setup(mqtt_server, mqtt_port);
+  MQTT::setup(mqtt_server_str.c_str(), mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
 }
 
@@ -120,7 +126,7 @@ void loop()
 
     delay(10000);
 
-    MQTT::publish(mqtt_topic, payload);
+    MQTT::publish(mqtt_topic_str.c_str(), payload);
 
     Serial.printf("Published: %s \n", payload);
   }

@@ -5,6 +5,7 @@
 #include "wifi_config.h"
 #include <wifi_config_manager.h>
 #include <auth_helper.h>
+#include <time_helper.h>
 
 namespace
 {
@@ -136,8 +137,7 @@ void startSetupWebServer()
   Serial.println("[Setup] Completing setup and restarting...");
 
 
-  delay(5000);  
-  ESP.restart(); });
+  TimeHelper::scheduleRestart(5000); });
 
   server.begin();
 }
