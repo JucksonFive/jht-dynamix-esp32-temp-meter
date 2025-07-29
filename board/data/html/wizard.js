@@ -215,13 +215,14 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
       })
         .then((res) => {
-          if (res.ok) {
-            alert(
-              "✅ Setup complete! Device will restart and connect to your WiFi network."
-            );
-          } else {
-            alert("❌ Setup completion failed.");
-          }
+          console.log("Status:", res.status);
+          return res.text();
+        })
+        .then((text) => {
+          console.log("Body:", text);
+          alert(
+            "✅ Setup complete! Device will restart and connect to your WiFi network."
+          );
         })
         .catch((err) => {
           console.error("Setup completion failed:", err);

@@ -2,14 +2,14 @@
 #include <LittleFS.h>
 #include "storage_helper.h"
 
-String StorageHelper::getConfigValue(const String &key)
+String StorageHelper::getConfigValue(const String &path, const String &key)
 {
     if (!LittleFS.begin())
     {
         Serial.println("[Config] LittleFS mount failed");
         return "";
     }
-    File file = LittleFS.open("/config/config.json", "r");
+    File file = LittleFS.open(path, "r");
     if (!file)
     {
         Serial.println("[Config] config.json not found");

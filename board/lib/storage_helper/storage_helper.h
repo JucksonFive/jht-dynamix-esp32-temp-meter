@@ -3,5 +3,5 @@
 
 namespace StorageHelper
 {
-    String getConfigValue(const String &key);
+    String getConfigValue(const String &path, const String &key);
 }

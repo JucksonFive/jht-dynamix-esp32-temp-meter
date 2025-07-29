@@ -128,15 +128,16 @@ void startSetupWebServer()
     request->send(500, "text/plain", "Failed to save device link");
   } });
 
-  // Add endpoint to complete setup
   server.on("/complete-setup", HTTP_POST, [](AsyncWebServerRequest *request)
             {
-    setupComplete = true;
-    delay(1000);
-    request->send(200, "text/plain", "Setup completed. Restarting...");
-    Serial.println("[Setup] Completing setup and restarting...");
-    delay(1000);
-    ESP.restart(); });
+  setupComplete = true;
+
+  request->send(200, "text/plain", "Setup completed. Restarting...");
+  Serial.println("[Setup] Completing setup and restarting...");
+
+
+  delay(5000);  
+  ESP.restart(); });
 
   server.begin();
 }

@@ -7,14 +7,11 @@
 #include "time_helper.h"
 #include <LittleFS.h>
 #include <WiFi.h>
+#include <wifi_config_manager.h>
 
-String mqttServerStr = StorageHelper::getConfigValue("mqtt_server");
-String mqttPortStr = StorageHelper::getConfigValue("mqtt_port");
-String mqttTopicStr = StorageHelper::getConfigValue("mqtt_topic");
-
-const char *mqtt_server = mqttServerStr.c_str();
-int mqtt_port = mqttPortStr.toInt();
-const char *mqtt_topic = mqttTopicStr.c_str();
+const char *mqtt_server;
+int mqtt_port;
+const char *mqtt_topic;
 
 String clientId;
 
@@ -22,9 +19,6 @@ void setup()
 {
   Serial.begin(115200);
   delay(1000);
-  Serial.println("[DEBUG] mqtt_server: " + String(mqtt_server));
-  Serial.println("[DEBUG] mqtt_port: " + String(mqtt_port));
-  Serial.println("[DEBUG] mqtt_topic: " + String(mqtt_topic));
 
   if (!LittleFS.begin())
   {
@@ -36,27 +30,56 @@ void setup()
   if (!isSetupComplete())
   {
     Serial.println("[Setup] Setup not complete, starting wizard");
+
+    // 🔧 Säilytä sekä AP että STA käytössä setupin aikana
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP("TempSensor-Setup");
+
     startSetupWebServer();
     return;
   }
 
-  if (wifiCredentialsExist() && connectToWifi())
+  if (wifiCredentialsExist())
   {
+    WifiCredentials creds;
+    if (!wifi_config_manager::readCredentials(creds))
+    {
+      Serial.println("[WiFi] Failed to read wifi.json, starting setup wizard");
+      WiFi.softAP("TempSensor-Setup");
+      startSetupWebServer();
+      return;
+    }
+
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.begin(creds.ssid.c_str(),
+               creds.password.c_str());
+
+    unsigned long start = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - start < 10000)
+    {
+      delay(100);
+    }
+
+    if (WiFi.status() != WL_CONNECTED)
+    {
+      Serial.println("[WiFi] Connection failed, starting wizard fallback");
+      WiFi.softAP("TempSensor-Setup");
+      startSetupWebServer();
+      return;
+    }
+
     Serial.println("[WiFi] Connected");
   }
-  else
-  {
-    Serial.println("[WiFi] Starting setup wizard");
-    startSetupWebServer();
-    return;
-  }
 
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("[WiFi] Still not connected, aborting init.");
-    return;
-  }
   Serial.println("MQTT::SETUP");
+
+  String mqttServerStr = StorageHelper::getConfigValue("/config/config.json", "mqtt_server");
+  String mqttPortStr = StorageHelper::getConfigValue("/config/config.json", "mqtt_port");
+  String mqttTopicStr = StorageHelper::getConfigValue("/config/config.json", "mqtt_topic");
+
+  mqtt_server = mqttServerStr.c_str();
+  mqtt_port = mqttPortStr.toInt();
+  mqtt_topic = mqttTopicStr.c_str();
 
   clientId = "esp32-" + String(WiFi.macAddress());
   TimeHelper::setup();
