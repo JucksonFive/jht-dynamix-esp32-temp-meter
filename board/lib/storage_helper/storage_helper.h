@@ -3,5 +3,5 @@
 
 namespace StorageHelper
 {
-    String getAuthUrlFromConfig(const String &key);
+    String getConfigValue(const String &key);
 }

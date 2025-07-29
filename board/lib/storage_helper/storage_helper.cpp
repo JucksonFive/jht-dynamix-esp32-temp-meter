@@ -1,7 +1,8 @@
 #include <ArduinoJson.h>
 #include <LittleFS.h>
+#include "storage_helper.h"
 
-String getAuthUrlFromConfig(const String &key)
+String StorageHelper::getConfigValue(const String &key)
 {
     if (!LittleFS.begin())
     {
@@ -27,5 +28,5 @@ String getAuthUrlFromConfig(const String &key)
         Serial.println("[Config] " + key + " missing in config.json");
         return "";
     }
-    return String(doc[key].as<const char *>());
+    return String(doc[key].as<String>());
 }

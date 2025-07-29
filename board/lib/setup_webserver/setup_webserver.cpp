@@ -132,6 +132,7 @@ void startSetupWebServer()
   server.on("/complete-setup", HTTP_POST, [](AsyncWebServerRequest *request)
             {
     setupComplete = true;
+    delay(1000);
     request->send(200, "text/plain", "Setup completed. Restarting...");
     Serial.println("[Setup] Completing setup and restarting...");
     delay(1000);

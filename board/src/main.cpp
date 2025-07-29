@@ -2,14 +2,19 @@
 #include "wifi_config.h"
 #include "setup_webserver.h"
 #include "mqtt_helper.h"
+#include "storage_helper.h"
 #include "temperature_sensor.h"
 #include "time_helper.h"
 #include <LittleFS.h>
 #include <WiFi.h>
 
-const char *mqtt_server = "a2ig9dwsqscl2t-ats.iot.eu-north-1.amazonaws.com";
-const int mqtt_port = 8883;
-const char *mqtt_topic = "sensors/temperature";
+String mqttServerStr = StorageHelper::getConfigValue("mqtt_server");
+String mqttPortStr = StorageHelper::getConfigValue("mqtt_port");
+String mqttTopicStr = StorageHelper::getConfigValue("mqtt_topic");
+
+const char *mqtt_server = mqttServerStr.c_str();
+int mqtt_port = mqttPortStr.toInt();
+const char *mqtt_topic = mqttTopicStr.c_str();
 
 String clientId;
 
@@ -17,6 +22,9 @@ void setup()
 {
   Serial.begin(115200);
   delay(1000);
+  Serial.println("[DEBUG] mqtt_server: " + String(mqtt_server));
+  Serial.println("[DEBUG] mqtt_port: " + String(mqtt_port));
+  Serial.println("[DEBUG] mqtt_topic: " + String(mqtt_topic));
 
   if (!LittleFS.begin())
   {
