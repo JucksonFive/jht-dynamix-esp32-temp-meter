@@ -25,6 +25,13 @@ void setup()
       ;
   }
 
+  if (!isSetupComplete())
+  {
+    Serial.println("[Setup] Setup not complete, starting wizard");
+    startSetupWebServer();
+    return;
+  }
+
   if (wifiCredentialsExist() && connectToWifi())
   {
     Serial.println("[WiFi] Connected");

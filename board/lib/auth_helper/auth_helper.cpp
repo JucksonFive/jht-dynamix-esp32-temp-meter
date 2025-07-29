@@ -58,7 +58,7 @@ bool AuthHelper::authenticateUser(const String &username, const String &password
             file.print(response);
             file.close();
             Serial.println("[Auth] User data saved successfully");
-            https.end(); // Clean up
+            https.end();
             return true;
         }
         else
