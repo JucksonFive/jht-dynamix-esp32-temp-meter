@@ -5,7 +5,9 @@ import { AuthStack } from "../lib/auth-stack";
 import { LambdaStack } from "../lib/lambda-stack";
 import { InfrastructureStack } from "../lib/infrastructure-stack";
 import { EspAuthStack } from "../lib/esp-auth-stack";
+import * as dotenv from "dotenv";
 
+dotenv.config();
 const app = new cdk.App();
 
 // Create infrastructure stack with DynamoDB tables first
@@ -28,7 +30,10 @@ const authStack = new AuthStack(app, "AuthStack", {
   authProtectedFn: lambdaStack.authProtectedFn,
 });
 
-new EspAuthStack(app, "EspAuthStack");
+new EspAuthStack(app, "EspAuthStack", {
+  userPoolId: authStack.userPool.userPoolId,
+  clientId: authStack.userPoolClient.userPoolClientId,
+});
 // Add dependencies
 lambdaStack.addDependency(infraStack);
 backendStack.addDependency(lambdaStack);
