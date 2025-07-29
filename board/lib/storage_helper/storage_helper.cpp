@@ -4,11 +4,6 @@
 
 String StorageHelper::getConfigValue(const String &path, const String &key)
 {
-    if (!LittleFS.begin())
-    {
-        Serial.println("[Config] LittleFS mount failed");
-        return "";
-    }
     File file = LittleFS.open(path, "r");
     if (!file)
     {

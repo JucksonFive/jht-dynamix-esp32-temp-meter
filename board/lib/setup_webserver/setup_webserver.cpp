@@ -38,12 +38,6 @@ void startSetupWebServer()
   WiFi.mode(WIFI_AP);
   WiFi.softAP("TempSensor-Setup");
 
-  if (!LittleFS.begin())
-  {
-    Serial.println("LittleFS mount failed");
-    return;
-  }
-
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/html/index.html", "text/html"); });
 
@@ -151,15 +145,6 @@ bool isSetupComplete()
   if (setupChecked)
   {
     return setupResult;
-  }
-
-  // Check if setup is complete by looking for setup completion marker files
-  if (!LittleFS.begin())
-  {
-    Serial.println("[Setup] LittleFS mount failed");
-    setupChecked = true;
-    setupResult = false;
-    return false;
   }
 
   // Check if both WiFi credentials and device linking are complete
