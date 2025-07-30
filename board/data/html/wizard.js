@@ -156,51 +156,6 @@ function handleUserAuth(username, userPassword) {
       authStatus.classList.remove("hidden");
     });
 }
-// // UUSI FUNKTIO: Käyttäjän autentikointi step 2:ssa
-// function handleUserAuth() {
-//   const form = document.getElementById("setupForm");
-//   const username = form.querySelector("input[name='username']").value.trim();
-//   const userPassword = form
-//     .querySelector("input[name='userPassword']")
-//     .value.trim();
-//   const statusBox = document.getElementById("user-auth-status");
-
-//   if (!username || !userPassword) {
-//     alert("Please enter username and password.");
-//     return;
-//   }
-
-//   statusBox.innerText = "Authenticating...";
-//   statusBox.className = "status";
-//   statusBox.classList.remove("hidden");
-
-//   const formData = new FormData();
-//   formData.append("username", username);
-//   formData.append("userPassword", userPassword);
-
-//   fetch("/link-device", {
-//     method: "POST",
-//     body: formData,
-//   })
-//     .then((res) => {
-//       if (res.ok) {
-//         statusBox.innerText = "✅ Authenticated!";
-//         statusBox.className = "status success";
-//         setTimeout(() => {
-//           currentStep++;
-//           showStep(currentStep);
-//         }, 1200);
-//       } else {
-//         statusBox.innerText = "❌ Authentication failed.";
-//         statusBox.className = "status error";
-//       }
-//     })
-//     .catch((err) => {
-//       console.error("Auth network error:", err);
-//       statusBox.innerText = "❌ Network error. Try again.";
-//       statusBox.className = "status error";
-//     });
-// }
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
