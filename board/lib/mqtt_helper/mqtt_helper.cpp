@@ -12,7 +12,7 @@ namespace
 
 void MQTT::setup(const char *server, int port)
 {
-    CertHelper::loadCerts(secureClient); 
+    CertHelper::loadCerts(secureClient);
     client.setServer(server, port);
 }
 
@@ -50,4 +50,3 @@ bool MQTT::isConnected()
 {
     return client.connected();
 }
-

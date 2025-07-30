@@ -11,26 +11,6 @@ namespace
 {
   AsyncWebServer server(80);
   bool setupComplete = false;
-
-  void handleFormSubmission(AsyncWebServerRequest *request)
-  {
-    if (!request->hasParam("ssid", true) || !request->hasParam("password", true))
-    {
-      request->send(400, "text/plain", "Missing parameters");
-      return;
-    }
-
-    String ssid = request->getParam("ssid", true)->value();
-    String password = request->getParam("password", true)->value();
-
-    saveWifiCredentials(ssid, password);
-
-    request->send(200, "text/plain", "Credentials saved. Restarting...");
-    setupComplete = true;
-
-    delay(1000);
-    ESP.restart();
-  }
 }
 
 void startSetupWebServer()
@@ -47,16 +27,9 @@ void startSetupWebServer()
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/html/style.css", "text/css"); });
 
-  // Serve router.svg
-  server.on("/router.svg", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(LittleFS, "/html/router.svg", "image/svg+xml"); });
-
   // Serve globe.svg
   server.on("/globe.svg", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/html/globe.svg", "image/svg+xml"); });
-
-  server.on("/favicon.ico", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(204, "image/x-icon", ""); }); // Return 204 No Content
 
   server.on("/favicon.svg", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/html/favicon.svg", "image/svg+xml"); });
