@@ -8,6 +8,7 @@
 #include <LittleFS.h>
 #include <WiFi.h>
 #include <wifi_config_manager.h>
+#include <wifi_scan_helper.h>
 
 String mqtt_server_str;
 String mqtt_topic_str;
@@ -94,7 +95,7 @@ void setup()
 
 void loop()
 {
-  // If setup is not complete, don't run MQTT operations
+  WifiScanHelper::processScanResult();
   if (!isSetupComplete())
   {
     Serial.println("[DEBUG] Setup not complete, skipping MQTT operations");

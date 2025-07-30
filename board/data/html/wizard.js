@@ -1,4 +1,59 @@
 let currentStep = 1;
+let selectedSSID = "";
+
+const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await fetch("/scan-wifi");
+      const text = await res.text();
+      console.log(`📡 Attempt ${attempt + 1}:`, text);
+
+      // jos ei vielä valmis
+      if (res.status === 202 || text === "Scan started") {
+        await new Promise((resolve) => setTimeout(resolve, interval));
+        continue;
+      }
+
+      // yritä jäsentää
+      const data = JSON.parse(text);
+      if (!data || !Array.isArray(data.networks)) {
+        throw new Error("Invalid JSON structure: " + JSON.stringify(data));
+      }
+
+      // renderöi lista
+      const list = document.getElementById("wifi-list");
+      list.innerHTML = "";
+      data.networks.forEach((network) => {
+        const item = document.createElement("li");
+        item.className = "wifi-item";
+        item.textContent = network.ssid;
+        item.onclick = () => openModal(network.ssid);
+        list.appendChild(item);
+      });
+
+      return; // ✅ success
+    } catch (err) {
+      console.warn("⚠️ WiFi scan retry error:", err.message);
+      await new Promise((resolve) => setTimeout(resolve, interval));
+    }
+  }
+
+  console.error("❌ WiFi scan failed after max attempts");
+};
+const loadWifiList = () => {
+  pollWifiList();
+};
+
+function openModal(ssid) {
+  selectedSSID = ssid;
+  document.getElementById("selected-ssid").innerText = ssid;
+  document.getElementById("password-modal").classList.remove("hidden");
+}
+
+function closeModal() {
+  document.getElementById("password-modal").classList.add("hidden");
+  document.getElementById("wifi-password").value = "";
+}
 
 function showStep(step) {
   document.querySelectorAll(".step").forEach((el, index) => {
@@ -62,25 +117,22 @@ function prevStep() {
   }
 }
 
-function handleWifiSubmit() {
-  const form = document.getElementById("setupForm");
-  const ssid = form.querySelector("input[name='ssid']").value.trim();
-  const password = form.querySelector("input[name='password']").value.trim();
-
-  if (!ssid || !password) {
-    alert("Please enter SSID and password.");
+function submitWifi() {
+  const password = document.getElementById("wifi-password").value.trim();
+  if (!password) {
+    alert("Please enter WiFi password");
     return;
   }
 
-  // Use the correct spinner elements from HTML
   const wifiSpinner = document.getElementById("wifi-spinner");
   const wifiStatus = document.getElementById("wifi-status");
 
   wifiSpinner.classList.remove("hidden");
   wifiStatus.classList.add("hidden");
+  closeModal();
 
   const formData = new FormData();
-  formData.append("ssid", ssid);
+  formData.append("ssid", selectedSSID);
   formData.append("password", password);
 
   fetch("/connect-to-wifi", {
@@ -94,19 +146,18 @@ function handleWifiSubmit() {
         wifiStatus.className = "status success";
         wifiStatus.classList.remove("hidden");
 
-        // Auto advance to next step after delay
         setTimeout(() => {
           currentStep++;
           showStep(currentStep);
         }, 1500);
       } else {
-        wifiStatus.innerText = "❌ Connection failed. Check SSID/password.";
+        wifiStatus.innerText = "❌ Connection failed. Check password.";
         wifiStatus.className = "status error";
         wifiStatus.classList.remove("hidden");
       }
     })
     .catch((err) => {
-      console.error("Network error:", err);
+      console.error("WiFi error:", err);
       wifiSpinner.classList.add("hidden");
       wifiStatus.innerText = "❌ Network error. Try again.";
       wifiStatus.className = "status error";
@@ -160,7 +211,7 @@ function handleUserAuth(username, userPassword) {
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
   showStep(currentStep);
-
+  if (currentStep === 1) loadWifiList();
   // Handle final form submission
   document.getElementById("setupForm").addEventListener("submit", (e) => {
     e.preventDefault();

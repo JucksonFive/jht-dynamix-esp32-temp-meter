@@ -6,6 +6,7 @@
 #include <wifi_config_manager.h>
 #include <auth_helper.h>
 #include <time_helper.h>
+#include <wifi_scan_helper.h>
 
 namespace
 {
@@ -34,6 +35,22 @@ void startSetupWebServer()
   server.on("/favicon.svg", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/html/favicon.svg", "image/svg+xml"); });
 
+  server.on("/scan-wifi", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+  if (!WifiScanHelper::hasResult()) {
+    WifiScanHelper::beginScan();
+    request->send(202, "text/plain", "Scan started");
+    return;
+  }
+
+  String json = WifiScanHelper::getResultAndClear();
+
+  if (json.length() == 0) {
+    request->send(500, "application/json", "{\"networks\":[]}");
+    return;
+  }
+
+  request->send(200, "application/json", json); });
   server.on("/connect-to-wifi", HTTP_POST, [](AsyncWebServerRequest *request)
             {
   if (!request->hasParam("ssid", true) || !request->hasParam("password", true)) {
