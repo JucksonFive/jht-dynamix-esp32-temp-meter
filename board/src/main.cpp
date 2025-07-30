@@ -11,8 +11,8 @@
 
 String mqtt_server_str;
 String mqtt_topic_str;
+String userId;
 int mqtt_port;
-
 String clientId;
 
 void setup()
@@ -45,7 +45,6 @@ void setup()
     if (!wifi_config_manager::readCredentials(creds))
     {
       Serial.println("[WiFi] Failed to read wifi.json, starting setup wizard");
-      WiFi.softAP("TempSensor-Setup");
       startSetupWebServer();
       return;
     }
@@ -63,7 +62,6 @@ void setup()
     if (WiFi.status() != WL_CONNECTED)
     {
       Serial.println("[WiFi] Connection failed, starting wizard fallback");
-      WiFi.softAP("TempSensor-Setup");
       startSetupWebServer();
       return;
     }
@@ -119,10 +117,11 @@ void loop()
   {
     char payload[128];
     const char *ts = TimeHelper::getLocalTimestamp();
+    userId = StorageHelper::getConfigValue("/user.json", "userId");
 
     snprintf(payload, sizeof(payload),
-             "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%s\"}",
-             temp, ts);
+             "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%s\",\"userId\":\"%s\"}",
+             temp, ts, userId.c_str());
 
     delay(10000);
 
