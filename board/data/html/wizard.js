@@ -59,7 +59,7 @@ function closeModal() {
   const scanSpinner = document.getElementById("scan-spinner");
   document.getElementById("password-modal").classList.add("hidden");
   document.getElementById("wifi-password").value = "";
-  scanSpinner.classList.remove("hidden");
+  scanSpinner.classList.add("hidden");
 }
 
 function showStep(step) {
