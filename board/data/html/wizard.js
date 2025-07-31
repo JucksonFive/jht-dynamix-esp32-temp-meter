@@ -34,7 +34,7 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
         list.appendChild(item);
       });
 
-      return; // ✅ success
+      return;
     } catch (err) {
       console.warn("⚠️ WiFi scan retry error:", err.message);
       await new Promise((resolve) => setTimeout(resolve, interval));
@@ -48,14 +48,18 @@ const loadWifiList = () => {
 };
 
 function openModal(ssid) {
+  const scanSpinner = document.getElementById("scan-spinner");
   selectedSSID = ssid;
   document.getElementById("selected-ssid").innerText = ssid;
   document.getElementById("password-modal").classList.remove("hidden");
+  scanSpinner.classList.add("hidden");
 }
 
 function closeModal() {
+  const scanSpinner = document.getElementById("scan-spinner");
   document.getElementById("password-modal").classList.add("hidden");
   document.getElementById("wifi-password").value = "";
+  scanSpinner.classList.remove("hidden");
 }
 
 function showStep(step) {
