@@ -4,7 +4,10 @@ let selectedSSID = "";
 const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
+      const scanSpinner = document.getElementById("scan-spinner");
+
       const res = await fetch("/scan-wifi");
+      scanSpinner.classList.remove("hidden");
       const text = await res.text();
       console.log(`📡 Attempt ${attempt + 1}:`, text);
 

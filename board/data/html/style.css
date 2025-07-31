@@ -184,3 +184,10 @@ button:hover {
 .wifi-item:hover {
   background-color: #5b2b85;
 }
+
+#scan-feedback {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
