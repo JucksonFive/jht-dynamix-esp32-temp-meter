@@ -33,6 +33,7 @@ export class AuthStack extends Stack {
       userPool,
       generateSecret: false,
       authFlows: {
+        userSrp: true,
         userPassword: true,
       },
     });

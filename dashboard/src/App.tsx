@@ -9,7 +9,6 @@ import { Dashboard } from "./components/Dashboard";
 interface DeviceData {
   id: string;
   temperature: number;
-  humidity: number;
   timestamp: string;
 }
 
