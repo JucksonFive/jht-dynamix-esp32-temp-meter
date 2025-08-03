@@ -1,12 +1,10 @@
-
 import { useState } from "react";
-import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
+import { getCurrentUser, signIn } from "@aws-amplify/auth";
 
-
-export const Login = ({setUser}: {setUser: (user: any) => void}) => {
+export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "reset">("signin");
   const [error, setError] = useState<string | null>(null);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -79,24 +77,26 @@ export const Login = ({setUser}: {setUser: (user: any) => void}) => {
           placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
         />
-        <input
-          type="password"
-          className="border px-4 py-2 w-full mb-4 rounded text-center"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        {mode === "signin" && (
+          <input
+            type="password"
+            className="border px-4 py-2 w-full mb-4 rounded text-center"
+            placeholder="Password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        )}
         <button
           className="bg-black text-white py-2 rounded mb-4"
           onClick={handleAuth}
         >
-          {mode === "signin" ? "Sign In" : "Sign Up"}
+          {mode === "signin" ? "Sign In" : "Reset Password"}
         </button>
 
         <button
           className="text-sm text-blue-600 underline"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+          onClick={() => setMode(mode === "signin" ? "reset" : "signin")}
         >
-          {mode === "signin" ? "Create an account" : "Already have an account?"}
+          {mode === "signin" ? "Forgot password?" : "I want to sign in instead"}
         </button>
       </div>
 
