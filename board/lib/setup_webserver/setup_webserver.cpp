@@ -51,39 +51,26 @@ void startSetupWebServer()
   }
 
   request->send(200, "application/json", json); });
+
   server.on("/connect-to-wifi", HTTP_POST, [](AsyncWebServerRequest *request)
             {
-  if (!request->hasParam("ssid", true) || !request->hasParam("password", true)) {
-    request->send(400, "text/plain", "Missing parameters");
-    return;
-  }
+    if (!request->hasParam("ssid", true) || !request->hasParam("password", true))
+    {
+      request->send(400, "text/plain", "Missing parameters");
+      return;
+    }
 
-  String ssid = request->getParam("ssid", true)->value();
-  String password = request->getParam("password", true)->value();
+    String ssid = request->getParam("ssid", true)->value();
+    String password = request->getParam("password", true)->value();
 
-  if (!saveWifiCredentials(ssid, password)) {
-    request->send(500, "text/plain", "Failed to save credentials");
-    return;
-  }
+    if (!saveWifiCredentials(ssid, password))
+    {
+      request->send(500, "text/plain", "Failed to save credentials");
+      return;
+    }
 
-  // Test WiFi connection while keeping AP mode active
-  WiFi.mode(WIFI_AP_STA); // Enable both AP and STA modes
-  WiFi.begin(ssid.c_str(), password.c_str());
-  
-  // Wait for connection with timeout
-  unsigned long startTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 10000) {
-    delay(100);
-  }
-
-  if (WiFi.status() == WL_CONNECTED) {
-    request->send(200, "text/plain", "WiFi connected successfully");
-    Serial.println("[WiFi] Test connection successful");
-  } else {
-    request->send(500, "text/plain", "WiFi connection failed");
-    Serial.println("[WiFi] Test connection failed");
-    WiFi.mode(WIFI_AP); // Fall back to AP mode only
-  } });
+    startWifiConnectTask(ssid, password);
+    request->send(200, "text/plain", "WiFi connected successfully"); });
 
   server.on("/link-device", HTTP_POST, [](AsyncWebServerRequest *request)
             {
