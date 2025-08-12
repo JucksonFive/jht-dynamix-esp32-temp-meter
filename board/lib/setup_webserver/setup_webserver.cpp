@@ -75,13 +75,14 @@ void startSetupWebServer()
   server.on("/link-device", HTTP_POST, [](AsyncWebServerRequest *request)
             {
   if (!request->hasParam("username", true) ||
-      !request->hasParam("userPassword", true)) {
+      !request->hasParam("userPassword", true) || !request->hasParam("deviceId", true)) {
     request->send(400, "text/plain", "Missing parameters");
     return;
   }
 
   String username = request->getParam("username", true)->value();
   String password = request->getParam("userPassword", true)->value();
+  String deviceId = request->getParam("deviceId", true)->value();
 
   Serial.printf("[Setup] Authenticating user '%s'\n", username.c_str());
 

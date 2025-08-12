@@ -100,14 +100,16 @@ function nextStep() {
     const userPassword = form
       .querySelector("input[name='userPassword']")
       .value.trim();
-
-    if (!username || !userPassword) {
-      alert("Please enter username and password before proceeding.");
+    const deviceId = form.querySelector("input[name='deviceId']").value.trim();
+    if (!username || !userPassword || !deviceId) {
+      alert(
+        "Please enter username, password, and device ID before proceeding."
+      );
       return;
     }
 
     // Call authentication function instead of just advancing
-    handleUserAuth(username, userPassword);
+    handleUserAuth(username, userPassword, deviceId);
     return;
   }
 
@@ -172,7 +174,7 @@ function submitWifi() {
     });
 }
 
-function handleUserAuth(username, userPassword) {
+function handleUserAuth(username, userPassword, deviceId) {
   // Use the correct spinner elements from HTML
   const authSpinner = document.getElementById("auth-spinner");
   const authStatus = document.getElementById("auth-status");
@@ -183,6 +185,7 @@ function handleUserAuth(username, userPassword) {
   const formData = new FormData();
   formData.append("username", username);
   formData.append("userPassword", userPassword);
+  formData.append("deviceId", deviceId);
 
   fetch("/link-device", {
     method: "POST",
