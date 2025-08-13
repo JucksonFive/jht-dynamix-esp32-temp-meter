@@ -15,6 +15,7 @@ String mqtt_topic_str;
 String userId;
 int mqtt_port;
 String clientId;
+String deviceId;
 
 void setup()
 {
@@ -32,7 +33,6 @@ void setup()
   {
     Serial.println("[Setup] Setup not complete, starting wizard");
 
-    // 🔧 Säilytä sekä AP että STA käytössä setupin aikana
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAP("TempSensor-Setup");
 
@@ -119,10 +119,11 @@ void loop()
     char payload[128];
     const char *ts = TimeHelper::getLocalTimestamp();
     userId = StorageHelper::getConfigValue("/user.json", "userId");
+    deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
 
     snprintf(payload, sizeof(payload),
-             "{\"deviceId\":\"esp32-1\",\"temperature\":%.2f,\"timestamp\":\"%s\",\"userId\":\"%s\"}",
-             temp, ts, userId.c_str());
+             "{\"deviceId\":\"%s\",\"temperature\":%.2f,\"timestamp\":\"%s\",\"userId\":\"%s\"}",
+             deviceId.c_str(), temp, ts, userId.c_str());
 
     delay(10000);
 

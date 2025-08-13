@@ -25,3 +25,27 @@ String StorageHelper::getConfigValue(const String &path, const String &key)
     }
     return String(doc[key].as<String>());
 }
+
+bool StorageHelper::saveJsonValue(const char *path, const char *key, const String &value)
+{
+    File f = LittleFS.open(path, "w");
+    if (!f)
+    {
+        Serial.printf("[StorageHelper] Failed to open %s for writing\n", path);
+        return false;
+    }
+
+    JsonDocument doc;
+    doc[key] = value;
+
+    if (serializeJson(doc, f) == 0)
+    {
+        Serial.printf("[StorageHelper] Failed to write JSON to %s\n", path);
+        f.close();
+        return false;
+    }
+
+    f.close();
+    Serial.printf("[StorageHelper] Saved %s=%s to %s\n", key, value.c_str(), path);
+    return true;
+}

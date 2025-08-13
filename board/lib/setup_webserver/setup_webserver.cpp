@@ -7,6 +7,7 @@
 #include <auth_helper.h>
 #include <time_helper.h>
 #include <wifi_scan_helper.h>
+#include <storage_helper.h>
 
 namespace
 {
@@ -92,14 +93,11 @@ void startSetupWebServer()
     return;
   }
 
-  // Simuloi laitteen ja käyttäjän linkitystä tallentamalla tiedosto
-  File f = LittleFS.open("/device.json", "w");
-  if (f) {
-    f.close();
-    request->send(200, "text/plain", "Device linked successfully");
-  } else {
+  if (!StorageHelper::saveJsonValue("/device.json", "deviceId", deviceId)) {
     request->send(500, "text/plain", "Failed to save device link");
-  } });
+    return;
+  }
+  request->send(200, "text/plain", "Device linked successfully"); });
 
   server.on("/complete-setup", HTTP_POST, [](AsyncWebServerRequest *request)
             {
