@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
-import { Logo } from "../../components/Logo";
-import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { Logo } from "./Components/Logo";
+import { LoadingSpinner } from "./Components/LoadingSpinner";
 
 export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   const [email, setEmail] = useState("");
