@@ -19,7 +19,6 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
       if (mode === "signin") {
         await signIn({ username: email, password });
       } else {
-        // Perus signUp (ei vahvistuskoodin UI:ta tässä vielä)
         await signUp({
           username: email,
           password,
