@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
+import { Logo } from "../../components/Logo";
 
 export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   const [email, setEmail] = useState("");
@@ -38,45 +39,7 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
     <div className="flex flex-col md:flex-row min-h-screen">
       <div className="w-full md:w-1/2 bg-[#f9fafb] flex flex-col justify-center px-8 sm:px-16 py-12">
         <div className="mb-8 flex flex-col items-center">
-          <svg
-            width="64"
-            height="64"
-            viewBox="0 0 128 128"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="64"
-              cy="64"
-              r="60"
-              stroke="#2D9CDB"
-              strokeWidth="4"
-              fill="#F2F2F2"
-            />
-            <path
-              d="M64 4 A60 60 0 0 1 64 124"
-              stroke="#27AE60"
-              strokeWidth="3"
-              fill="none"
-            />
-            <path
-              d="M4 64 A60 60 0 0 1 124 64"
-              stroke="#EB5757"
-              strokeWidth="3"
-              fill="none"
-            />
-            <text
-              x="64"
-              y="72"
-              textAnchor="middle"
-              fontSize="18"
-              fill="#333"
-              fontFamily="Arial"
-              fontWeight="bold"
-            >
-              JT-DYNAMIX
-            </text>
-          </svg>
+          <Logo size={128} />
         </div>
         <div className="text-center">
           <h1 className="text-3xl font-semibold mb-2">Welcome</h1>
@@ -145,45 +108,7 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
       </div>
 
       <div className="hidden md:flex w-full md:w-1/2 bg-black text-white items-center justify-center p-8">
-        <svg
-          width="128"
-          height="128"
-          viewBox="0 0 128 128"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle
-            cx="64"
-            cy="64"
-            r="60"
-            stroke="#2D9CDB"
-            strokeWidth="4"
-            fill="#F2F2F2"
-          />
-          <path
-            d="M64 4 A60 60 0 0 1 64 124"
-            stroke="#27AE60"
-            strokeWidth="3"
-            fill="none"
-          />
-          <path
-            d="M4 64 A60 60 0 0 1 124 64"
-            stroke="#EB5757"
-            strokeWidth="3"
-            fill="none"
-          />
-          <text
-            x="64"
-            y="72"
-            textAnchor="middle"
-            fontSize="18"
-            fill="#333"
-            fontFamily="Arial"
-            fontWeight="bold"
-          >
-            JT-DYNAMIX
-          </text>
-        </svg>
+        <Logo size={512} />
       </div>
     </div>
   );
