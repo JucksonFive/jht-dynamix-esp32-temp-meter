@@ -17,7 +17,6 @@ namespace
 
 void startSetupWebServer()
 {
-  WiFi.mode(WIFI_AP);
   WiFi.softAP("TempSensor-Setup");
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)

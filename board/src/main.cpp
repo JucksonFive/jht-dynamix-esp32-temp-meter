@@ -33,9 +33,6 @@ void setup()
   {
     Serial.println("[Setup] Setup not complete, starting wizard");
 
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.softAP("TempSensor-Setup");
-
     startSetupWebServer();
     return;
   }
@@ -50,7 +47,6 @@ void setup()
       return;
     }
 
-    WiFi.mode(WIFI_AP_STA);
     WiFi.begin(creds.ssid.c_str(),
                creds.password.c_str());
 
@@ -82,15 +78,12 @@ void setup()
     while (true)
       ;
   }
-
+  clientId = "esp32-" + String(WiFi.macAddress());
   MQTT::setup(mqtt_server_str.c_str(), mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
 
-  clientId = "esp32-" + String(WiFi.macAddress());
   TimeHelper::setup();
   TempSensor::setup();
-  MQTT::setup(mqtt_server_str.c_str(), mqtt_port);
-  MQTT::ensureConnection(clientId.c_str());
 }
 
 void loop()

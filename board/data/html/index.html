@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,26 +7,20 @@
   <link href="style.css" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
-
 <body>
   <div class="container">
     <div class="header">
       <img src="globe.svg" alt="Globe Logo" class="logo" />
     </div>
     <h1>Device Configuration</h1>
-
     <!-- WiFi Configuration -->
     <form id="setupForm">
       <!-- Step 1: WiFi -->
       <div class="step" id="step-1">
         <h2>1. WiFi Settings</h2>
-
-
-
         <div id="wifi-list-container">
           <ul id="wifi-list"></ul>
         </div>
-        
         <div id="scan-feedback">
           <div id="scan-spinner" class="spinner hidden">
             <img src="favicon.svg" alt="Loading" class="spinner-icon" />
@@ -35,7 +28,6 @@
           </div>
           <p id="scan-status" class="status hidden"></p>
         </div>
-
         <!-- Password Modal -->
         <div id="password-modal" class="modal hidden">
           <div class="modal-content">
@@ -47,7 +39,6 @@
             </div>
           </div>
         </div>
-
         <div id="wifi-feedback">
           <div id="wifi-spinner" class="spinner hidden">
             <img src="favicon.svg" alt="Loading" class="spinner-icon" />
@@ -56,8 +47,6 @@
           <p id="wifi-status" class="status hidden"></p>
         </div>
       </div>
-
-
       <!-- Step 2: Login -->
       <div class="step hidden" id="step-2">
         <h2>2. JT-Credentials</h2>
@@ -76,7 +65,6 @@
           <p id="auth-status" class="status hidden"></p>
         </div>
       </div>
-
       <!-- Step 3: Confirm & Submit -->
       <div class="step hidden" id="step-3">
         <h2>3. Confirm Settings</h2>
@@ -93,5 +81,4 @@
   </div>
   <script src="wizard.js"></script>
 </body>
-
 </html>
