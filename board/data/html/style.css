@@ -72,6 +72,7 @@ button:hover {
   font-size: 0.85rem;
   color: #aaa;
 }
+
 .step {
   margin-bottom: 20px;
 }
@@ -122,6 +123,7 @@ button:hover {
 .hidden {
   display: none;
 }
+
 .spinner {
   display: flex;
   align-items: center;
@@ -135,8 +137,13 @@ button:hover {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .hidden {
@@ -185,9 +192,25 @@ button:hover {
   background-color: #5b2b85;
 }
 
-#scan-feedback, #wifi-feedback, #auth-feedback {
+#scan-feedback,
+#wifi-feedback,
+#auth-feedback {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+}
+
+.register-link {
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+
+.register-link a {
+  color: #2D9CDB;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
 }
