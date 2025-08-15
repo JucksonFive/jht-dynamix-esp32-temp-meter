@@ -6,18 +6,31 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      await signIn({ username: email, password });
-      const user = await getCurrentUser();
-      setUser(user);
+      setLoading(true);
+      if (mode === "signin") {
+        await signIn({ username: email, password });
+      } else {
+        // Perus signUp (ei vahvistuskoodin UI:ta tässä vielä)
+        await signUp({
+          username: email,
+          password,
+          options: { userAttributes: { email } },
+        });
+      }
+      const user = await getCurrentUser().catch(() => null);
+      if (user) setUser(user);
     } catch (err: any) {
-      console.error("Login failed", err);
-      setError(err.message || "Login failed");
+      console.error("Auth failed", err);
+      setError(err.message || "Authentication failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,11 +97,44 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
           onChange={(e) => setPassword(e.target.value)}
         />
         <button
-          className="bg-black text-white py-2 rounded mb-4"
+          className={`bg-black text-white py-2 rounded mb-4 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed`}
           onClick={handleAuth}
+          disabled={loading || !email || !password}
+          aria-busy={loading}
         >
-          {mode === "signin" ? "Sign In" : "Sign Up"}
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              <span>
+                {mode === "signin" ? "Signing In..." : "Signing Up..."}
+              </span>
+            </>
+          ) : (
+            <span>{mode === "signin" ? "Sign In" : "Sign Up"}</span>
+          )}
         </button>
+        {error && (
+          <div className="text-red-600 text-sm mb-2 text-center">{error}</div>
+        )}
 
         <button
           className="text-sm text-blue-600 underline"
