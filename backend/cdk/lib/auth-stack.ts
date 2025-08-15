@@ -19,7 +19,6 @@ export class AuthStack extends Stack {
     const userPool = new cognito.UserPool(this, "UserPool", {
       selfSignUpEnabled: false,
       signInAliases: { email: true },
-      autoVerify: { email: true },
       passwordPolicy: {
         minLength: 8,
         requireLowercase: true,
