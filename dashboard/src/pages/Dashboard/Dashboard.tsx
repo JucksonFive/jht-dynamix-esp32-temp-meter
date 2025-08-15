@@ -1,4 +1,5 @@
-import { TemperatureChart } from "../../components/TemperatureChart";
+import { TemperatureChart } from "./Components/TemperatureChart";
+import { SidePanel } from "./Components/SidePanel";
 
 interface DeviceData {
   id: string;
@@ -12,60 +13,6 @@ interface DashboardProps {
   setSelectedDeviceId: (id: string) => void;
   handleLogout: () => void;
 }
-
-export const DeviceList = ({
-  devices,
-  selectedId,
-  onSelect,
-}: {
-  devices: { id: string; lastSeen?: string }[];
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) => {
-  return (
-    <aside className="w-72 shrink-0 border-r border-gray-200 bg-gray-50 h-[calc(100vh-5rem)] overflow-y-auto rounded-lg">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold mb-3">Devices</h2>
-        <ul className="space-y-2">
-          {devices.map((d) => {
-            const isActive = d.id === selectedId;
-            return (
-              <li key={d.id}>
-                <button
-                  onClick={() => onSelect(d.id)}
-                  className={[
-                    "w-full text-left px-3 py-2 rounded-md transition",
-                    isActive
-                      ? "bg-blue-600 text-white"
-                      : "bg-white hover:bg-gray-100 text-gray-800 border border-gray-200",
-                  ].join(" ")}
-                  aria-current={isActive ? "page" : undefined}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{d.id}</span>
-                    {d.lastSeen && (
-                      <span
-                        className={
-                          "text-xs " +
-                          (isActive ? "text-blue-100" : "text-gray-500")
-                        }
-                      >
-                        {new Date(d.lastSeen).toLocaleTimeString()}
-                      </span>
-                    )}
-                  </div>
-                </button>
-              </li>
-            );
-          })}
-          {devices.length === 0 && (
-            <li className="text-sm text-gray-500">No devices yet.</li>
-          )}
-        </ul>
-      </div>
-    </aside>
-  );
-};
 
 export const Dashboard = ({
   data,
@@ -104,7 +51,7 @@ export const Dashboard = ({
 
       {/* Main layout */}
       <div className="flex gap-6">
-        <DeviceList
+        <SidePanel
           devices={devices}
           selectedId={selectedDeviceId}
           onSelect={(id) => setSelectedDeviceId(id)}
