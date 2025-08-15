@@ -1,4 +1,4 @@
-import { TemperatureChart } from "./TemperatureChart";
+import { TemperatureChart } from "../../components/TemperatureChart";
 
 interface DeviceData {
   id: string;

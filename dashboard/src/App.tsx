@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { getCurrentUser, signOut } from "aws-amplify/auth";
-import { Login } from "./components/Login";
+import { Login } from "./pages/Login/Login";
 import { fetchTemperatureData } from "./services/api";
-import { Dashboard } from "./components/Dashboard";
+import { Dashboard } from "./pages/Dashboard/Dashboard";
 
 interface DeviceData {
   id: string;
