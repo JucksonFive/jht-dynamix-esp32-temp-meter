@@ -8,6 +8,7 @@ backend/cdk/*.js
 backend/cdk/!jest.config.js
 backend/cdk/*.d.ts
 backend/node_modules
+backend/coverage
 
 # CDK asset staging directory
 backend/cdk/.cdk.staging
