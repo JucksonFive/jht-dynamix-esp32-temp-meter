@@ -1,61 +1,106 @@
-// 🔧 Mockit ensin
-const mockSend = jest.fn();
+import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 
-jest.mock("@aws-sdk/client-dynamodb", () => {
+// We will capture the mock so tests can set return values
+const sendMock = jest.fn();
+
+jest.mock("@aws-sdk/lib-dynamodb", () => {
+  const actual = jest.requireActual("@aws-sdk/lib-dynamodb");
   return {
-    DynamoDBClient: jest.fn(() => ({
-      send: mockSend,
-    })),
-    PutItemCommand: jest.fn((params) => ({
-      ...params,
-      __type: "PutItemCommand",
-    })),
+    ...actual,
+    DynamoDBDocumentClient: {
+      from: () => ({
+        send: (command: any) => sendMock(command),
+      }),
+    },
   };
 });
 
-// ✅ Tuo vasta mockien jälkeen
-import { handler } from "./postToDynamo";
-
-// 🔬 Testit
-describe("postToDynamo Lambda", () => {
-  beforeAll(() => {
-    process.env.TABLE_NAME = "Temperatures";
-  });
+describe("postToDynamoDb handler", () => {
+  // Import after mocks applied
+  const { handler } = require("./postToDynamo");
 
   beforeEach(() => {
-    mockSend.mockClear();
+    sendMock.mockReset();
+    process.env.TABLE_NAME = "Temperatures";
+    process.env.DEVICES_TABLE = "Devices";
   });
 
-  it("should send data to DynamoDB with correct structure", async () => {
+  it("returns 400 for invalid payload", async () => {
+    const res = await handler({} as any);
+    expect(res.statusCode).toBe(400);
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("writes temperature with resolved userId from device lookup", async () => {
+    sendMock
+      .mockResolvedValueOnce({ Item: { userId: "user123" } }) // GetCommand
+      .mockResolvedValueOnce({}); // PutCommand
+
     const event = {
-      payload: JSON.stringify({
-        deviceId: "dev-001",
-        temperature: 23.4,
-        humidity: 51,
-        timestamp: "2025-05-13T18:00:00.000Z",
-      }),
+      deviceId: "dev1",
+      temperature: 22.5,
+      timestamp: new Date().toISOString(),
     };
 
-    await handler(event);
+    const res = await handler(event);
+    expect(res.statusCode).toBe(200);
 
-    expect(mockSend).toHaveBeenCalledTimes(1);
-    const calledWith = mockSend.mock.calls[0][0];
-
-    expect(calledWith.TableName).toBe("Temperatures");
-    expect(calledWith.Item).toEqual({
-      deviceId: { S: "dev-001" },
-      temperature: { N: "23.4" },
-      humidity: { N: "51" },
-      timestamp: { S: "2025-05-13T18:00:00.000Z" },
-    });
+    // First call GetCommand, second PutCommand
+    expect(sendMock.mock.calls[0][0]).toBeInstanceOf(GetCommand);
+    const putCmd = sendMock.mock.calls[1][0];
+    expect(putCmd).toBeInstanceOf(PutCommand);
+    expect(putCmd.input.Item.userId).toBe("user123");
+    expect(putCmd.input.Item.temperature).toBe(22.5);
   });
 
-  it("should throw if payload is invalid", async () => {
-    const badEvent = {
-      payload: "not-json",
+  it("falls back to 'unknown' when device lookup fails and no userId present", async () => {
+    sendMock
+      .mockRejectedValueOnce(new Error("DDB error")) // GetCommand fails
+      .mockResolvedValueOnce({}); // PutCommand ok
+
+    const event = {
+      deviceId: "dev2",
+      temperature: 18.3,
+      timestamp: new Date().toISOString(),
     };
 
-    await expect(handler(badEvent)).rejects.toThrow();
-    expect(mockSend).not.toHaveBeenCalled();
+    const res = await handler(event);
+    expect(res.statusCode).toBe(200);
+    const putCmd = sendMock.mock.calls[1][0];
+    expect(putCmd.input.Item.userId).toBe("unknown");
+  });
+
+  it("uses provided userId override when device table has no mapping", async () => {
+    sendMock
+      .mockResolvedValueOnce({}) // GetCommand returns no Item
+      .mockResolvedValueOnce({}); // PutCommand
+
+    const overrideUser = "overrideUser";
+    const event = {
+      deviceId: "dev3",
+      temperature: 30.1,
+      timestamp: new Date().toISOString(),
+      userId: overrideUser,
+    };
+
+    const res = await handler(event);
+    expect(res.statusCode).toBe(200);
+    const putCmd = sendMock.mock.calls[1][0];
+    expect(putCmd.input.Item.userId).toBe(overrideUser);
+  });
+
+  it("returns 500 when PutCommand fails", async () => {
+    sendMock
+      .mockResolvedValueOnce({ Item: { userId: "userX" } }) // Get ok
+      .mockRejectedValueOnce(new Error("put failed")); // Put fails
+
+    const event = {
+      deviceId: "dev4",
+      temperature: 10.0,
+      timestamp: new Date().toISOString(),
+    };
+
+    const res = await handler(event);
+    expect(res.statusCode).toBe(500);
   });
 });

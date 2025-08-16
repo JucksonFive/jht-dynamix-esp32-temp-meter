@@ -1,40 +1,52 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 
-const client = new DynamoDBClient({});
+const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-export const handler = async (event: any): Promise<void> => {
+const TEMPS_TABLE = process.env.TABLE_NAME!;
+const DEVICES_TABLE = process.env.DEVICES_TABLE!;
+
+type Event = {
+  deviceId: string;
+  temperature: number;
+  timestamp: string; // ISO8601
+  userId?: string; // optional override
+};
+
+export const handler = async (event: Event) => {
   console.log("Received event:", JSON.stringify(event));
 
   const { deviceId, temperature, timestamp } = event;
-
-  if (!deviceId || temperature === undefined || !timestamp) {
-    console.error("Missing required fields");
-    return;
+  if (!deviceId || typeof temperature !== "number" || !timestamp) {
+    console.error("Invalid payload");
+    return { statusCode: 400, body: "Invalid payload" };
   }
 
-  const mapping = await client.send(
-    new GetCommand({
-      TableName: "Devices",
-      Key: { deviceId: { S: event.deviceId } },
-    })
-  );
-
-  const userId = mapping.Item?.userId?.S;
-
-  if (!userId) {
-    console.warn(`No user mapping found for device ${event.deviceId}`);
+  // Resolve userId from Devices table
+  let userId = event.userId;
+  try {
+    const res = await ddb.send(
+      new GetCommand({ TableName: DEVICES_TABLE, Key: { deviceId } })
+    );
+    userId = (res.Item as any)?.userId ?? userId ?? "unknown";
+  } catch (e) {
+    console.warn("Device lookup failed, continuing:", e);
+    userId = userId ?? "unknown";
   }
 
-  const command = new PutItemCommand({
-    TableName: process.env.TABLE_NAME!,
-    Item: {
-      deviceId: { S: deviceId },
-      temperature: { N: temperature.toString() },
-      timestamp: { S: timestamp },
-      userId: userId ? { S: userId } : { S: "unknown" },
-    },
-  });
+  // Temperatures PK/SK = deviceId + timestamp
+  const item = { deviceId, timestamp, userId, temperature };
 
-  await client.send(command);
+  try {
+    await ddb.send(new PutCommand({ TableName: TEMPS_TABLE, Item: item }));
+    console.log("Put OK");
+    return { statusCode: 200, body: JSON.stringify({ ok: true }) };
+  } catch (e) {
+    console.error("Put failed:", e);
+    return { statusCode: 500, body: "DDB write failed" };
+  }
 };

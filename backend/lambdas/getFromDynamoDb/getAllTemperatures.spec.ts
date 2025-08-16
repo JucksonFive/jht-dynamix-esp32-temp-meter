@@ -1,56 +1,56 @@
-const mockSend = jest.fn();
+import { QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
-jest.mock("@aws-sdk/client-dynamodb", () => {
-  return {
-    DynamoDBClient: jest.fn(),
-  };
-});
+const sendMock = jest.fn();
 
 jest.mock("@aws-sdk/lib-dynamodb", () => {
   const actual = jest.requireActual("@aws-sdk/lib-dynamodb");
-
   return {
     ...actual,
     DynamoDBDocumentClient: {
-      from: jest.fn(() => ({
-        send: mockSend,
-      })),
+      from: () => ({
+        send: (cmd: any) => sendMock(cmd),
+      }),
     },
-    ScanCommand: jest.fn((params) => ({ ...params, __type: "ScanCommand" })),
-    GetCommand: jest.fn((params) => ({ ...params, __type: "GetCommand" })),
   };
 });
 
-import { ScanCommand } from "@aws-sdk/client-dynamodb";
-import { handler } from "./getAllTemperatures";
+describe("getAllTemperatures handler", () => {
+  const { handler } = require("./getAllTemperatures");
 
-describe("getAllTemperatures Lambda", () => {
-  it("should return all items", async () => {
-    mockSend.mockResolvedValueOnce({
-      Items: [
-        { deviceId: "dev-123", temperature: 21 },
-        { deviceId: "dev-456", temperature: 23 },
-      ],
-    });
-
-    const result = await handler({} as any);
-
-    expect(result.statusCode).toBe(200);
-    const body = JSON.parse(result.body);
-    expect(body).toHaveLength(2);
-    expect(ScanCommand).toHaveBeenCalledWith({ TableName: "Temperatures" });
+  beforeEach(() => {
+    sendMock.mockReset();
+    process.env.TABLE_NAME = "Temperatures";
   });
 
-  it("should return 404 if item not found", async () => {
-    mockSend.mockResolvedValueOnce({ Item: undefined });
+  it("queries by deviceId when provided", async () => {
+    sendMock.mockResolvedValueOnce({
+      Items: [{ deviceId: "a", temperature: 1 }],
+    });
 
-    const event = {
-      queryStringParameters: { deviceId: "not-found" },
-    };
+    const res = await handler({
+      queryStringParameters: { deviceId: "a" },
+    } as any);
 
-    const result = await handler(event as any);
+    expect(res.statusCode).toBe(200);
+    expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(sendMock.mock.calls[0][0]).toBeInstanceOf(QueryCommand);
+    expect(JSON.parse(res.body)[0].deviceId).toBe("a");
+  });
 
-    expect(result.statusCode).toBe(404);
-    expect(JSON.parse(result.body).message).toMatch("Reading not found");
+  it("scans table when no deviceId provided", async () => {
+    sendMock.mockResolvedValueOnce({
+      Items: [{ deviceId: "b", temperature: 2 }],
+    });
+
+    const res = await handler({} as any);
+    expect(res.statusCode).toBe(200);
+    expect(sendMock.mock.calls[0][0]).toBeInstanceOf(ScanCommand);
+  });
+
+  it("returns 500 on error", async () => {
+    sendMock.mockRejectedValueOnce(new Error("ddb fail"));
+    const res = await handler({} as any);
+    expect(res.statusCode).toBe(500);
+    expect(JSON.parse(res.body).message).toBe("Server error");
   });
 });
