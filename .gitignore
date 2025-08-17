@@ -1,4 +1,3 @@
-simulator/*
 certs/*
 event.json
 certs_output.json
@@ -40,3 +39,4 @@ dashboard/yarn-error.log*
 dashboard/.env
 .github
 board/data/mqtt.json
+board/.vscode/extensions.json

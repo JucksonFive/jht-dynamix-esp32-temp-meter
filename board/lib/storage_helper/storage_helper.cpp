@@ -10,7 +10,7 @@ String StorageHelper::getConfigValue(const String &path, const String &key)
         Serial.println("[Config] config.json not found");
         return "";
     }
-    DynamicJsonDocument doc(512);
+    JsonDocument doc;
     DeserializationError err = deserializeJson(doc, file);
     file.close();
     if (err)
@@ -48,4 +48,21 @@ bool StorageHelper::saveJsonValue(const char *path, const char *key, const Strin
     f.close();
     Serial.printf("[StorageHelper] Saved %s=%s to %s\n", key, value.c_str(), path);
     return true;
+}
+
+bool StorageHelper::buildPayload(char *out, size_t outSize,
+                                 const String &deviceId,
+                                 float temperature,
+                                 const char *ts,
+                                 const String &userId)
+{
+
+    JsonDocument doc;
+    doc["deviceId"] = deviceId;
+    doc["temperature"] = temperature;
+    doc["timestamp"] = ts;
+    doc["userId"] = userId;
+
+    size_t n = serializeJson(doc, out, outSize);
+    return (n > 0 && n < outSize);
 }

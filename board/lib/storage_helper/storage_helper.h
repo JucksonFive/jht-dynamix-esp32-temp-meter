@@ -1,8 +1,14 @@
 #pragma once
 #include <Arduino.h>
 
-namespace StorageHelper
+class StorageHelper
 {
-    String getConfigValue(const String &path, const String &key);
-    bool saveJsonValue(const char *path, const char *key, const String &value);
-}
+public:
+    static String getConfigValue(const String &path, const String &key);
+    static bool saveJsonValue(const char *path, const char *key, const String &value);
+    static bool buildPayload(char *out, size_t outSize,
+                             const String &deviceId,
+                             float temperature,
+                             const char *ts,
+                             const String &userId);
+};

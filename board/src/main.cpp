@@ -109,21 +109,21 @@ void loop()
   }
   else
   {
-    char payload[128];
+    char payload[256];
     const char *ts = TimeHelper::getLocalTimestamp();
     userId = StorageHelper::getConfigValue("/user.json", "userId");
     deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
 
-    snprintf(payload, sizeof(payload),
-             "{\"deviceId\":\"%s\",\"temperature\":%.2f,\"timestamp\":\"%s\",\"userId\":\"%s\"}",
-             deviceId.c_str(), temp, ts, userId.c_str());
-
-    delay(10000);
+    if (!StorageHelper::buildPayload(payload, sizeof(payload), deviceId, temp, ts, userId))
+    {
+      Serial.println("[ERR] JSON serialize failed (buffer too small?)");
+      delay(2000);
+      return;
+    }
 
     MQTT::publish(mqtt_topic_str.c_str(), payload);
-
-    Serial.printf("Published: %s \n", payload);
+    Serial.printf("[MQTT] publish topic=%s len=%u | %s\n",
+                  mqtt_topic_str.c_str(), (unsigned)strlen(payload), payload);
+    delay(10000);
   }
-
-  delay(5000);
 }

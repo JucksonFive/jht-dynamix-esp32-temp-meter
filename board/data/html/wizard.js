@@ -53,6 +53,12 @@ function openModal(ssid) {
   document.getElementById("selected-ssid").innerText = ssid;
   document.getElementById("password-modal").classList.remove("hidden");
   scanSpinner.classList.add("hidden");
+  // Focus password field and enable Enter submit
+  const pwd = document.getElementById("wifi-password");
+  if (pwd) {
+    pwd.value = "";
+    pwd.focus();
+  }
 }
 
 function closeModal() {
@@ -222,6 +228,16 @@ function handleUserAuth(username, userPassword, deviceId) {
 document.addEventListener("DOMContentLoaded", () => {
   showStep(currentStep);
   if (currentStep === 1) loadWifiList();
+  // Global key handler for Enter inside password modal
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const modal = document.getElementById("password-modal");
+      if (!modal.classList.contains("hidden")) {
+        e.preventDefault();
+        submitWifi();
+      }
+    }
+  });
   // Handle final form submission
   document.getElementById("setupForm").addEventListener("submit", (e) => {
     e.preventDefault();
