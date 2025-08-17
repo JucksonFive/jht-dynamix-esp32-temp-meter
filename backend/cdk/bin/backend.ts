@@ -23,6 +23,7 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
 const backendStack = new BackendStack(app, "BackendStack", {
   saveToDynamoFn: lambdaStack.saveToDynamoFn,
   fetchFromDynamoFn: lambdaStack.fetchFromDynamoFn,
+  fetchUserTemperaturesFn: lambdaStack.fetchUserTemperaturesFn,
 });
 
 // Create auth stack with Lambda dependencies

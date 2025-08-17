@@ -9,13 +9,14 @@ import { Construct } from "constructs";
 export interface BackendStackProps extends cdk.StackProps {
   saveToDynamoFn: NodejsFunction;
   fetchFromDynamoFn: NodejsFunction;
+  fetchUserTemperaturesFn: NodejsFunction;
 }
 
 export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
-
-    const { saveToDynamoFn, fetchFromDynamoFn } = props;
+    const { saveToDynamoFn, fetchFromDynamoFn, fetchUserTemperaturesFn } =
+      props;
 
     new iot.CfnThing(this, "Esp32Thing", {
       thingName: "esp32-sensor",
@@ -51,6 +52,16 @@ export class BackendStack extends cdk.Stack {
       .addMethod("GET", new apigateway.LambdaIntegration(fetchFromDynamoFn), {
         apiKeyRequired: true,
       });
+
+    api.root
+      .addResource("user-readings")
+      .addMethod(
+        "GET",
+        new apigateway.LambdaIntegration(fetchUserTemperaturesFn),
+        {
+          apiKeyRequired: true,
+        }
+      );
 
     const apikey = api.addApiKey("Esp32ApiKey", {
       apiKeyName: "Esp32ApiKey",

@@ -18,9 +18,16 @@ export class InfrastructureStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // Dev environment only. Removes all the data!
     });
 
+    this.temperaturesTable.addGlobalSecondaryIndex({
+      indexName: "userId-timestamp-index",
+      partitionKey: { name: "userId", type: dynamoDb.AttributeType.STRING },
+      sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
+      projectionType: dynamoDb.ProjectionType.ALL,
+    });
+
     // DynamoDB table for mapping devices to users
     this.deviceUserTable = new dynamoDb.Table(this, "DeviceUserMapping", {
-      tableName: "Devices", 
+      tableName: "Devices",
       partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
       billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,

@@ -13,6 +13,7 @@ export interface LambdaStackProps extends cdk.StackProps {
 export class LambdaStack extends cdk.Stack {
   public readonly saveToDynamoFn: NodejsFunction;
   public readonly fetchFromDynamoFn: NodejsFunction;
+  public readonly fetchUserTemperaturesFn: NodejsFunction;
   public readonly authProtectedFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
@@ -56,8 +57,43 @@ export class LambdaStack extends cdk.Stack {
       }
     );
 
+    this.fetchUserTemperaturesFn = new NodejsFunction(
+      this,
+      "FetchUserTemperaturesFn",
+      {
+        entry: path.join(__dirname, "../../lambdas/fetchUserTemperatures.ts"),
+        runtime: lambda.Runtime.NODEJS_22_X,
+        handler: "handler",
+        memorySize: 256,
+        timeout: cdk.Duration.seconds(10),
+        environment: {
+          TABLE_NAME: temperaturesTable.tableName,
+        },
+      }
+    );
+    temperaturesTable.grantReadData(this.fetchUserTemperaturesFn);
     // Grant read permissions for the fetch function
     temperaturesTable.grantReadData(this.fetchFromDynamoFn);
+
+    // Lambda function for fetching temperature data by userId via GSI (userId-timestamp-index)
+    this.fetchUserTemperaturesFn = new NodejsFunction(
+      this,
+      "FetchUserTemperaturesFunction",
+      {
+        functionName: "FetchUserTemperaturesFunction",
+        entry: path.join(
+          __dirname,
+          "../../lambdas/getFromDynamoDb/getUserTemperatures.ts"
+        ),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        environment: {
+          TABLE_NAME: temperaturesTable.tableName,
+          GSI_NAME: "userId-timestamp-index",
+        },
+      }
+    );
+    temperaturesTable.grantReadData(this.fetchUserTemperaturesFn);
 
     // Auth protected Lambda function
     this.authProtectedFn = new NodejsFunction(this, "AuthProtectedLambda", {
