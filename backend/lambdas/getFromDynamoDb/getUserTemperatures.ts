@@ -5,7 +5,31 @@ import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE_NAME = process.env.TABLE_NAME!;
 const GSI_NAME = process.env.GSI_NAME!; // userId-timestamp-index
+// at top
+const ALLOWED_ORIGINS = new Set([
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+]);
 
+const makeResponse =
+  (event: APIGatewayEvent) => (statusCode: number, body: unknown) => {
+    const reqOrigin = event.headers?.origin || event.headers?.Origin;
+    const allowOrigin =
+      reqOrigin && ALLOWED_ORIGINS.has(reqOrigin)
+        ? reqOrigin
+        : "http://localhost:5173"; // fallback devissä tai prod-domain myöhemmin
+
+    return {
+      statusCode,
+      headers: {
+        "Access-Control-Allow-Origin": allowOrigin,
+        "Access-Control-Allow-Headers":
+          "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
+        "Access-Control-Allow-Methods": "GET,OPTIONS",
+      },
+      body: JSON.stringify(body),
+    };
+  };
 const response = (statusCode: number, body: unknown) => ({
   statusCode,
   headers: {
@@ -32,6 +56,7 @@ export const handler = async (
   const qs = event.queryStringParameters ?? {};
   const from = qs.from;
   const to = qs.to;
+  const response = makeResponse(event);
 
   if (!userId)
     return response(401, { message: "Unauthorized: Missing UserId" });
