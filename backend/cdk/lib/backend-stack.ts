@@ -52,7 +52,7 @@ export class BackendStack extends cdk.Stack {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
       defaultCorsPreflightOptions: {
-        allowOrigins: ["http://localhost:5173"], // kehityksessä
+        allowOrigins: ["http://localhost:5173", "http://127.0.0.1:5173"], // kehityksessä
         allowMethods: ["GET", "OPTIONS"],
         allowHeaders: [
           "Content-Type",
@@ -61,6 +61,25 @@ export class BackendStack extends cdk.Stack {
           "X-Api-Key",
           "X-Amz-Security-Token",
         ],
+      },
+    });
+
+    api.addGatewayResponse("Default4xxWithCors", {
+      type: apigateway.ResponseType.DEFAULT_4XX,
+      responseHeaders: {
+        "Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "Access-Control-Allow-Headers":
+          "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        "Access-Control-Allow-Methods": "'GET,OPTIONS'",
+      },
+    });
+    api.addGatewayResponse("Default5xxWithCors", {
+      type: apigateway.ResponseType.DEFAULT_5XX,
+      responseHeaders: {
+        "Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "Access-Control-Allow-Headers":
+          "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        "Access-Control-Allow-Methods": "'GET,OPTIONS'",
       },
     });
 
