@@ -1,13 +1,11 @@
-// Uber-auth-aware App.tsx for JT-DYNAMIX Dashboard (multi-device)
-
-import { useEffect, useState } from "react";
 import { getCurrentUser, signOut } from "aws-amplify/auth";
-import { Login } from "./pages/Login/Login";
-import { fetchTemperatureData } from "./services/api";
+import { useEffect, useState } from "react";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
+import { Login } from "./pages/Login/Login";
+import { fetchAllUserReadings } from "./services/api";
 
 interface DeviceData {
-  id: string;
+  id: string; // mapped from deviceId
   temperature: number;
   timestamp: string;
 }
@@ -17,9 +15,16 @@ function App() {
   const [data, setData] = useState<DeviceData[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // optional: viimeiset 7 päivää
+  const [from] = useState(() =>
+    new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString()
+  );
+  const [to, setTo] = useState(() => new Date().toISOString());
 
   useEffect(() => {
-    const checkUser = async () => {
+    (async () => {
       try {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
@@ -28,13 +33,42 @@ function App() {
       } finally {
         setLoading(false);
       }
-    };
-    checkUser();
+    })();
   }, []);
 
+  // data fetch + 30s auto-refresh
   useEffect(() => {
-    if (user) fetchTemperatureData().then(setData);
-  }, [user]);
+    if (!user) return;
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setError(null);
+        const items = await fetchAllUserReadings({ from, to, pageSize: 500 });
+        if (cancelled) return;
+        setData(
+          items.map((r) => ({
+            id: r.deviceId,
+            temperature: r.temperature,
+            timestamp: r.timestamp,
+          }))
+        );
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message ?? "Fetch failed");
+      }
+    };
+
+    load();
+    const iv = setInterval(() => {
+      setTo(new Date().toISOString()); // päivitä 'to' => triggeröi refetch
+      load();
+    }, 30000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(iv);
+    };
+  }, [user, from, to]);
 
   const handleLogout = async () => {
     await signOut();
@@ -48,16 +82,22 @@ function App() {
       </div>
     );
   }
-
   if (!user) return <Login setUser={setUser} />;
 
   return (
-    <Dashboard
-      data={data}
-      selectedDeviceId={selectedDeviceId}
-      setSelectedDeviceId={setSelectedDeviceId}
-      handleLogout={handleLogout}
-    />
+    <>
+      {error && (
+        <div className="p-2 mb-2 text-sm text-white bg-red-500 rounded">
+          {error}
+        </div>
+      )}
+      <Dashboard
+        data={data}
+        selectedDeviceId={selectedDeviceId}
+        setSelectedDeviceId={setSelectedDeviceId}
+        handleLogout={handleLogout}
+      />
+    </>
   );
 }
 

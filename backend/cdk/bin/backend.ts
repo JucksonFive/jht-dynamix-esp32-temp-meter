@@ -18,17 +18,16 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   temperaturesTable: infraStack.temperaturesTable,
   deviceUserTable: infraStack.deviceUserTable,
 });
-
+// Create auth stack with Lambda dependencies
+const authStack = new AuthStack(app, "AuthStack", {
+  authProtectedFn: lambdaStack.authProtectedFn,
+});
 // Create backend stack with Lambda dependencies
 const backendStack = new BackendStack(app, "BackendStack", {
   saveToDynamoFn: lambdaStack.saveToDynamoFn,
   fetchFromDynamoFn: lambdaStack.fetchFromDynamoFn,
   fetchUserTemperaturesFn: lambdaStack.fetchUserTemperaturesFn,
-});
-
-// Create auth stack with Lambda dependencies
-const authStack = new AuthStack(app, "AuthStack", {
-  authProtectedFn: lambdaStack.authProtectedFn,
+  userPool: authStack.userPool,
 });
 
 new EspAuthStack(app, "EspAuthStack", {

@@ -20,14 +20,13 @@ export const Dashboard = ({
   setSelectedDeviceId,
   handleLogout,
 }: DashboardProps) => {
-  // unique devices + lastSeen (latest timestamp per id)
-  const map = new Map<string, string>();
+  // lastSeen per device (nopeampi kuin Date-objektit)
+  const lastSeenMap = new Map<string, string>();
   for (const d of data) {
-    const prev = map.get(d.id);
-    if (!prev || new Date(d.timestamp) > new Date(prev))
-      map.set(d.id, d.timestamp);
+    const prev = lastSeenMap.get(d.id);
+    if (!prev || prev < d.timestamp) lastSeenMap.set(d.id, d.timestamp);
   }
-  const devices = Array.from(map.entries()).map(([id, lastSeen]) => ({
+  const devices = Array.from(lastSeenMap, ([id, lastSeen]) => ({
     id,
     lastSeen,
   }));
@@ -54,7 +53,7 @@ export const Dashboard = ({
         <SidePanel
           devices={devices}
           selectedId={selectedDeviceId}
-          onSelect={(id) => setSelectedDeviceId(id)}
+          onSelect={setSelectedDeviceId}
         />
 
         <main className="flex-1">

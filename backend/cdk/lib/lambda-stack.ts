@@ -57,21 +57,6 @@ export class LambdaStack extends cdk.Stack {
       }
     );
 
-    this.fetchUserTemperaturesFn = new NodejsFunction(
-      this,
-      "FetchUserTemperaturesFn",
-      {
-        entry: path.join(__dirname, "../../lambdas/fetchUserTemperatures.ts"),
-        runtime: lambda.Runtime.NODEJS_22_X,
-        handler: "handler",
-        memorySize: 256,
-        timeout: cdk.Duration.seconds(10),
-        environment: {
-          TABLE_NAME: temperaturesTable.tableName,
-        },
-      }
-    );
-    temperaturesTable.grantReadData(this.fetchUserTemperaturesFn);
     // Grant read permissions for the fetch function
     temperaturesTable.grantReadData(this.fetchFromDynamoFn);
 

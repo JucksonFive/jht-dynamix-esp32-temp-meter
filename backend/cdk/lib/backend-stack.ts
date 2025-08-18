@@ -3,6 +3,7 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as iot from "aws-cdk-lib/aws-iot";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as cognito from "aws-cdk-lib/aws-cognito";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 
@@ -10,13 +11,18 @@ export interface BackendStackProps extends cdk.StackProps {
   saveToDynamoFn: NodejsFunction;
   fetchFromDynamoFn: NodejsFunction;
   fetchUserTemperaturesFn: NodejsFunction;
+  userPool: cognito.IUserPool;
 }
 
 export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
-    const { saveToDynamoFn, fetchFromDynamoFn, fetchUserTemperaturesFn } =
-      props;
+    const {
+      saveToDynamoFn,
+      fetchFromDynamoFn,
+      fetchUserTemperaturesFn,
+      userPool,
+    } = props;
 
     new iot.CfnThing(this, "Esp32Thing", {
       thingName: "esp32-sensor",
@@ -45,7 +51,26 @@ export class BackendStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, "TemperatureApi", {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
+      defaultCorsPreflightOptions: {
+        allowOrigins: ["http://localhost:5173"], // kehityksessä
+        allowMethods: ["GET", "OPTIONS"],
+        allowHeaders: [
+          "Content-Type",
+          "Authorization",
+          "X-Amz-Date",
+          "X-Api-Key",
+          "X-Amz-Security-Token",
+        ],
+      },
     });
+
+    const authorizer = new apigateway.CognitoUserPoolsAuthorizer(
+      this,
+      "CognitoAuthorizer",
+      {
+        cognitoUserPools: [userPool],
+      }
+    );
 
     api.root
       .addResource("readings")
@@ -59,7 +84,9 @@ export class BackendStack extends cdk.Stack {
         "GET",
         new apigateway.LambdaIntegration(fetchUserTemperaturesFn),
         {
-          apiKeyRequired: true,
+          authorizer,
+          authorizationType: apigateway.AuthorizationType.COGNITO,
+          apiKeyRequired: false,
         }
       );
 
