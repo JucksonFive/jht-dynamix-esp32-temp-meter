@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Login } from "./pages/Login/Login";
 import { fetchAllUserReadings } from "./services/api";
+import { Reading } from "./services/types";
 
 interface DeviceData {
   id: string; // mapped from deviceId
@@ -47,7 +48,7 @@ function App() {
         const items = await fetchAllUserReadings({ from, to, pageSize: 500 });
         if (cancelled) return;
         setData(
-          items.map((r) => ({
+          items.map((r: Reading) => ({
             id: r.deviceId,
             temperature: r.temperature,
             timestamp: r.timestamp,
