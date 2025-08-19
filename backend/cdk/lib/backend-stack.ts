@@ -67,7 +67,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "Access-Control-Allow-Origin": "method.request.header.Origin",
         "Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         "Access-Control-Allow-Methods": "'GET,OPTIONS'",
@@ -76,7 +76,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "'http://localhost:5173'",
+        "Access-Control-Allow-Origin": "method.request.header.Origin",
         "Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         "Access-Control-Allow-Methods": "'GET,OPTIONS'",
