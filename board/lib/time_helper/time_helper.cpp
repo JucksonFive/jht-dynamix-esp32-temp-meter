@@ -69,16 +69,19 @@ void TimeHelper::setup()
 const char *TimeHelper::getLocalTimestamp()
 {
     time_t now = time(nullptr);
-    struct tm timeinfo;
+    struct tm tm;
 
-    localtime_r(&now, &timeinfo);
+    // get local time
+    localtime_r(&now, &tm);
 
-    strftime(timestampBuffer, sizeof(timestampBuffer), "%Y-%m-%dT%H:%M:%S%z", &timeinfo);
+    // Alustava muoto (antaa esim. +0300)
+    strftime(timestampBuffer, sizeof(timestampBuffer), "%Y-%m-%dT%H:%M:%S%z", &tm);
 
+    // Muunna offset muotoon +03:00
     size_t len = strlen(timestampBuffer);
     if (len >= 5 && (timestampBuffer[len - 5] == '+' || timestampBuffer[len - 5] == '-'))
     {
-        memmove(&timestampBuffer[len + 1], &timestampBuffer[len - 2], 3); // Shift "00\0"
+        memmove(&timestampBuffer[len - 1], &timestampBuffer[len - 2], 3); // siirrä "00\0"
         timestampBuffer[len - 2] = ':';
     }
 
