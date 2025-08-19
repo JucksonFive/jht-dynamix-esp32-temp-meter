@@ -4,6 +4,7 @@ import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Login } from "./pages/Login/Login";
 import { fetchAllUserReadings } from "./services/api";
 import { Reading } from "./services/types";
+import { toLocalOffSetIso } from "./utils/utils";
 
 interface DeviceData {
   id: string; // mapped from deviceId
@@ -22,7 +23,7 @@ function App() {
   const [from] = useState(() =>
     new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString()
   );
-  const [to, setTo] = useState(() => new Date().toISOString());
+  const [to, setTo] = useState(() => toLocalOffSetIso());
 
   useEffect(() => {
     (async () => {
@@ -61,7 +62,7 @@ function App() {
 
     load();
     const iv = setInterval(() => {
-      setTo(new Date().toISOString()); // päivitä 'to' => triggeröi refetch
+      setTo(() => toLocalOffSetIso()); // päivitä 'to' => triggeröi refetch
       load();
     }, 30000);
 
