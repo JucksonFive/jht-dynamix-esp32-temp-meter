@@ -20,8 +20,8 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   // optional: viimeiset 7 päivää
-  const [from] = useState(() =>
-    new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString()
+  const [from] = useState(
+    () => toLocalOffSetIso(new Date(Date.now() - 7 * 24 * 3600 * 1000)) // 👈 local offset
   );
   const [to, setTo] = useState(() => toLocalOffSetIso());
 
