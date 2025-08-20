@@ -22,3 +22,8 @@ export type DeviceData = {
 };
 
 export type Point = { timestamp: string; temperature: number };
+
+export interface SidePanelDevice {
+  id: string;
+  lastSeen?: string;
+}

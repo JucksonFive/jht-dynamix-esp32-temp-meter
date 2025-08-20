@@ -1,9 +1,5 @@
 import React from "react";
-
-export interface SidePanelDevice {
-  id: string;
-  lastSeen?: string;
-}
+import { SidePanelDevice } from "../../../utils/types";
 
 export interface SidePanelProps {
   devices: SidePanelDevice[];
