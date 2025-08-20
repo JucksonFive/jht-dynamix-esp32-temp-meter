@@ -1,104 +1,78 @@
+// App.tsx
 import { getCurrentUser, signOut } from "aws-amplify/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Login } from "./pages/Login/Login";
-import { fetchAllUserReadings, fetchReadingBounds } from "./services/api";
-import { Reading } from "./services/types";
 import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
-
-interface DeviceData {
-  id: string;
-  temperature: number;
-  timestamp: string;
-}
+import { useReadingBounds } from "./hooks/useReadingBounds";
+import { useReadings } from "./hooks/useReadings";
+import { clampRange, type Range } from "./utils/range";
 
 const THREE_WEEKS = 21 * 864e5;
 
 function App() {
   const [user, setUser] = useState<any>(null);
-  const [data, setData] = useState<DeviceData[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [bounds, setBounds] = useState<{ min: string; max: string } | null>(
-    null
-  );
+  const [autoLive, setAutoLive] = useState(true);
 
-  const [range, setRange] = useState(() => ({
-    from: toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS)),
-    to: toLocalOffsetIso(),
-  }));
-
-  const [autoLive] = useState(true);
-
+  // auth bootstrap
+  const [bootLoading, setBootLoading] = useState(true);
   useEffect(() => {
     (async () => {
       try {
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
+        const u = await getCurrentUser();
+        setUser(u);
       } catch {
         setUser(null);
       } finally {
-        setLoading(false);
+        setBootLoading(false);
       }
     })();
   }, []);
 
-  // data fetch + 30s auto-refresh
+  // bounds
+  const {
+    bounds,
+    loading: boundsLoading,
+    error: boundsError,
+  } = useReadingBounds(user);
+
+  // range (init kun bounds ladattu)
+  const [range, setRange] = useState<Range>(() => {
+    const now = toLocalOffsetIso();
+    const from = toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS));
+    return { from, to: now };
+  });
+
   useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
+    if (!bounds) return;
+    const maxD = new Date(bounds.max);
+    const start = new Date(
+      Math.max(new Date(bounds.min).getTime(), maxD.getTime() - THREE_WEEKS)
+    );
+    setRange({ from: toLocalOffsetIso(start), to: toLocalOffsetIso(maxD) });
+  }, [bounds?.min, bounds?.max]); // init tai kun bounds päivittyy
 
-    const load = async (r = range) => {
-      try {
-        setError(null);
-
-        const items = await fetchAllUserReadings({
-          from: r.from,
-          to: r.to,
-          pageSize: 500,
-        });
-        const b = await fetchReadingBounds();
-        if (cancelled) return;
-        if (!b?.min || !b?.max) {
-          const today = new Date().toISOString();
-          setBounds({ min: today, max: today });
-        } else {
-          setBounds({ min: b.min, max: b.max });
-        }
-        setData(
-          items.map((r: Reading) => ({
-            id: r.deviceId,
-            temperature: r.temperature,
-            timestamp: r.timestamp,
-          }))
-        );
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? "Fetch failed");
-      }
-    };
-
-    load();
-    const iv = setInterval(() => {
-      setRange((prev) => ({
-        ...prev,
-        to: toLocalOffsetIso(),
-      }));
-      load();
-    }, 60000);
-
-    return () => {
-      cancelled = true;
-      clearInterval(iv);
-    };
-  }, [user, range.from, range.to]);
+  // readings
+  const clampedRange = useMemo(
+    () =>
+      bounds ? clampRange(range, { from: bounds.min, to: bounds.max }) : range,
+    [range, bounds]
+  );
+  const {
+    data,
+    loading: dataLoading,
+    error: dataError,
+  } = useReadings(user, clampedRange, {
+    intervalMs: 60000,
+  });
 
   const handleLogout = async () => {
     await signOut();
     setUser(null);
   };
 
-  if (loading) {
+  if (bootLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
         Loading...
@@ -106,6 +80,8 @@ function App() {
     );
   }
   if (!user) return <Login setUser={setUser} />;
+
+  const error = boundsError || dataError;
 
   return (
     <>
@@ -117,13 +93,14 @@ function App() {
 
       <Dashboard
         data={data}
-        range={range}
         bounds={bounds}
+        range={clampedRange}
         autoLive={autoLive}
         onRangeChange={(r) => setRange(r)}
         selectedDeviceId={selectedDeviceId}
         setSelectedDeviceId={setSelectedDeviceId}
         handleLogout={handleLogout}
+        loading={boundsLoading || dataLoading}
       />
     </>
   );

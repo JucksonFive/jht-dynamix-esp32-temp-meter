@@ -17,6 +17,7 @@ interface DashboardProps {
   selectedDeviceId: string;
   setSelectedDeviceId: (id: string) => void;
   handleLogout: () => void;
+  loading: boolean;
 }
 
 export const Dashboard = ({
@@ -28,6 +29,7 @@ export const Dashboard = ({
   selectedDeviceId,
   setSelectedDeviceId,
   handleLogout,
+  loading,
 }: DashboardProps) => {
   const lastSeenMap = new Map<string, string>();
   for (const d of data) {
