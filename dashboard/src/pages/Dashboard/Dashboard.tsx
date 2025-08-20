@@ -1,5 +1,6 @@
 import { TemperatureChart } from "./Components/TemperatureChart";
 import { SidePanel } from "./Components/SidePanel";
+import { DateRangePicker } from "./Components/DateRangePicker";
 
 interface DeviceData {
   id: string;
@@ -9,6 +10,9 @@ interface DeviceData {
 
 interface DashboardProps {
   data: DeviceData[];
+  range: { from: string; to: string };
+  autoLive?: boolean;
+  onRangeChange: (r: { from: string; to: string }) => void;
   selectedDeviceId: string;
   setSelectedDeviceId: (id: string) => void;
   handleLogout: () => void;
@@ -16,11 +20,13 @@ interface DashboardProps {
 
 export const Dashboard = ({
   data,
+  range,
+  autoLive = true,
+  onRangeChange,
   selectedDeviceId,
   setSelectedDeviceId,
   handleLogout,
 }: DashboardProps) => {
-  // lastSeen per device (nopeampi kuin Date-objektit)
   const lastSeenMap = new Map<string, string>();
   for (const d of data) {
     const prev = lastSeenMap.get(d.id);
@@ -48,6 +54,15 @@ export const Dashboard = ({
         </button>
       </div>
 
+      {/* Range controls */}
+      <div className="mb-4 flex items-center gap-4">
+        <DateRangePicker value={range} onChange={onRangeChange} />
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={autoLive} readOnly />
+          Live
+        </label>
+      </div>
+
       {/* Main layout */}
       <div className="flex gap-6">
         <SidePanel
@@ -58,7 +73,14 @@ export const Dashboard = ({
 
         <main className="flex-1">
           {selectedDeviceId ? (
-            <TemperatureChart data={selectedData} />
+            <TemperatureChart
+              data={selectedData.map((d) => ({
+                timestamp: d.timestamp,
+                temperature: d.temperature,
+              }))}
+              range={range}
+              onRangeChange={(r) => onRangeChange(r)} // esim. brush-zoom palauttaa uuden välin
+            />
           ) : (
             <div className="h-full grid place-items-center">
               <p className="text-gray-500">

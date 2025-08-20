@@ -104,8 +104,12 @@ function App() {
           {error}
         </div>
       )}
+
       <Dashboard
         data={data}
+        range={range}
+        autoLive={autoLive}
+        onRangeChange={(r) => setRange(r)}
         selectedDeviceId={selectedDeviceId}
         setSelectedDeviceId={setSelectedDeviceId}
         handleLogout={handleLogout}
