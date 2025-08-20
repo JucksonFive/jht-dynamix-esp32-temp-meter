@@ -2,7 +2,7 @@ import { getCurrentUser, signOut } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Login } from "./pages/Login/Login";
-import { fetchAllUserReadings } from "./services/api";
+import { fetchAllUserReadings, fetchReadingBounds } from "./services/api";
 import { Reading } from "./services/types";
 import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
 
@@ -20,6 +20,9 @@ function App() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bounds, setBounds] = useState<{ min: string; max: string } | null>(
+    null
+  );
 
   const [range, setRange] = useState(() => ({
     from: toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS)),
@@ -49,12 +52,20 @@ function App() {
     const load = async (r = range) => {
       try {
         setError(null);
+
         const items = await fetchAllUserReadings({
           from: r.from,
           to: r.to,
           pageSize: 500,
         });
+        const b = await fetchReadingBounds();
         if (cancelled) return;
+        if (!b?.min || !b?.max) {
+          const today = new Date().toISOString();
+          setBounds({ min: today, max: today });
+        } else {
+          setBounds({ min: b.min, max: b.max });
+        }
         setData(
           items.map((r: Reading) => ({
             id: r.deviceId,
@@ -107,6 +118,7 @@ function App() {
       <Dashboard
         data={data}
         range={range}
+        bounds={bounds}
         autoLive={autoLive}
         onRangeChange={(r) => setRange(r)}
         selectedDeviceId={selectedDeviceId}

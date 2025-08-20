@@ -27,6 +27,7 @@ const backendStack = new BackendStack(app, "BackendStack", {
   saveToDynamoFn: lambdaStack.saveToDynamoFn,
   fetchFromDynamoFn: lambdaStack.fetchFromDynamoFn,
   fetchUserTemperaturesFn: lambdaStack.fetchUserTemperaturesFn,
+  fetchUserTemperatureBoundsFn: lambdaStack.fetchUserTemperatureBoundsFn,
   userPool: authStack.userPool,
 });
 

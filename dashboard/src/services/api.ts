@@ -51,3 +51,19 @@ export async function fetchAllUserReadings(opts?: {
   } while (nextKey);
   return items;
 }
+
+export async function fetchReadingBounds(): Promise<{
+  min: string | null;
+  max: string | null;
+}> {
+  const session = await fetchAuthSession();
+  const token =
+    session.tokens?.idToken?.toString() ??
+    session.tokens?.accessToken?.toString();
+
+  const res = await axios.get(`${BASE_URL}/bounds`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
+  return res.data;
+}

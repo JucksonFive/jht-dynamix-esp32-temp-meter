@@ -10,6 +10,7 @@ interface DeviceData {
 
 interface DashboardProps {
   data: DeviceData[];
+  bounds: { min: string; max: string } | null; // allowed range for data
   range: { from: string; to: string };
   autoLive?: boolean;
   onRangeChange: (r: { from: string; to: string }) => void;
@@ -20,6 +21,7 @@ interface DashboardProps {
 
 export const Dashboard = ({
   data,
+  bounds,
   range,
   autoLive = false,
   onRangeChange,
@@ -40,7 +42,7 @@ export const Dashboard = ({
   const selectedData = selectedDeviceId
     ? data.filter((d) => d.id === selectedDeviceId)
     : [];
-
+  console.log("bounds", bounds);
   return (
     <div className="min-h-screen bg-white p-6">
       {/* Top bar */}

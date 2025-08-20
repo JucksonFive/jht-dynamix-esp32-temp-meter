@@ -11,7 +11,7 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:5173",
 ]);
 
-const makeResponse =
+export const makeResponse =
   (event: APIGatewayEvent) => (statusCode: number, body: unknown) => {
     const reqOrigin = event.headers?.origin || event.headers?.Origin;
     const allowOrigin =
@@ -30,15 +30,6 @@ const makeResponse =
       body: JSON.stringify(body),
     };
   };
-const response = (statusCode: number, body: unknown) => ({
-  statusCode,
-  headers: {
-    "Access-Control-Allow-Origin": "http://localhost:5173",
-    "Access-Control-Allow-Headers":
-      "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
-  },
-  body: JSON.stringify(body),
-});
 
 const getUserId = (event: APIGatewayEvent) => {
   // REST API (Cognito User Pools authorizer)

@@ -87,12 +87,15 @@ export class LambdaStack extends cdk.Stack {
       "FetchUserTemperatureBoundsFunction",
       {
         functionName: "FetchUserTemperatureBoundsFunction",
-        entry: path.join(__dirname, "../../lambdas/getReadingBounds/index.ts"),
+        entry: path.join(
+          __dirname,
+          "../../lambdas/getReadingBounds/getReadingBounds.ts"
+        ),
         handler: "handler",
         runtime: lambda.Runtime.NODEJS_22_X,
         environment: {
           TABLE_NAME: temperaturesTable.tableName,
-          GSI_NAME: "UserTimeIndex",
+          GSI_NAME: "userId-timestamp-index",
         },
       }
     );

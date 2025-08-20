@@ -11,6 +11,7 @@ export interface BackendStackProps extends cdk.StackProps {
   saveToDynamoFn: NodejsFunction;
   fetchFromDynamoFn: NodejsFunction;
   fetchUserTemperaturesFn: NodejsFunction;
+  fetchUserTemperatureBoundsFn: NodejsFunction;
   userPool: cognito.IUserPool;
 }
 
@@ -21,6 +22,7 @@ export class BackendStack extends cdk.Stack {
       saveToDynamoFn,
       fetchFromDynamoFn,
       fetchUserTemperaturesFn,
+      fetchUserTemperatureBoundsFn,
       userPool,
     } = props;
 
@@ -102,6 +104,17 @@ export class BackendStack extends cdk.Stack {
       .addMethod(
         "GET",
         new apigateway.LambdaIntegration(fetchUserTemperaturesFn),
+        {
+          authorizer,
+          authorizationType: apigateway.AuthorizationType.COGNITO,
+          apiKeyRequired: false,
+        }
+      );
+    api.root
+      .addResource("bounds")
+      .addMethod(
+        "GET",
+        new apigateway.LambdaIntegration(fetchUserTemperatureBoundsFn),
         {
           authorizer,
           authorizationType: apigateway.AuthorizationType.COGNITO,
