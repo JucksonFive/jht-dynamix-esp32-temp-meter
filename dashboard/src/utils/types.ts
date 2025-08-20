@@ -1,10 +1,12 @@
-export type DateStr = string; // yyyy-MM-ddTHH:mm:ss+zz:zz (tai oma formaatti)
+export type DateStr = string;
 
 export type Range = { from: DateStr; to: DateStr };
+
 export const clampRange = (r: Range, bounds: Range): Range => ({
   from: r.from < bounds.from ? bounds.from : r.from,
   to: r.to > bounds.to ? bounds.to : r.to,
 });
+
 export const isAllTime = (r: Range, b: Range) =>
   r.from === b.from && r.to === b.to;
 
