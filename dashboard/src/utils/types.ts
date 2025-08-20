@@ -20,3 +20,5 @@ export type DeviceData = {
   temperature: number;
   timestamp: string;
 };
+
+export type Point = { timestamp: string; temperature: number };

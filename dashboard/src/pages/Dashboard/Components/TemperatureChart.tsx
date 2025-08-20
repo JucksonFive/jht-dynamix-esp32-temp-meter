@@ -9,9 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-type Point = { timestamp: string; temperature: number };
-type Range = { from: string; to: string };
+import { Point, Range } from "../../../utils/types";
 
 const fmtTime = (d: Date) =>
   new Intl.DateTimeFormat(undefined, {

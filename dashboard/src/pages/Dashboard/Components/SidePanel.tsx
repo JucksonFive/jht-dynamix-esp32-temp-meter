@@ -49,16 +49,6 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{d.id}</span>
-                    {d.lastSeen && (
-                      <span
-                        className={
-                          "text-xs " +
-                          (isActive ? "text-blue-100" : "text-gray-500")
-                        }
-                      >
-                        {new Date(d.lastSeen).toLocaleTimeString()}
-                      </span>
-                    )}
                   </div>
                 </button>
               </li>
