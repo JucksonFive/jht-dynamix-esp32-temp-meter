@@ -3,19 +3,14 @@ import { useMemo } from "react";
 import { DateRangePicker } from "./Components/DateRangePicker";
 import { SidePanel } from "./Components/SidePanel";
 import { TemperatureChart } from "./Components/TemperatureChart";
+import { Bounds, DeviceData, Range } from "../../utils/types";
+import { fmtYMD, parseYMD } from "../../utils/utils";
 
-const parseYMD = (s: string) => parseISO(s);
-const fmtYMD = (d: Date) => format(d, "yyyy-MM-dd");
-interface DeviceData {
-  id: string;
-  temperature: number;
-  timestamp: string;
-}
 interface DashboardProps {
   data: DeviceData[];
-  bounds: { min: string; max: string } | null;
-  range: { from: string; to: string };
-  onRangeChange: (r: { from: string; to: string }) => void;
+  bounds: Bounds | null;
+  range: Range;
+  onRangeChange: (r: Range) => void;
   selectedDeviceId: string;
   setSelectedDeviceId: (id: string) => void;
   handleLogout: () => void;

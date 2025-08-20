@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchAllUserReadings } from "../services/api";
 import type { Reading } from "../services/types";
-import type { Range } from "../utils/range";
+import type { Range } from "../utils/types";
 
 export interface DeviceData {
   id: string;

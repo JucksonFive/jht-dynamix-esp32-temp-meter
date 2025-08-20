@@ -8,7 +8,13 @@ export const clampRange = (r: Range, bounds: Range): Range => ({
 export const isAllTime = (r: Range, b: Range) =>
   r.from === b.from && r.to === b.to;
 
-export interface Bounds {
+export type Bounds = {
   min: DateStr;
   max: DateStr;
-}
+};
+
+export type DeviceData = {
+  id: string;
+  temperature: number;
+  timestamp: string;
+};

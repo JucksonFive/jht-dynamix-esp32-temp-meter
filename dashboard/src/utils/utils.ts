@@ -1,4 +1,5 @@
-// ISO8601 paikallisella aikavyöhykkeellä: YYYY-MM-DDTHH:mm:ss+HH:MM
+import { format, parseISO } from "date-fns";
+
 export const toLocalOffSetIso = (date: Date = new Date()): string => {
   const pad = (n: number) => String(n).padStart(2, "0");
   const y = date.getFullYear();
@@ -16,3 +17,6 @@ export const toLocalOffSetIso = (date: Date = new Date()): string => {
 
   return `${y}-${m}-${d}T${hh}:${mm}:${ss}${sign}${offH}:${offM}`;
 };
+
+export const parseYMD = (s: string) => parseISO(s);
+export const fmtYMD = (d: Date) => format(d, "yyyy-MM-dd");

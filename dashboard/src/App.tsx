@@ -6,14 +6,13 @@ import { Login } from "./pages/Login/Login";
 import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
 import { useReadingBounds } from "./hooks/useReadingBounds";
 import { useReadings } from "./hooks/useReadings";
-import { clampRange, type Range } from "./utils/range";
+import { clampRange, type Range } from "./utils/types";
 
 const THREE_WEEKS = 21 * 864e5;
 
 function App() {
   const [user, setUser] = useState<any>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
-  const [autoLive, setAutoLive] = useState(true);
 
   // auth bootstrap
   const [bootLoading, setBootLoading] = useState(true);
@@ -95,7 +94,6 @@ function App() {
         data={data}
         bounds={bounds}
         range={clampedRange}
-        autoLive={autoLive}
         onRangeChange={(r) => setRange(r)}
         selectedDeviceId={selectedDeviceId}
         setSelectedDeviceId={setSelectedDeviceId}
