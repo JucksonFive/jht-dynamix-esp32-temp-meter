@@ -40,3 +40,4 @@ dashboard/.env
 .github
 board/data/mqtt.json
 board/.vscode/extensions.json
+.vscode/settings.json
