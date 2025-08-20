@@ -26,7 +26,9 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
           if (start) {
             onChange({
               from: format(start, "yyyy-MM-dd"),
-              to: end ? format(end, "yyyy-MM-dd") : value.to,
+              to: end
+                ? format(new Date(end.getTime() - 86400000), "yyyy-MM-dd")
+                : value.to,
             });
           }
         }}

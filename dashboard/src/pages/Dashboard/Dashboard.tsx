@@ -1,18 +1,20 @@
-import { TemperatureChart } from "./Components/TemperatureChart";
-import { SidePanel } from "./Components/SidePanel";
+import { format, isAfter, isBefore, parseISO } from "date-fns";
+import { useMemo } from "react";
 import { DateRangePicker } from "./Components/DateRangePicker";
+import { SidePanel } from "./Components/SidePanel";
+import { TemperatureChart } from "./Components/TemperatureChart";
 
+const parseYMD = (s: string) => parseISO(s);
+const fmtYMD = (d: Date) => format(d, "yyyy-MM-dd");
 interface DeviceData {
   id: string;
   temperature: number;
-  timestamp: string; // ISO
+  timestamp: string;
 }
-
 interface DashboardProps {
   data: DeviceData[];
-  bounds: { min: string; max: string } | null; // allowed range for data
+  bounds: { min: string; max: string } | null;
   range: { from: string; to: string };
-  autoLive?: boolean;
   onRangeChange: (r: { from: string; to: string }) => void;
   selectedDeviceId: string;
   setSelectedDeviceId: (id: string) => void;
@@ -24,12 +26,10 @@ export const Dashboard = ({
   data,
   bounds,
   range,
-  autoLive = false,
   onRangeChange,
   selectedDeviceId,
   setSelectedDeviceId,
   handleLogout,
-  loading,
 }: DashboardProps) => {
   const lastSeenMap = new Map<string, string>();
   for (const d of data) {
@@ -44,10 +44,20 @@ export const Dashboard = ({
   const selectedData = selectedDeviceId
     ? data.filter((d) => d.id === selectedDeviceId)
     : [];
-  console.log("bounds", bounds);
+
+  const clampedRange = useMemo(() => {
+    if (!bounds) return range;
+    const min = parseYMD(bounds.min);
+    const max = parseYMD(bounds.max);
+    const f = parseYMD(range.from);
+    const t = parseYMD(range.to);
+    const cf = isBefore(f, min) ? min : isAfter(f, max) ? max : f;
+    const ct = isBefore(t, min) ? min : isAfter(t, max) ? max : t;
+    return { from: fmtYMD(cf), to: fmtYMD(ct) };
+  }, [range.from, range.to, bounds?.min, bounds?.max]);
+
   return (
     <div className="min-h-screen bg-white p-6">
-      {/* Top bar */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">JT-DYNAMIX Dashboard</h1>
         <button
@@ -58,13 +68,13 @@ export const Dashboard = ({
         </button>
       </div>
 
-      {/* Range controls */}
       <div className="mb-4 flex items-center gap-4">
-        <DateRangePicker value={range} onChange={onRangeChange} />
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={autoLive} readOnly />
-          Live
-        </label>
+        <DateRangePicker
+          value={clampedRange}
+          onChange={onRangeChange}
+          // @ts-ignore
+          allowed={bounds ?? { min: clampedRange.from, max: clampedRange.to }}
+        />
       </div>
 
       {/* Main layout */}
@@ -83,7 +93,7 @@ export const Dashboard = ({
                 temperature: d.temperature,
               }))}
               range={range}
-              onRangeChange={(r) => onRangeChange(r)} // esim. brush-zoom palauttaa uuden välin
+              onRangeChange={(r) => onRangeChange(r)}
             />
           ) : (
             <div className="h-full grid place-items-center">
