@@ -4,13 +4,15 @@ import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Login } from "./pages/Login/Login";
 import { fetchAllUserReadings } from "./services/api";
 import { Reading } from "./services/types";
-import { toLocalOffSetIso } from "./utils/utils";
+import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
 
 interface DeviceData {
   id: string; // mapped from deviceId
   temperature: number;
   timestamp: string;
 }
+
+const THREE_WEEKS = 21 * 864e5;
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -19,11 +21,12 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // optional: viimeiset 7 päivää
-  const [from] = useState(
-    () => toLocalOffSetIso(new Date(Date.now() - 7 * 24 * 3600 * 1000)) // 👈 local offset
-  );
-  const [to, setTo] = useState(() => toLocalOffSetIso());
+  const [range, setRange] = useState(() => ({
+    from: toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS)),
+    to: toLocalOffsetIso(),
+  }));
+
+  const [autoLive, setAutoLive] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -43,10 +46,14 @@ function App() {
     if (!user) return;
     let cancelled = false;
 
-    const load = async () => {
+    const load = async (r = range) => {
       try {
         setError(null);
-        const items = await fetchAllUserReadings({ from, to, pageSize: 500 });
+        const items = await fetchAllUserReadings({
+          from: r.from,
+          to: r.to,
+          pageSize: 500,
+        });
         if (cancelled) return;
         setData(
           items.map((r: Reading) => ({
@@ -62,15 +69,18 @@ function App() {
 
     load();
     const iv = setInterval(() => {
-      setTo(() => toLocalOffSetIso()); // päivitä 'to' => triggeröi refetch
+      setRange((prev) => ({
+        ...prev,
+        to: toLocalOffsetIso(),
+      }));
       load();
-    }, 30000);
+    }, 60000);
 
     return () => {
       cancelled = true;
       clearInterval(iv);
     };
-  }, [user, from, to]);
+  }, [user, range.from, range.to]);
 
   const handleLogout = async () => {
     await signOut();
@@ -85,6 +95,7 @@ function App() {
     );
   }
   if (!user) return <Login setUser={setUser} />;
+  console.log("Range", range);
 
   return (
     <>
