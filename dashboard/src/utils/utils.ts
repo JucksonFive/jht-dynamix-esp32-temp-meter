@@ -9,7 +9,6 @@ export const toLocalOffSetIso = (date: Date = new Date()): string => {
   const mm = pad(date.getMinutes());
   const ss = pad(date.getSeconds());
 
-  // getTimezoneOffset palauttaa minuutteina (UTC - local), joten käännä merkki
   const offsetMinTotal = -date.getTimezoneOffset();
   const sign = offsetMinTotal >= 0 ? "+" : "-";
   const offH = pad(Math.floor(Math.abs(offsetMinTotal) / 60));
