@@ -15,14 +15,7 @@ export class InfrastructureStack extends cdk.Stack {
       partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
       sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
       billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // Dev environment only. Removes all the data!
-    });
-
-    this.temperaturesTable.addGlobalSecondaryIndex({
-      indexName: "userId-timestamp-index",
-      partitionKey: { name: "userId", type: dynamoDb.AttributeType.STRING },
-      sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
-      projectionType: dynamoDb.ProjectionType.ALL,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
     // DynamoDB table for mapping devices to users
@@ -30,7 +23,21 @@ export class InfrastructureStack extends cdk.Stack {
       tableName: "Devices",
       partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
       billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    this.temperaturesTable.addGlobalSecondaryIndex({
+      indexName: "UserTimeIndex",
+      partitionKey: { name: "userId", type: dynamoDb.AttributeType.STRING },
+      sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
+      projectionType: dynamoDb.ProjectionType.KEYS_ONLY,
+    });
+
+    this.temperaturesTable.addGlobalSecondaryIndex({
+      indexName: "userId-timestamp-index",
+      partitionKey: { name: "userId", type: dynamoDb.AttributeType.STRING },
+      sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
+      projectionType: dynamoDb.ProjectionType.ALL,
     });
   }
 }

@@ -1,15 +1,14 @@
 // TemperatureChart.tsx
+import { useMemo } from "react";
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-  Brush,
 } from "recharts";
-import { useMemo, useState } from "react";
 
 type Point = { timestamp: string; temperature: number };
 type Range = { from: string; to: string };
@@ -38,7 +37,6 @@ function pickBucketMs(ms: number) {
 function bucketize(points: Point[], r: Range) {
   const ms = spanMs(r);
   const bucket = pickBucketMs(ms);
-  const start = Math.floor(+new Date(r.from) / bucket) * bucket;
   const acc: Record<number, { sum: number; n: number }> = {};
   for (const p of points) {
     const t = +new Date(p.timestamp);
@@ -55,33 +53,17 @@ function bucketize(points: Point[], r: Range) {
 export function TemperatureChart({
   data,
   range,
-  onRangeChange,
 }: {
   data: Point[]; // raw points (already filtered by range on backend)
   range: Range; // current fetch range
   onRangeChange?: (r: Range) => void; // called when brush changes
 }) {
-  const [brushIndex, setBrushIndex] = useState<{
-    startIndex: number;
-    endIndex: number;
-  } | null>(null);
-
   const series = useMemo(
     () => bucketize(data, range),
     [data, range.from, range.to]
   );
 
   const xDomain = [new Date(range.from), new Date(range.to)];
-
-  const handleBrushChange = (b: any) => {
-    if (!b) return;
-    setBrushIndex({ startIndex: b.startIndex, endIndex: b.endIndex });
-    const start = series[b.startIndex]?.ts;
-    const end = series[Math.min(b.endIndex, series.length - 1)]?.ts;
-    if (start && end && onRangeChange) {
-      onRangeChange({ from: start.toISOString(), to: end.toISOString() }); // sovita oma formatoijasi jos käytät local-offsettia
-    }
-  };
 
   return (
     <div className="h-[420px] w-full">

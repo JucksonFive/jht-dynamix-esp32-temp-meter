@@ -7,7 +7,7 @@ import { Reading } from "./services/types";
 import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
 
 interface DeviceData {
-  id: string; // mapped from deviceId
+  id: string;
   temperature: number;
   timestamp: string;
 }
@@ -26,7 +26,7 @@ function App() {
     to: toLocalOffsetIso(),
   }));
 
-  const [autoLive, setAutoLive] = useState(true);
+  const [autoLive] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -95,7 +95,6 @@ function App() {
     );
   }
   if (!user) return <Login setUser={setUser} />;
-  console.log("Range", range);
 
   return (
     <>

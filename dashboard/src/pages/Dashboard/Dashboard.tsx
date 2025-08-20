@@ -21,7 +21,7 @@ interface DashboardProps {
 export const Dashboard = ({
   data,
   range,
-  autoLive = true,
+  autoLive = false,
   onRangeChange,
   selectedDeviceId,
   setSelectedDeviceId,

@@ -14,6 +14,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly saveToDynamoFn: NodejsFunction;
   public readonly fetchFromDynamoFn: NodejsFunction;
   public readonly fetchUserTemperaturesFn: NodejsFunction;
+  public readonly fetchUserTemperatureBoundsFn: NodejsFunction;
   public readonly authProtectedFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
@@ -79,6 +80,23 @@ export class LambdaStack extends cdk.Stack {
       }
     );
     temperaturesTable.grantReadData(this.fetchUserTemperaturesFn);
+
+    // Lambda function for fetching first and last temperature readings
+    this.fetchUserTemperatureBoundsFn = new NodejsFunction(
+      this,
+      "FetchUserTemperatureBoundsFunction",
+      {
+        functionName: "FetchUserTemperatureBoundsFunction",
+        entry: path.join(__dirname, "../../lambdas/getReadingBounds/index.ts"),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        environment: {
+          TABLE_NAME: temperaturesTable.tableName,
+          GSI_NAME: "UserTimeIndex",
+        },
+      }
+    );
+    temperaturesTable.grantReadData(this.fetchUserTemperatureBoundsFn);
 
     // Auth protected Lambda function
     this.authProtectedFn = new NodejsFunction(this, "AuthProtectedLambda", {
