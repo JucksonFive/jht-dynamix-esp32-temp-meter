@@ -14,7 +14,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
   const toDate = value.to ? new Date(value.to) : null;
 
   return (
-    <div className="flex gap-3 items-end">
+    <div className="flex flex-col gap-2">
       <div>
         <label className="block text-xs font-semibold text-gray-600 mb-1">
           From
