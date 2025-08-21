@@ -12,9 +12,8 @@ const THREE_WEEKS = 21 * 864e5;
 
 function App() {
   const [user, setUser] = useState<any>(null);
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [selectedDeviceIds, setSelectedDeviceId] = useState<string[]>([]);
 
-  // auth bootstrap
   const [bootLoading, setBootLoading] = useState(true);
   useEffect(() => {
     (async () => {
@@ -29,7 +28,6 @@ function App() {
     })();
   }, []);
 
-  // bounds
   const {
     bounds,
     loading: boundsLoading,
@@ -95,8 +93,8 @@ function App() {
         bounds={bounds}
         range={clampedRange}
         onRangeChange={(r) => setRange(r)}
-        selectedDeviceId={selectedDeviceId}
-        setSelectedDeviceId={setSelectedDeviceId}
+        selectedDeviceIds={selectedDeviceIds}
+        setSelectedDeviceIds={setSelectedDeviceId}
         handleLogout={handleLogout}
         loading={boundsLoading || dataLoading}
       />

@@ -1,21 +1,24 @@
 import React from "react";
-import { SidePanelDevice } from "../../../utils/types";
+
+export interface SidePanelDevice {
+  id: string;
+  lastSeen?: string;
+}
 
 export interface SidePanelProps {
   devices: SidePanelDevice[];
-  selectedId: string;
-  onSelect: (id: string) => void;
+  selectedIds: string[];
+  onSelectSingle: (id: string) => void; // uusi
+  onToggleMulti: (id: string) => void; // uusi
   title?: string;
   className?: string;
 }
 
-/**
- * Sidebar listing available devices with last-seen timestamps.
- */
 export const SidePanel: React.FC<SidePanelProps> = ({
   devices,
-  selectedId,
-  onSelect,
+  selectedIds,
+  onSelectSingle,
+  onToggleMulti,
   title = "Devices",
   className = "",
 }) => {
@@ -30,23 +33,46 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         <h2 className="text-lg font-semibold mb-3">{title}</h2>
         <ul className="space-y-2">
           {devices.map((d) => {
-            const isActive = d.id === selectedId;
+            const isActive = selectedIds.includes(d.id);
             return (
               <li key={d.id}>
-                <button
-                  onClick={() => onSelect(d.id)}
+                <div
                   className={[
-                    "w-full text-left px-3 py-2 rounded-md transition",
+                    "flex items-center justify-between rounded-md border px-2 py-1",
                     isActive
-                      ? "bg-blue-600 text-white"
-                      : "bg-white hover:bg-gray-100 text-gray-800 border border-gray-200",
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-gray-200 bg-white",
                   ].join(" ")}
-                  aria-current={isActive ? "page" : undefined}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{d.id}</span>
-                  </div>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => onSelectSingle(d.id)}
+                    className={[
+                      "flex-1 text-left px-1 py-1 rounded",
+                      "focus:outline-none focus:ring-2 focus:ring-blue-500",
+                      isActive ? "text-blue-700 font-medium" : "text-gray-800",
+                    ].join(" ")}
+                    title="Klikkaa valitaksesi vain tämän"
+                  >
+                    <span>{d.id}</span>
+                    {d.lastSeen && (
+                      <span className="block text-[10px] text-gray-500">
+                        {new Date(d.lastSeen).toLocaleTimeString()}
+                      </span>
+                    )}
+                  </button>
+                  <label
+                    className="flex items-center ml-2 cursor-pointer"
+                    title="Monivalinta: ruksaa lisätäksesi / poistaaksesi"
+                  >
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-blue-600"
+                      checked={isActive}
+                      onChange={() => onToggleMulti(d.id)}
+                    />
+                  </label>
+                </div>
               </li>
             );
           })}

@@ -1,18 +1,18 @@
-import { format, isAfter, isBefore, parseISO } from "date-fns";
-import { useMemo } from "react";
+import { isAfter, isBefore } from "date-fns";
+import React, { useMemo } from "react";
+import { Bounds, DeviceData, Range } from "../../utils/types";
+import { fmtYMD, parseYMD } from "../../utils/utils";
 import { DateRangePicker } from "./Components/DateRangePicker";
 import { SidePanel } from "./Components/SidePanel";
 import { TemperatureChart } from "./Components/TemperatureChart";
-import { Bounds, DeviceData, Range } from "../../utils/types";
-import { fmtYMD, parseYMD } from "../../utils/utils";
 
 interface DashboardProps {
   data: DeviceData[];
   bounds: Bounds | null;
   range: Range;
   onRangeChange: (r: Range) => void;
-  selectedDeviceId: string;
-  setSelectedDeviceId: (id: string) => void;
+  selectedDeviceIds: string[];
+  setSelectedDeviceIds: React.Dispatch<React.SetStateAction<string[]>>;
   handleLogout: () => void;
   loading: boolean;
 }
@@ -22,8 +22,8 @@ export const Dashboard = ({
   bounds,
   range,
   onRangeChange,
-  selectedDeviceId,
-  setSelectedDeviceId,
+  selectedDeviceIds,
+  setSelectedDeviceIds,
   handleLogout,
 }: DashboardProps) => {
   const lastSeenMap = new Map<string, string>();
@@ -36,10 +36,17 @@ export const Dashboard = ({
     lastSeen,
   }));
 
-  const selectedData = selectedDeviceId
-    ? data.filter((d) => d.id === selectedDeviceId)
-    : [];
+  const selectedData =
+    selectedDeviceIds.length > 0
+      ? data.filter((d) => selectedDeviceIds.includes(d.id))
+      : [];
 
+  const selectSingle = (id: string) => setSelectedDeviceIds([id]);
+
+  const toggleMulti = (id: string) =>
+    setSelectedDeviceIds((prev: string[]) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
   const clampedRange = useMemo(() => {
     if (!bounds) return range;
     const min = parseYMD(bounds.min);
@@ -76,14 +83,16 @@ export const Dashboard = ({
       <div className="flex gap-6">
         <SidePanel
           devices={devices}
-          selectedId={selectedDeviceId}
-          onSelect={setSelectedDeviceId}
+          selectedIds={selectedDeviceIds}
+          onSelectSingle={selectSingle}
+          onToggleMulti={toggleMulti}
         />
 
         <main className="flex-1">
-          {selectedDeviceId ? (
+          {selectedDeviceIds.length > 0 ? (
             <TemperatureChart
               data={selectedData.map((d) => ({
+                id: d.id,
                 timestamp: d.timestamp,
                 temperature: d.temperature,
               }))}
