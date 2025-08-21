@@ -9,8 +9,8 @@ export interface SidePanelDevice {
 export interface SidePanelProps {
   devices: SidePanelDevice[];
   selectedIds: string[];
-  onSelectSingle: (id: string) => void; // uusi
-  onToggleMulti: (id: string) => void; // uusi
+  onSelectSingle: (id: string) => void;
+  onToggleMulti: (id: string) => void;
   title?: string;
   className?: string;
 }

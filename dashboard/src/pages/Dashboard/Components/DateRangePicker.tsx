@@ -31,7 +31,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
           }
           maxDate={toDate || undefined}
           dateFormat="dd.MM.yyyy"
-          className="border rounded px-2 py-1"
+          className="border rounded px-2 py-1 cursor-pointer"
         />
       </div>
       <div>
@@ -50,7 +50,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
           minDate={fromDate || undefined}
           maxDate={new Date()}
           dateFormat="dd.MM.yyyy"
-          className="border rounded px-2 py-1"
+          className="border rounded px-2 py-1 cursor-pointer"
         />
       </div>
     </div>
