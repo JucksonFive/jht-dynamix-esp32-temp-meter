@@ -4,10 +4,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 
 type DateStr = string;
-
 interface Props {
   value: { from: DateStr; to: DateStr };
-  onChange: (range: { from: DateStr; to: DateStr }) => void;
+  onChange: (r: { from: DateStr; to: DateStr }) => void;
 }
 
 export const DateRangePicker = ({ value, onChange }: Props) => {
@@ -15,26 +14,44 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
   const toDate = value.to ? new Date(value.to) : null;
 
   return (
-    <div>
-      <label className="block text-sm text-gray-600 mb-1">Date Range</label>
-      <DatePicker
-        selectsRange
-        startDate={fromDate}
-        endDate={toDate}
-        onChange={(dates) => {
-          const [start, end] = dates as [Date | null, Date | null];
-          if (start) {
+    <div className="flex gap-3 items-end">
+      <div>
+        <label className="block text-xs font-semibold text-gray-600 mb-1">
+          From
+        </label>
+        <DatePicker
+          selected={fromDate}
+          onChange={(d) =>
+            d &&
             onChange({
-              from: format(start, "yyyy-MM-dd"),
-              to: end
-                ? format(new Date(end.getTime() - 86400000), "yyyy-MM-dd")
-                : value.to,
-            });
+              from: format(d, "yyyy-MM-dd"),
+              to: value.to,
+            })
           }
-        }}
-        dateFormat="dd.MM.yyyy"
-        className="border rounded px-2 py-1"
-      />
+          maxDate={toDate || undefined}
+          dateFormat="dd.MM.yyyy"
+          className="border rounded px-2 py-1"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-gray-600 mb-1">
+          To
+        </label>
+        <DatePicker
+          selected={toDate}
+          onChange={(d) =>
+            d &&
+            onChange({
+              from: value.from,
+              to: format(d, "yyyy-MM-dd"),
+            })
+          }
+          minDate={fromDate || undefined}
+          maxDate={new Date()}
+          dateFormat="dd.MM.yyyy"
+          className="border rounded px-2 py-1"
+        />
+      </div>
     </div>
   );
 };
