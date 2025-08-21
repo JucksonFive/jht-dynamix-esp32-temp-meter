@@ -97,7 +97,6 @@ export const Dashboard = ({
                 temperature: d.temperature,
               }))}
               range={range}
-              onRangeChange={(r) => onRangeChange(r)}
             />
           ) : (
             <div className="h-full grid place-items-center">
