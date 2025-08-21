@@ -2,17 +2,17 @@ import React from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
-import { Range } from "../../../utils/types";
+
+type DateStr = string;
 
 interface Props {
-  value: Range;
-  onChange: (range: Range) => void;
+  value: { from: DateStr; to: DateStr };
+  onChange: (range: { from: DateStr; to: DateStr }) => void;
 }
 
 export const DateRangePicker = ({ value, onChange }: Props) => {
   const fromDate = value.from ? new Date(value.from) : null;
   const toDate = value.to ? new Date(value.to) : null;
-  const dateFormat = "dd-MM-yyyy";
 
   return (
     <div>
@@ -25,9 +25,9 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
           const [start, end] = dates as [Date | null, Date | null];
           if (start) {
             onChange({
-              from: format(start, dateFormat),
+              from: format(start, "yyyy-MM-dd"),
               to: end
-                ? format(new Date(end.getTime() - 86400000), dateFormat)
+                ? format(new Date(end.getTime() - 86400000), "yyyy-MM-dd")
                 : value.to,
             });
           }
