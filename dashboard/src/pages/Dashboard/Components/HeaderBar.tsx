@@ -1,4 +1,5 @@
 import React from "react";
+import strings from "../../../locale/strings";
 
 interface HeaderBarProps {
   title: string;
@@ -26,7 +27,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           className="text-sm text-white bg-red-500 hover:bg-red-600 rounded px-4 py-2"
           onClick={onLogout}
         >
-          Logout
+          {strings.logout}
         </button>
       </div>
     </div>

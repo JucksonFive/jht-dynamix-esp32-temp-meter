@@ -1,4 +1,5 @@
 import React from "react";
+import strings from "../../../locale/strings";
 
 export interface SidePanelDevice {
   id: string;
@@ -19,7 +20,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   selectedIds,
   onSelectSingle,
   onToggleMulti,
-  title = "Devices",
+  title = strings.sidePanelTitle,
   className = "",
 }) => {
   return (
@@ -30,7 +31,17 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       ].join(" ")}
     >
       <div className="p-4">
-        <h2 className="text-lg font-semibold mb-3">{title}</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="text-lg font-semibold">{title}</h2>
+          <button
+            type="button"
+            aria-label={strings.sidePanelSelectionHelp}
+            title={strings.sidePanelSelectionHelp}
+            className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+          >
+            <span aria-hidden>ℹ️</span>
+          </button>
+        </div>
         <ul className="space-y-2">
           {devices.map((d) => {
             const isActive = selectedIds.includes(d.id);
@@ -52,7 +63,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                       "focus:outline-none focus:ring-2 focus:ring-blue-500",
                       isActive ? "text-blue-700 font-medium" : "text-gray-800",
                     ].join(" ")}
-                    title="Klikkaa valitaksesi vain tämän"
+                    title={strings.tooltipSelectSingle}
                   >
                     <span>{d.id}</span>
                     {d.lastSeen && (
@@ -63,7 +74,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   </button>
                   <label
                     className="flex items-center ml-2 cursor-pointer"
-                    title="Monivalinta: ruksaa lisätäksesi / poistaaksesi"
+                    title={strings.tooltipToggleMulti}
                   >
                     <input
                       type="checkbox"
@@ -77,7 +88,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             );
           })}
           {devices.length === 0 && (
-            <li className="text-sm text-gray-500">No devices yet.</li>
+            <li className="text-sm text-gray-500">{strings.noDevices}</li>
           )}
         </ul>
       </div>

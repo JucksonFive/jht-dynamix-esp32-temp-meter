@@ -1,0 +1,32 @@
+// Simple localization strings. Extend or swap based on selected language.
+// You can later add a language switcher that swaps this export.
+export interface LocaleStrings {
+  appTitle: string;
+  logout: string;
+  sidePanelTitle: string;
+  noDevices: string;
+  selectDeviceHelp: string;
+  fromLabel: string;
+  toLabel: string;
+  tooltipSelectSingle: string;
+  tooltipToggleMulti: string;
+  sidePanelSelectionHelp: string;
+}
+
+// Default language bundle.
+export const strings: LocaleStrings = {
+  appTitle: "JT-DYNAMIX Dashboard",
+  logout: "Logout",
+  sidePanelTitle: "Devices",
+  noDevices: "No devices yet.",
+  selectDeviceHelp: "Select a device from the left to view data.",
+  fromLabel: "From",
+  toLabel: "To",
+  tooltipSelectSingle: "Click to select only this device",
+  tooltipToggleMulti:
+    "Toggle multi-select (check to add or remove this device)",
+  sidePanelSelectionHelp:
+    "Click a device name to show only that device. Use the checkbox to add or remove devices for multi-selection.",
+};
+
+export default strings;

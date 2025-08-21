@@ -6,6 +6,7 @@ import { DateRangePicker } from "./Components/DateRangePicker";
 import { SidePanel } from "./Components/SidePanel";
 import { TemperatureChart } from "./Components/TemperatureChart";
 import { HeaderBar } from "./Components/HeaderBar";
+import strings from "../../locale/strings";
 
 interface DashboardProps {
   data: DeviceData[];
@@ -61,7 +62,7 @@ export const Dashboard = ({
 
   return (
     <div className="min-h-screen bg-white p-6">
-      <HeaderBar title="JT-DYNAMIX Dashboard" onLogout={handleLogout} />
+      <HeaderBar title={strings.appTitle} onLogout={handleLogout} />
 
       <div className="mb-4 flex items-center gap-4">
         <DateRangePicker
@@ -92,9 +93,7 @@ export const Dashboard = ({
             />
           ) : (
             <div className="h-full grid place-items-center">
-              <p className="text-gray-500">
-                Select a device from the left to view data.
-              </p>
+              <p className="text-gray-500">{strings.selectDeviceHelp}</p>
             </div>
           )}
         </main>

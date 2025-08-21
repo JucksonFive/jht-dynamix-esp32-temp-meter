@@ -2,6 +2,7 @@ import React from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import strings from "../../../locale/strings";
 
 type DateStr = string;
 interface Props {
@@ -17,7 +18,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
     <div className="flex flex-col gap-2">
       <div>
         <label className="block text-xs font-semibold text-gray-600 mb-1">
-          From
+          {strings.fromLabel}
         </label>
         <DatePicker
           selected={fromDate}
@@ -35,7 +36,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
       </div>
       <div>
         <label className="block text-xs font-semibold text-gray-600 mb-1">
-          To
+          {strings.toLabel}
         </label>
         <DatePicker
           selected={toDate}
