@@ -11,6 +11,16 @@ export interface LocaleStrings {
   tooltipSelectSingle: string;
   tooltipToggleMulti: string;
   sidePanelSelectionHelp: string;
+  authWelcome: string;
+  authSubtitle: string;
+  authSignIn: string;
+  authSignUp: string;
+  authSigningIn: string;
+  authSigningUp: string;
+  authSigningInEllipsis: string;
+  authSigningUpEllipsis: string;
+  authCreateAccount: string;
+  authAlreadyAccount: string;
 }
 
 // Default language bundle.
@@ -27,6 +37,16 @@ export const strings: LocaleStrings = {
     "Toggle multi-select (check to add or remove this device)",
   sidePanelSelectionHelp:
     "Click a device name to show only that device. Use the checkbox to add or remove devices for multi-selection.",
+  authWelcome: "Welcome",
+  authSubtitle: "Enter your credentials to access your dashboard",
+  authSignIn: "Sign In",
+  authSignUp: "Sign Up",
+  authSigningIn: "Signing In",
+  authSigningUp: "Signing Up",
+  authSigningInEllipsis: "Signing In...",
+  authSigningUpEllipsis: "Signing Up...",
+  authCreateAccount: "Create an account",
+  authAlreadyAccount: "Already have an account?",
 };
 
 export default strings;

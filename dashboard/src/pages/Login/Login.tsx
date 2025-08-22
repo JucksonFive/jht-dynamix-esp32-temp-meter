@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
+import { useState } from "react";
+import AuthActions from "./Components/AuthActions";
+import strings from "../../locale/strings";
 import { Logo } from "./Components/Logo";
-import { LoadingSpinner } from "./Components/LoadingSpinner";
-import { Button } from "../../ui/Button";
 
 export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   const [email, setEmail] = useState("");
@@ -43,10 +43,8 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
           <Logo size={128} />
         </div>
         <div className="text-center">
-          <h1 className="text-3xl font-semibold mb-2">Welcome</h1>
-          <p className="text-sm text-gray-500 mb-8">
-            Enter your credentials to access your dashboard
-          </p>
+          <h1 className="text-3xl font-semibold mb-2">{strings.authWelcome}</h1>
+          <p className="text-sm text-gray-500 mb-8">{strings.authSubtitle}</p>
         </div>
         <input
           type="email"
@@ -60,41 +58,15 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button
-          intent="primary"
-          size="md"
-          onClick={handleAuth}
+        <AuthActions
+          mode={mode}
+          loading={loading}
+          error={error}
           disabled={loading || !email || !password}
-          aria-busy={loading}
-          className="w-full mb-4 gap-2"
-        >
-          {loading ? (
-            <>
-              <LoadingSpinner
-                size={20}
-                label={mode === "signin" ? "Signing In" : "Signing Up"}
-              />
-              <span>
-                {mode === "signin" ? "Signing In..." : "Signing Up..."}
-              </span>
-            </>
-          ) : (
-            <span>{mode === "signin" ? "Sign In" : "Sign Up"}</span>
-          )}
-        </Button>
-        {error && (
-          <div className="text-red-600 text-sm mb-2 text-center">{error}</div>
-        )}
-
-        <Button
-          intent="link"
-          size="sm"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-        >
-          {mode === "signin" ? "Create an account" : "Already have an account?"}
-        </Button>
+          onAuth={(e) => handleAuth(e as any)}
+          onToggleMode={() => setMode(mode === "signin" ? "signup" : "signin")}
+        />
       </div>
-
       <div className="hidden md:flex w-full md:w-1/2 bg-black text-white items-center justify-center p-8">
         <Logo size={512} />
       </div>
