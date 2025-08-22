@@ -4,20 +4,14 @@ import {
   GetCommand,
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { HandlerEvent } from "../utils/types";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 const TEMPS_TABLE = process.env.TABLE_NAME!;
 const DEVICES_TABLE = process.env.DEVICES_TABLE!;
 
-type Event = {
-  deviceId: string;
-  temperature: number;
-  timestamp: string; // ISO8601
-  userId?: string; // optional override
-};
-
-export const handler = async (event: Event) => {
+export const handler = async (event: HandlerEvent) => {
   console.log("Received event:", JSON.stringify(event));
 
   const { deviceId, temperature, timestamp } = event;
