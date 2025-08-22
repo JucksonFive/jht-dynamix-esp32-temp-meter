@@ -24,17 +24,22 @@ export const AuthActions: React.FC<AuthActionsProps> = ({
   return (
     <div>
       <Button
-        intent="primary"
+        intent="ghost"
         size="md"
         onClick={onAuth}
         disabled={disabled}
         aria-busy={loading}
-        className="w-full mb-4 gap-2"
+        className="w-full mb-4 gap-2 relative overflow-hidden bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan text-white shadow-lg shadow-neon-purple/30 hover:shadow-neon-purple/50 focus:ring-neon-purple/40"
       >
         <AuthButtonContent mode={mode} loading={loading} />
       </Button>
       <AuthErrorMessage error={error} className="mb-2" />
-      <Button intent="link" size="sm" onClick={onToggleMode}>
+      <Button
+        intent="link"
+        size="sm"
+        onClick={onToggleMode}
+        className="text-neon-purple hover:text-neon-pink"
+      >
         {mode === "signin"
           ? strings.authCreateAccount
           : strings.authAlreadyAccount}

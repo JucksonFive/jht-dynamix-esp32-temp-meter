@@ -28,23 +28,37 @@ export const Logo: React.FC<LogoProps> = ({
       className={className}
     >
       <title>{title}</title>
+      <defs>
+        <linearGradient
+          id="lg1"
+          x1="0"
+          y1="0"
+          x2="128"
+          y2="128"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#8b5cf6" />
+          <stop offset="50%" stopColor="#ec4899" />
+          <stop offset="100%" stopColor="#06b6d4" />
+        </linearGradient>
+      </defs>
       <circle
         cx="64"
         cy="64"
         r="60"
-        stroke="#2D9CDB"
+        stroke="url(#lg1)"
         strokeWidth="4"
-        fill="#F2F2F2"
+        fill="#111827"
       />
       <path
         d="M64 4 A60 60 0 0 1 64 124"
-        stroke="#27AE60"
+        stroke="#06b6d4"
         strokeWidth="3"
         fill="none"
       />
       <path
         d="M4 64 A60 60 0 0 1 124 64"
-        stroke="#EB5757"
+        stroke="#ec4899"
         strokeWidth="3"
         fill="none"
       />
@@ -53,8 +67,8 @@ export const Logo: React.FC<LogoProps> = ({
         y="72"
         textAnchor="middle"
         fontSize="18"
-        fill="#333"
-        fontFamily="Arial"
+        fill="#f1f5f9"
+        fontFamily="'Inter', 'Arial'"
         fontWeight="bold"
       >
         {text}

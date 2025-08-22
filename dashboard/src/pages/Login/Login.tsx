@@ -37,38 +37,60 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
-      <div className="w-full md:w-1/2 bg-[#f9fafb] flex flex-col justify-center px-8 sm:px-16 py-12">
-        <div className="mb-8 flex flex-col items-center">
-          <Logo size={128} />
+    <div className="min-h-screen w-full bg-gradient-dashboard flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-8">
+        {/* Left: form card */}
+        <div className="relative bg-midnight-800/70 backdrop-blur-xl ring-1 ring-white/10 rounded-3xl p-8 sm:p-12 shadow-inner-soft flex flex-col justify-center">
+          <div className="absolute inset-0 pointer-events-none rounded-3xl border border-white/5" />
+          <div className="mb-8 flex flex-col items-center">
+            <Logo size={96} />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan">
+            {strings.authWelcome}
+          </h1>
+          <p className="text-sm text-gray-400 mb-8">{strings.authSubtitle}</p>
+          <div className="space-y-4">
+            <div>
+              <input
+                type="email"
+                autoComplete="email"
+                className="w-full text-sm rounded-md bg-midnight-700/60 border border-white/10 focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/40 text-gray-100 placeholder-gray-500 px-4 py-3 backdrop-blur-sm transition-colors"
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                autoComplete="current-password"
+                className="w-full text-sm rounded-md bg-midnight-700/60 border border-white/10 focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/40 text-gray-100 placeholder-gray-500 px-4 py-3 backdrop-blur-sm transition-colors"
+                placeholder="Password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <AuthActions
+              mode={mode}
+              loading={loading}
+              error={error}
+              disabled={loading || !email || !password}
+              onAuth={(e) => handleAuth(e as any)}
+              onToggleMode={() =>
+                setMode(mode === "signin" ? "signup" : "signin")
+              }
+            />
+          </div>
         </div>
-        <div className="text-center">
-          <h1 className="text-3xl font-semibold mb-2">{strings.authWelcome}</h1>
-          <p className="text-sm text-gray-500 mb-8">{strings.authSubtitle}</p>
+        {/* Right: brand / hero */}
+        <div className="hidden lg:flex relative items-center justify-center">
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-neon-purple/20 via-neon-pink/10 to-neon-cyan/20 blur-3xl" />
+          <div className="relative flex flex-col items-center gap-8">
+            <Logo size={280} />
+            <p className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">
+              JT-DYNAMIX IoT telemetry platform &mdash; secure temperature data
+              collection with real-time analytics.
+            </p>
+          </div>
         </div>
-        <input
-          type="email"
-          className="border px-4 py-2 w-full mb-4 rounded text-center"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          className="border px-4 py-2 w-full mb-4 rounded text-center"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <AuthActions
-          mode={mode}
-          loading={loading}
-          error={error}
-          disabled={loading || !email || !password}
-          onAuth={(e) => handleAuth(e as any)}
-          onToggleMode={() => setMode(mode === "signin" ? "signup" : "signin")}
-        />
-      </div>
-      <div className="hidden md:flex w-full md:w-1/2 bg-black text-white items-center justify-center p-8">
-        <Logo size={512} />
       </div>
     </div>
   );
