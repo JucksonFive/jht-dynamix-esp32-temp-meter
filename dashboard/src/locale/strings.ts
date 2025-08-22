@@ -21,6 +21,8 @@ export interface LocaleStrings {
   authSigningUpEllipsis: string;
   authCreateAccount: string;
   authAlreadyAccount: string;
+  dateRange: string;
+  temperatureHistory: string;
 }
 
 // Default language bundle.
@@ -47,6 +49,8 @@ export const strings: LocaleStrings = {
   authSigningUpEllipsis: "Signing Up...",
   authCreateAccount: "Create an account",
   authAlreadyAccount: "Already have an account?",
+  dateRange: "Date Range",
+  temperatureHistory: "Temperature History",
 };
 
 export default strings;
