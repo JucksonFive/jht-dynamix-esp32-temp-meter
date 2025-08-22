@@ -66,7 +66,7 @@ export const Dashboard = ({
         <HeaderBar title={strings.appTitle} onLogout={handleLogout} />
 
         {/* Filters */}
-        <section className="mb-6 flex flex-col sm:flex-row sm:items-end gap-4">
+        <section className="mb-6 flex flex-col sm:flex-row sm:items-end gap-4 relative z-40">
           <div className="bg-midnight-800/70 backdrop-blur-xl rounded-2xl shadow-inner-soft ring-1 ring-white/10 p-5 w-full sm:w-auto border border-white/5">
             <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-400 mb-2">
               {strings.dateRange}
