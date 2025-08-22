@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "../../../ui/Button";
 import { AuthButtonContent } from "./AuthButtonContent";
 import { AuthErrorMessage } from "./AuthErrorMessage";
+import { ToggleAuthModeButton } from "./ToggleAuthModeButton";
 import strings from "../../../locale/strings";
 
 export interface AuthActionsProps {
@@ -34,16 +35,7 @@ export const AuthActions: React.FC<AuthActionsProps> = ({
         <AuthButtonContent mode={mode} loading={loading} />
       </Button>
       <AuthErrorMessage error={error} className="mb-2" />
-      <Button
-        intent="link"
-        size="sm"
-        onClick={onToggleMode}
-        className="text-neon-purple hover:text-neon-pink"
-      >
-        {mode === "signin"
-          ? strings.authCreateAccount
-          : strings.authAlreadyAccount}
-      </Button>
+      <ToggleAuthModeButton mode={mode} onToggleMode={onToggleMode} />
     </div>
   );
 };
