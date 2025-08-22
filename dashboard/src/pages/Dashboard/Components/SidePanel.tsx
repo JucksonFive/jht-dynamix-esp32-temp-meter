@@ -1,5 +1,7 @@
 import React from "react";
 import strings from "../../../locale/strings";
+import { InfoButton } from "./InfoButton";
+import { DeviceSelectButton } from "./DeviceSelectButton";
 
 export interface SidePanelDevice {
   id: string;
@@ -36,14 +38,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <button
-            type="button"
-            aria-label={strings.sidePanelSelectionHelp}
-            title={strings.sidePanelSelectionHelp}
-            className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-          >
-            <span aria-hidden>ℹ️</span>
-          </button>
+          <InfoButton />
         </div>
         <ul className="space-y-2">
           {devices.map((d) => {
@@ -58,23 +53,13 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                       : "border-gray-200 bg-white",
                   ].join(" ")}
                 >
-                  <button
-                    type="button"
-                    onClick={() => onSelectSingle(d.id)}
-                    className={[
-                      "flex-1 text-left px-1 py-1 rounded",
-                      "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                      isActive ? "text-blue-700 font-medium" : "text-gray-800",
-                    ].join(" ")}
+                  <DeviceSelectButton
+                    id={d.id}
+                    lastSeen={d.lastSeen}
+                    active={isActive}
+                    onSelect={onSelectSingle}
                     title={strings.tooltipSelectSingle}
-                  >
-                    <span>{d.id}</span>
-                    {d.lastSeen && (
-                      <span className="block text-[10px] text-gray-500">
-                        {new Date(d.lastSeen).toLocaleTimeString()}
-                      </span>
-                    )}
-                  </button>
+                  />
                   <label
                     className="flex items-center ml-2 cursor-pointer"
                     title={strings.tooltipToggleMulti}
