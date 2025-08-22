@@ -9,6 +9,7 @@
 #include <WiFi.h>
 #include <wifi_config_manager.h>
 #include <wifi_scan_helper.h>
+#include "reset_helper.h"
 
 String mqtt_server_str;
 String mqtt_topic_str;
@@ -28,6 +29,9 @@ void setup()
     while (true)
       ;
   }
+
+  // Reset button helper initialization (long press 3s on GPIO0 -> factory reset)
+  ResetHelper::setup(/*pin=*/0, /*longPressMs=*/3000, /*shortPressRestart=*/false);
 
   if (!isSetupComplete())
   {
@@ -89,6 +93,7 @@ void setup()
 void loop()
 {
   WifiScanHelper::processScanResult();
+  ResetHelper::loop();
   if (!isSetupComplete())
   {
     Serial.println("[DEBUG] Setup not complete, skipping MQTT operations");
