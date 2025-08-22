@@ -3,7 +3,6 @@ import { Button } from "../../../ui/Button";
 import { AuthButtonContent } from "./AuthButtonContent";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 import { ToggleAuthModeButton } from "./ToggleAuthModeButton";
-import strings from "../../../locale/strings";
 
 export interface AuthActionsProps {
   mode: "signin" | "signup";
