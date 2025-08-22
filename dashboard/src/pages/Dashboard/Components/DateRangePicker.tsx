@@ -17,7 +17,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
   return (
     <div className="flex flex-col gap-2">
       <div>
-        <label className="block text-xs font-semibold text-gray-600 mb-1">
+        <label className="block text-xs font-semibold text-gray-400 mb-1">
           {strings.fromLabel}
         </label>
         <DatePicker
@@ -31,11 +31,11 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
           }
           maxDate={toDate || undefined}
           dateFormat="dd.MM.yyyy"
-          className="border rounded px-2 py-1 cursor-pointer"
+          className="w-full rounded-md bg-midnight-700/60 border border-white/10 focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/40 text-gray-200 placeholder-gray-500 text-sm px-3 py-2 backdrop-blur-sm transition-colors"
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-gray-600 mb-1">
+        <label className="block text-xs font-semibold text-gray-400 mb-1">
           {strings.toLabel}
         </label>
         <DatePicker
@@ -50,7 +50,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
           minDate={fromDate || undefined}
           maxDate={new Date()}
           dateFormat="dd.MM.yyyy"
-          className="border rounded px-2 py-1 cursor-pointer"
+          className="w-full rounded-md bg-midnight-700/60 border border-white/10 focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/40 text-gray-200 placeholder-gray-500 text-sm px-3 py-2 backdrop-blur-sm transition-colors"
         />
       </div>
     </div>

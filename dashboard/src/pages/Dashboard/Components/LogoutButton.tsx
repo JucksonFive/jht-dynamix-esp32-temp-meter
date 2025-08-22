@@ -11,8 +11,19 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
   onLogout,
   className = "",
 }) => (
-  <Button intent="danger" size="sm" onClick={onLogout} className={className}>
-    {strings.logout}
+  <Button
+    intent="ghost"
+    size="sm"
+    onClick={onLogout}
+    className={[
+      "relative overflow-hidden font-medium",
+      "bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan text-white",
+      "shadow-lg shadow-neon-purple/30 hover:shadow-neon-purple/50",
+      "focus:ring-neon-purple/40",
+      className,
+    ].join(" ")}
+  >
+    <span className="relative z-10">{strings.logout}</span>
   </Button>
 );
 

@@ -20,9 +20,12 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
       type="button"
       onClick={() => onSelect(id)}
       className={[
-        "flex-1 text-left px-1 py-1 rounded",
-        "focus:outline-none focus:ring-2 focus:ring-blue-500",
-        active ? "text-blue-700 font-medium" : "text-gray-800",
+        "flex-1 text-left px-1 py-1 rounded-md",
+        "focus:outline-none focus:ring-2 focus:ring-neon-purple/50",
+        active
+          ? "text-neon-purple font-semibold drop-shadow"
+          : "text-gray-300 group-hover:text-gray-100",
+        "transition-colors",
       ].join(" ")}
       title={title}
     >

@@ -61,14 +61,14 @@ export const Dashboard = ({
   }, [range.from, range.to, bounds?.min, bounds?.max]);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100">
-      <div className="mx-auto max-w-[1600px] px-4 lg:px-8 py-4 lg:py-6">
+    <div className="min-h-screen w-full bg-gradient-dashboard text-gray-100">
+      <div className="mx-auto max-w-[1700px] px-5 lg:px-10 py-5 lg:py-8">
         <HeaderBar title={strings.appTitle} onLogout={handleLogout} />
 
         {/* Filters */}
-        <section className="mb-5 flex flex-col sm:flex-row sm:items-end gap-4">
-          <div className="bg-white/70 dark:bg-gray-800/60 backdrop-blur rounded-xl shadow-sm border border-gray-200/70 dark:border-gray-700/60 p-4 w-full sm:w-auto">
-            <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 dark:text-gray-400 mb-2">
+        <section className="mb-6 flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="bg-midnight-800/70 backdrop-blur-xl rounded-2xl shadow-inner-soft ring-1 ring-white/10 p-5 w-full sm:w-auto border border-white/5">
+            <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-400 mb-2">
               {strings.dateRange}
             </div>
             <DateRangePicker
@@ -83,31 +83,31 @@ export const Dashboard = ({
         </section>
 
         {/* Main layout (mobile: stacked, desktop: side-by-side) */}
-        <div className="flex flex-col xl:flex-row gap-6 items-stretch">
+        <div className="flex flex-col xl:flex-row gap-8 items-stretch">
           <div className="xl:w-72">
-            <div className="h-full bg-white/70 dark:bg-gray-800/60 backdrop-blur border border-gray-200/70 dark:border-gray-700/60 shadow-sm rounded-2xl">
+            <div className="h-full bg-midnight-800/70 backdrop-blur-xl ring-1 ring-white/10 shadow-inner-soft rounded-2xl">
               <SidePanel
                 devices={devices}
                 selectedIds={selectedDeviceIds}
                 onSelectSingle={selectSingle}
                 onToggleMulti={toggleMulti}
-                className="bg-transparent border-0 w-full max-h-[unset]"
+                className="bg-transparent border-0 w-full max-h-[unset] text-gray-200"
               />
             </div>
           </div>
           <main className="flex-1 min-w-0">
-            <div className="h-full bg-white/70 dark:bg-gray-800/60 backdrop-blur border border-gray-200/70 dark:border-gray-700/60 shadow-sm rounded-2xl p-4 lg:p-6">
+            <div className="h-full bg-midnight-800/70 backdrop-blur-xl ring-1 ring-white/10 shadow-inner-soft rounded-2xl p-5 lg:p-7">
               {selectedDeviceIds.length > 0 ? (
                 <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                    <h2 className="text-lg font-semibold tracking-tight">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <h2 className="text-xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan">
                       {strings.temperatureHistory}
                     </h2>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 flex gap-2 flex-wrap">
+                    <div className="text-xs text-gray-400 flex gap-2 flex-wrap">
                       {selectedDeviceIds.map((id) => (
                         <span
                           key={id}
-                          className="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 text-[11px] font-medium"
+                          className="px-2 py-0.5 rounded-full bg-midnight-700/80 text-gray-200 border border-white/10 text-[11px] font-medium shadow-glow-purple/20"
                         >
                           {id}
                         </span>
@@ -124,8 +124,8 @@ export const Dashboard = ({
                   />
                 </div>
               ) : (
-                <div className="h-full min-h-[18rem] grid place-items-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl">
-                  <p className="text-gray-500 dark:text-gray-400 text-center px-6 text-sm">
+                <div className="h-full min-h-[18rem] grid place-items-center border-2 border-dashed border-white/10 rounded-xl">
+                  <p className="text-gray-400 text-center px-6 text-sm">
                     {strings.selectDeviceHelp}
                   </p>
                 </div>

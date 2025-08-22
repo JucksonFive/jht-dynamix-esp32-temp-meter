@@ -47,10 +47,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
               <li key={d.id}>
                 <div
                   className={[
-                    "flex items-center justify-between rounded-md border px-2 py-1",
+                    "flex items-center justify-between rounded-lg px-2.5 py-2 transition-colors group",
                     isActive
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-gray-200 bg-white",
+                      ? "bg-gradient-to-r from-neon-purple/25 via-neon-pink/25 to-neon-cyan/25 border border-neon-purple/40 shadow-glow-purple"
+                      : "bg-white/5 border border-white/10 hover:border-neon-purple/40 hover:bg-white/10",
                   ].join(" ")}
                 >
                   <DeviceSelectButton
@@ -66,7 +66,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   >
                     <input
                       type="checkbox"
-                      className="h-4 w-4 accent-blue-600"
+                      className="h-4 w-4 accent-neon-purple focus:ring-neon-purple/50"
                       checked={isActive}
                       onChange={() => onToggleMulti(d.id)}
                     />
