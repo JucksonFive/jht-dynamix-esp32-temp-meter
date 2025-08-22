@@ -73,15 +73,16 @@ export const Dashboard = ({
         />
       </div>
 
-      {/* Main layout */}
-      <div className="flex gap-6">
+      {/* Main layout (mobile: stacked, desktop: side-by-side) */}
+      <div className="flex flex-col lg:flex-row gap-6">
         <SidePanel
           devices={devices}
           selectedIds={selectedDeviceIds}
           onSelectSingle={selectSingle}
           onToggleMulti={toggleMulti}
+          className="w-full lg:w-72 h-auto lg:h-[calc(100vh-5rem)]"
         />
-        <main className="flex-1">
+        <main className="flex-1 min-w-0">
           {selectedDeviceIds.length > 0 ? (
             <TemperatureChart
               data={selectedData.map((d) => ({
@@ -92,8 +93,10 @@ export const Dashboard = ({
               range={range}
             />
           ) : (
-            <div className="h-full grid place-items-center">
-              <p className="text-gray-500">{strings.selectDeviceHelp}</p>
+            <div className="h-full min-h-[16rem] grid place-items-center border border-dashed rounded-lg">
+              <p className="text-gray-500 text-center px-4">
+                {strings.selectDeviceHelp}
+              </p>
             </div>
           )}
         </main>

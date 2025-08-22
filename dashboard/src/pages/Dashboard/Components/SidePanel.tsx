@@ -26,7 +26,10 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   return (
     <aside
       className={[
-        "w-72 shrink-0 border-r border-gray-200 bg-gray-50 h-[calc(100vh-5rem)] overflow-y-auto rounded-lg",
+        // Mobile: full width card; Desktop: fixed width panel with full-height scroll
+        "bg-gray-50 rounded-lg border border-gray-200 lg:border-r lg:rounded-lg",
+        "w-full lg:w-72 shrink-0",
+        "max-h-[22rem] lg:max-h-none overflow-y-auto",
         className,
       ].join(" ")}
     >
