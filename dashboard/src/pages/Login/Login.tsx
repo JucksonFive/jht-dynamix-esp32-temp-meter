@@ -2,6 +2,7 @@ import { useState } from "react";
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
 import { Logo } from "./Components/Logo";
 import { LoadingSpinner } from "./Components/LoadingSpinner";
+import { Button } from "../../ui/Button";
 
 export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
   const [email, setEmail] = useState("");
@@ -59,11 +60,13 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button
-          className={`bg-black text-white py-2 rounded mb-4 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed`}
+        <Button
+          intent="primary"
+          size="md"
           onClick={handleAuth}
           disabled={loading || !email || !password}
           aria-busy={loading}
+          className="w-full mb-4 gap-2"
         >
           {loading ? (
             <>
@@ -78,17 +81,18 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
           ) : (
             <span>{mode === "signin" ? "Sign In" : "Sign Up"}</span>
           )}
-        </button>
+        </Button>
         {error && (
           <div className="text-red-600 text-sm mb-2 text-center">{error}</div>
         )}
 
-        <button
-          className="text-sm text-blue-600 underline"
+        <Button
+          intent="link"
+          size="sm"
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
         >
           {mode === "signin" ? "Create an account" : "Already have an account?"}
-        </button>
+        </Button>
       </div>
 
       <div className="hidden md:flex w-full md:w-1/2 bg-black text-white items-center justify-center p-8">
