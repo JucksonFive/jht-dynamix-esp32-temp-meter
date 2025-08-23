@@ -1,4 +1,3 @@
-// App.tsx
 import { getCurrentUser, signOut } from "aws-amplify/auth";
 import { useEffect, useMemo, useState } from "react";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
