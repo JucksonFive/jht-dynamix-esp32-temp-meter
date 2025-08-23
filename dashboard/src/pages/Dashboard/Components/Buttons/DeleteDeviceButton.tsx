@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { deleteUserDevice } from "../../../../services/api";
 import { FiTrash2 } from "react-icons/fi";
 import strings from "../../../../locale/strings";
+import ConfirmDialog from "../../../../ui/Elements/Modal/ConfirmDialog";
 
 interface DeleteDeviceButtonProps {
   deviceId: string;
@@ -16,16 +17,10 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDelete = async () => {
     if (loading) return;
-    if (
-      !confirm(
-        `Poistetaanko laite ${deviceId}? Kaikki sen mittaukset poistetaan pysyvästi.`
-      )
-    )
-      return;
     try {
       setError(null);
       setLoading(true);
@@ -36,6 +31,7 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
       setError(err.message || "Delete failed");
     } finally {
       setLoading(false);
+      setOpen(false);
     }
   };
 
@@ -43,7 +39,10 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
     <div className="flex items-center">
       <button
         type="button"
-        onClick={handleDelete}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(true);
+        }}
         title={loading ? strings.deleteAction : strings.deleteDevice}
         className={`p-1 rounded-md transition-colors text-red-400 hover:text-red-200 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40 ${
           loading ? "opacity-60 cursor-not-allowed" : ""
@@ -57,6 +56,18 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
           !
         </span>
       )}
+      <ConfirmDialog
+        open={open}
+        title={strings.deleteDevice}
+        description={strings.deleteAction}
+        confirmLabel={strings.confirm}
+        cancelLabel={strings.cancel}
+        destructive
+        icon={<FiTrash2 />}
+        loading={loading}
+        onCancel={() => setOpen(false)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

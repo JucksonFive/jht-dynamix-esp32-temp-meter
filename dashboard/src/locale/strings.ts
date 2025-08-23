@@ -27,6 +27,8 @@ export interface LocaleStrings {
   heroTagline: string; // Landing hero descriptive text
   deleteDevice: string;
   deleteAction: string;
+  confirm: string;
+  cancel: string;
 }
 
 // Default language bundle.
@@ -61,6 +63,8 @@ export const strings: LocaleStrings = {
   deleteDevice: "Delete Device",
   deleteAction:
     "Are you sure you want to delete this device? This action cannot be undone.",
+  confirm: "Confirm",
+  cancel: "Cancel",
 };
 
 export default strings;
