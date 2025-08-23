@@ -15,6 +15,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly fetchFromDynamoFn: NodejsFunction;
   public readonly fetchUserTemperaturesFn: NodejsFunction;
   public readonly fetchUserTemperatureBoundsFn: NodejsFunction;
+  public readonly deleteUserDeviceFn: NodejsFunction;
   public readonly authProtectedFn: lambda.Function;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
@@ -100,6 +101,26 @@ export class LambdaStack extends cdk.Stack {
       }
     );
     temperaturesTable.grantReadData(this.fetchUserTemperatureBoundsFn);
+
+    // Lambda function for deleting a user's device
+    this.deleteUserDeviceFn = new NodejsFunction(
+      this,
+      "DeleteUserDeviceFunction",
+      {
+        functionName: "DeleteUserDeviceFunction",
+        entry: path.join(
+          __dirname,
+          "../../lambdas/deleteDevice/deleteDevice.ts"
+        ),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        environment: {
+          TABLE_NAME: temperaturesTable.tableName,
+          GSI_NAME: "userId-timestamp-index",
+        },
+      }
+    );
+    temperaturesTable.grantWriteData(this.deleteUserDeviceFn);
 
     // Auth protected Lambda function
     this.authProtectedFn = new NodejsFunction(this, "AuthProtectedLambda", {

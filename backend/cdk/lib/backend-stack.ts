@@ -12,6 +12,7 @@ export interface BackendStackProps extends cdk.StackProps {
   fetchFromDynamoFn: NodejsFunction;
   fetchUserTemperaturesFn: NodejsFunction;
   fetchUserTemperatureBoundsFn: NodejsFunction;
+  deleteUserDeviceFn: NodejsFunction;
   userPool: cognito.IUserPool;
 }
 
@@ -23,6 +24,7 @@ export class BackendStack extends cdk.Stack {
       fetchFromDynamoFn,
       fetchUserTemperaturesFn,
       fetchUserTemperatureBoundsFn,
+      deleteUserDeviceFn,
       userPool,
     } = props;
 
@@ -115,6 +117,18 @@ export class BackendStack extends cdk.Stack {
       .addMethod(
         "GET",
         new apigateway.LambdaIntegration(fetchUserTemperatureBoundsFn),
+        {
+          authorizer,
+          authorizationType: apigateway.AuthorizationType.COGNITO,
+          apiKeyRequired: false,
+        }
+      );
+
+    api.root
+      .addResource("delete-user-device")
+      .addMethod(
+        "DELETE",
+        new apigateway.LambdaIntegration(deleteUserDeviceFn),
         {
           authorizer,
           authorizationType: apigateway.AuthorizationType.COGNITO,
