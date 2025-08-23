@@ -3,6 +3,7 @@ import strings from "../../../locale/strings";
 import { InfoButton } from "./Buttons/InfoButton";
 import { DeviceSelectButton } from "./Buttons/DeviceSelectButton";
 import DeleteDeviceButton from "./Buttons/DeleteDeviceButton";
+import SelectAllDevicesButton from "./Buttons/SelectAllDevicesButton";
 
 export interface SidePanelDevice {
   id: string;
@@ -40,6 +41,28 @@ export const SidePanel: React.FC<SidePanelProps> = ({
         <div className="flex items-center gap-2 mb-3">
           <h2 className="text-lg font-semibold">{title}</h2>
           <InfoButton />
+        </div>
+        <div className="mb-3">
+          <SelectAllDevicesButton
+            total={devices.length}
+            selected={selectedIds.length}
+            onSelectAll={() => {
+              // select all devices that are not yet selected by toggling them on
+              devices.forEach((d) => {
+                if (!selectedIds.includes(d.id)) {
+                  onToggleMulti(d.id);
+                }
+              });
+            }}
+            onUnselectAll={() => {
+              // unselect all currently selected devices by toggling them off
+              devices.forEach((d) => {
+                if (selectedIds.includes(d.id)) {
+                  onToggleMulti(d.id);
+                }
+              });
+            }}
+          />
         </div>
         <ul className="space-y-2">
           {devices.map((d) => {

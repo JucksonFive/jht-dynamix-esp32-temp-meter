@@ -29,6 +29,9 @@ export interface LocaleStrings {
   deleteAction: string;
   confirm: string;
   cancel: string;
+  selectAll: string;
+  unselectAll: string;
+  tooltipSelectAll: string;
 }
 
 // Default language bundle.
@@ -65,6 +68,9 @@ export const strings: LocaleStrings = {
     "Are you sure you want to delete this device? This action cannot be undone.",
   confirm: "Confirm",
   cancel: "Cancel",
+  selectAll: "Select All",
+  unselectAll: "Unselect All",
+  tooltipSelectAll: "Toggle select / unselect all devices",
 };
 
 export default strings;
