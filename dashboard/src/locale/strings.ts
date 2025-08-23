@@ -24,6 +24,7 @@ export interface LocaleStrings {
   dateRange: string;
   temperatureHistory: string;
   loading: string;
+  heroTagline: string; // Landing hero descriptive text
 }
 
 // Default language bundle.
@@ -53,6 +54,8 @@ export const strings: LocaleStrings = {
   dateRange: "Date Range",
   temperatureHistory: "Temperature History",
   loading: "Loading...",
+  heroTagline:
+    "JT-DYNAMIX IoT telemetry platform — secure smart data collection with real-time analytics.",
 };
 
 export default strings;

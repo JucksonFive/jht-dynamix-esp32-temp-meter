@@ -86,8 +86,7 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
           <div className="relative flex flex-col items-center gap-8">
             <Logo size={280} />
             <p className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">
-              JT-DYNAMIX IoT telemetry platform &mdash; secure temperature data
-              collection with real-time analytics.
+              {strings.heroTagline}
             </p>
           </div>
         </div>
