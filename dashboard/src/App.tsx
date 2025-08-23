@@ -3,10 +3,13 @@ import { getCurrentUser, signOut } from "aws-amplify/auth";
 import { useEffect, useMemo, useState } from "react";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Login } from "./pages/Login/Login";
-import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
+import {
+  clampRange,
+  toLocalOffSetIso as toLocalOffsetIso,
+} from "./utils/utils";
 import { useReadingBounds } from "./hooks/useReadingBounds";
 import { useReadings } from "./hooks/useReadings";
-import { clampRange, type Range } from "./utils/types";
+import { type Range } from "./utils/types";
 
 const THREE_WEEKS = 21 * 864e5;
 
