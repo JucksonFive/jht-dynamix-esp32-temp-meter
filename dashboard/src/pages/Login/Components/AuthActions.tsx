@@ -1,8 +1,8 @@
 import React from "react";
 import { Button } from "../../../ui/Elements/Button/Button";
-import { AuthButtonContent } from "./AuthButtonContent";
+import { AuthButtonContent } from "./Buttons/AuthButtonContent";
 import { AuthErrorMessage } from "./AuthErrorMessage";
-import { ToggleAuthModeButton } from "./ToggleAuthModeButton";
+import { ToggleAuthModeButton } from "./Buttons/ToggleAuthModeButton";
 
 export interface AuthActionsProps {
   mode: "signin" | "signup";

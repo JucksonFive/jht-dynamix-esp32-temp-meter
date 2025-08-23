@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "../../../ui/Elements/Button/Button";
-import strings from "../../../locale/strings";
+import { Button } from "../../../../ui/Elements/Button/Button";
+import strings from "../../../../locale/strings";
 
 export interface ToggleAuthModeButtonProps {
   mode: "signin" | "signup";

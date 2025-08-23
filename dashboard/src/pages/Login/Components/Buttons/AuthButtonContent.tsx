@@ -1,6 +1,6 @@
 import React from "react";
-import { LoadingSpinner } from "./LoadingSpinner";
-import strings from "../../../locale/strings";
+import { LoadingSpinner } from "../LoadingSpinner";
+import strings from "../../../../locale/strings";
 
 export interface AuthButtonContentProps {
   mode: "signin" | "signup";
