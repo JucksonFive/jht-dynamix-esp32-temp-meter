@@ -1,5 +1,5 @@
 import React from "react";
-import strings from "../../../locale/strings";
+import strings from "../../../../locale/strings";
 
 interface InfoButtonProps {
   ariaLabel?: string;

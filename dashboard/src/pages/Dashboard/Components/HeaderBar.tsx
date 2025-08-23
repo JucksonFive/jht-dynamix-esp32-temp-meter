@@ -1,6 +1,6 @@
 import React from "react";
 import strings from "../../../locale/strings";
-import LogoutButton from "./LogoutButton";
+import LogoutButton from "./Buttons/LogoutButton";
 
 interface HeaderBarProps {
   title: string;

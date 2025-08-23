@@ -1,6 +1,6 @@
 import React from "react";
 import strings from "../../../locale/strings";
-import { InfoButton } from "./InfoButton";
+import { InfoButton } from "./Buttons/InfoButton";
 import { DeviceSelectButton } from "./DeviceSelectButton";
 
 export interface SidePanelDevice {
