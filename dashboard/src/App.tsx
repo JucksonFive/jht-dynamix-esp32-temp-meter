@@ -10,6 +10,7 @@ import {
 import { useReadingBounds } from "./hooks/useReadingBounds";
 import { useReadings } from "./hooks/useReadings";
 import { type Range } from "./utils/types";
+import strings from "./locale/strings";
 
 const THREE_WEEKS = 21 * 864e5;
 
@@ -75,7 +76,7 @@ function App() {
   if (bootLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Loading...
+        {strings.loading}
       </div>
     );
   }

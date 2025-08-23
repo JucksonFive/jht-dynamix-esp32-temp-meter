@@ -23,6 +23,7 @@ export interface LocaleStrings {
   authAlreadyAccount: string;
   dateRange: string;
   temperatureHistory: string;
+  loading: string;
 }
 
 // Default language bundle.
@@ -51,6 +52,7 @@ export const strings: LocaleStrings = {
   authAlreadyAccount: "Already have an account?",
   dateRange: "Date Range",
   temperatureHistory: "Temperature History",
+  loading: "Loading...",
 };
 
 export default strings;
