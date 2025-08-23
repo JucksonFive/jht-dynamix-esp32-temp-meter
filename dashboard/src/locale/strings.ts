@@ -25,6 +25,8 @@ export interface LocaleStrings {
   temperatureHistory: string;
   loading: string;
   heroTagline: string; // Landing hero descriptive text
+  deleteDevice: string;
+  deleteAction: string;
 }
 
 // Default language bundle.
@@ -56,6 +58,9 @@ export const strings: LocaleStrings = {
   loading: "Loading...",
   heroTagline:
     "JT-DYNAMIX IoT telemetry platform — secure smart data collection with real-time analytics.",
+  deleteDevice: "Delete Device",
+  deleteAction:
+    "Are you sure you want to delete this device? This action cannot be undone.",
 };
 
 export default strings;

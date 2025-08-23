@@ -67,3 +67,19 @@ export async function fetchReadingBounds(): Promise<{
   if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
   return res.data;
 }
+
+// Delete a single user device (and its data server-side) by deviceId
+export async function deleteUserDevice(
+  deviceId: string
+): Promise<{ message: string }> {
+  const session = await fetchAuthSession();
+  const token =
+    session.tokens?.idToken?.toString() ??
+    session.tokens?.accessToken?.toString();
+  const res = await axios.delete(`${BASE_URL}/delete-user-device`, {
+    headers: { Authorization: `Bearer ${token}` },
+    params: { deviceId },
+  });
+  if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
+  return res.data;
+}
