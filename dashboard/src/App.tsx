@@ -13,6 +13,7 @@ import { type Range } from "./utils/types";
 import strings from "./locale/strings";
 
 const THREE_WEEKS = 21 * 864e5;
+const MINUTE = 60 * 1000;
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -65,7 +66,7 @@ function App() {
     loading: dataLoading,
     error: dataError,
   } = useReadings(user, clampedRange, {
-    intervalMs: 60000,
+    intervalMs: MINUTE,
   });
 
   const handleLogout = async () => {
