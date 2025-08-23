@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "../../../ui/Button";
+import { Button } from "../../../ui/Elements/Button/Button";
 import { AuthButtonContent } from "./AuthButtonContent";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 import { ToggleAuthModeButton } from "./ToggleAuthModeButton";

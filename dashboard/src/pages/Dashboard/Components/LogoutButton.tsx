@@ -1,6 +1,6 @@
 import React from "react";
 import strings from "../../../locale/strings";
-import { Button } from "../../../ui/Button";
+import { Button } from "../../../ui/Elements/Button/Button";
 
 interface LogoutButtonProps {
   onLogout: () => void;
