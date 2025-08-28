@@ -17,22 +17,15 @@ export class InfrastructureStack extends cdk.Stack {
       billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
-
-    // DynamoDB table for mapping devices to users
-    this.deviceUserTable = new dynamoDb.Table(this, "DeviceUserMapping", {
+    // DynamoDB table for storing Devices
+    this.deviceUserTable = new dynamoDb.Table(this, "DevicesTable", {
       tableName: "Devices",
-      partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
+      partitionKey: { name: "userId", type: dynamoDb.AttributeType.STRING },
+      sortKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
       billingMode: dynamoDb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
-
-    this.temperaturesTable.addGlobalSecondaryIndex({
-      indexName: "UserTimeIndex",
-      partitionKey: { name: "userId", type: dynamoDb.AttributeType.STRING },
-      sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
-      projectionType: dynamoDb.ProjectionType.KEYS_ONLY,
-    });
-
+    // Global secondary index for querying readings by userId and timestamp
     this.temperaturesTable.addGlobalSecondaryIndex({
       indexName: "userId-timestamp-index",
       partitionKey: { name: "userId", type: dynamoDb.AttributeType.STRING },

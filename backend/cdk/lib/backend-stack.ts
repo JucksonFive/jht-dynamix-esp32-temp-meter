@@ -11,6 +11,7 @@ export interface BackendStackProps extends cdk.StackProps {
   saveToDynamoFn: NodejsFunction;
   fetchFromDynamoFn: NodejsFunction;
   fetchUserTemperaturesFn: NodejsFunction;
+  registerDeviceFn: NodejsFunction;
   fetchUserTemperatureBoundsFn: NodejsFunction;
   deleteUserDeviceFn: NodejsFunction;
   userPool: cognito.IUserPool;
@@ -24,6 +25,7 @@ export class BackendStack extends cdk.Stack {
       fetchFromDynamoFn,
       fetchUserTemperaturesFn,
       fetchUserTemperatureBoundsFn,
+      registerDeviceFn,
       deleteUserDeviceFn,
       userPool,
     } = props;
@@ -57,7 +59,7 @@ export class BackendStack extends cdk.Stack {
       description: "This service serves temperature data.",
       defaultCorsPreflightOptions: {
         allowOrigins: ["http://localhost:5173", "http://127.0.0.1:5173"], // kehityksessä
-        allowMethods: ["GET", "OPTIONS"],
+        allowMethods: ["GET", "OPTIONS", "DELETE"],
         allowHeaders: [
           "Content-Type",
           "Authorization",
@@ -71,19 +73,20 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "method.request.header.Origin",
+        // Static values must be wrapped in single quotes per API Gateway docs
+        "Access-Control-Allow-Origin": "'*'",
         "Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
-        "Access-Control-Allow-Methods": "'GET,OPTIONS'",
+        "Access-Control-Allow-Methods": "'GET,OPTIONS,DELETE'",
       },
     });
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "method.request.header.Origin",
+        "Access-Control-Allow-Origin": "'*'",
         "Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
-        "Access-Control-Allow-Methods": "'GET,OPTIONS'",
+        "Access-Control-Allow-Methods": "'GET,OPTIONS,DELETE'",
       },
     });
 
@@ -123,6 +126,14 @@ export class BackendStack extends cdk.Stack {
           apiKeyRequired: false,
         }
       );
+
+    api.root
+      .addResource("devices")
+      .addMethod("POST", new apigateway.LambdaIntegration(registerDeviceFn), {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+        apiKeyRequired: false,
+      });
 
     api.root
       .addResource("delete-user-device")

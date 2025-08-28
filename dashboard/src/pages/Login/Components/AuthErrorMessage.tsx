@@ -1,4 +1,5 @@
 import React from "react";
+import strings from "../../../locale/strings";
 
 export interface AuthErrorMessageProps {
   error?: string | null;
@@ -12,7 +13,7 @@ export const AuthErrorMessage: React.FC<AuthErrorMessageProps> = ({
   if (!error) return null;
   return (
     <div className={["text-red-600 text-sm text-center", className].join(" ")}>
-      {error}
+      <p>{strings.authError}</p>
     </div>
   );
 };

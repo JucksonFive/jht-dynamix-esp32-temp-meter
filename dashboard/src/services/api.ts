@@ -2,7 +2,37 @@ import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { ReadingsResponse } from "./types";
 
-const BASE_URL = "https://feqbwshm63.execute-api.eu-north-1.amazonaws.com/prod";
+const BASE_URL = "https://xgacqgcwb9.execute-api.eu-north-1.amazonaws.com/prod";
+
+// Yleinen autentikoitu API-pyyntö
+async function apiRequest<T>(opts: {
+  method?: "GET" | "POST" | "DELETE" | "PUT";
+  path: string; // esim. "/user-readings"
+  params?: Record<string, any>;
+  data?: any;
+}): Promise<T> {
+  const session = await fetchAuthSession();
+  const token =
+    session.tokens?.idToken?.toString() ??
+    session.tokens?.accessToken?.toString();
+  if (!token) throw new Error("Auth token not available");
+
+  try {
+    const res = await axios.request<T>({
+      method: opts.method ?? "GET",
+      url: `${BASE_URL}${opts.path}`,
+      params: opts.params,
+      data: opts.data,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (err: any) {
+    // Voit lisätä hienostuneemman virheenkäsittelyn myöhemmin
+    throw err;
+  }
+}
 
 export async function fetchUserReadings(params?: {
   from?: string;
@@ -11,11 +41,6 @@ export async function fetchUserReadings(params?: {
   limit?: number;
   nextKey?: string | null;
 }): Promise<ReadingsResponse> {
-  const session = await fetchAuthSession();
-  const token =
-    session.tokens?.idToken?.toString() ??
-    session.tokens?.accessToken?.toString();
-
   const query: Record<string, string> = {};
   if (params?.from) query.from = params.from;
   if (params?.to) query.to = params.to;
@@ -23,11 +48,10 @@ export async function fetchUserReadings(params?: {
   if (params?.limit) query.limit = String(params.limit);
   if (params?.nextKey) query.nextKey = params.nextKey;
 
-  const res = await axios.get<ReadingsResponse>(`${BASE_URL}/user-readings`, {
-    headers: { Authorization: `Bearer ${token}` },
+  return apiRequest<ReadingsResponse>({
+    path: "/user-readings",
     params: query,
   });
-  return res.data;
 }
 
 export async function fetchAllUserReadings(opts?: {
@@ -56,30 +80,18 @@ export async function fetchReadingBounds(): Promise<{
   min: string | null;
   max: string | null;
 }> {
-  const session = await fetchAuthSession();
-  const token =
-    session.tokens?.idToken?.toString() ??
-    session.tokens?.accessToken?.toString();
-
-  const res = await axios.get(`${BASE_URL}/bounds`, {
-    headers: { Authorization: `Bearer ${token}` },
+  return apiRequest<{ min: string | null; max: string | null }>({
+    path: "/bounds",
   });
-  if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
-  return res.data;
 }
 
 // Delete a single user device (and its data server-side) by deviceId
 export async function deleteUserDevice(
   deviceId: string
 ): Promise<{ message: string }> {
-  const session = await fetchAuthSession();
-  const token =
-    session.tokens?.idToken?.toString() ??
-    session.tokens?.accessToken?.toString();
-  const res = await axios.delete(`${BASE_URL}/delete-user-device`, {
-    headers: { Authorization: `Bearer ${token}` },
+  return apiRequest<{ message: string }>({
+    method: "DELETE",
+    path: "/delete-user-device",
     params: { deviceId },
   });
-  if (res.status !== 200) throw new Error(`HTTP ${res.status}`);
-  return res.data;
 }

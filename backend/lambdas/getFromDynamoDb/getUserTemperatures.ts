@@ -1,20 +1,15 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import {
-  APIGatewayEvent,
-  APIGatewayProxyEventV2WithJWTAuthorizer,
-  APIGatewayProxyResult,
-  APIGatewayProxyResultV2,
-} from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { getUserId, makeResponse } from "../utils/utils";
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE_NAME = process.env.TABLE_NAME!;
-const GSI_NAME = process.env.GSI_NAME!; // userId-timestamp-index
+const GSI_NAME = process.env.GSI_NAME!;
 
 export const handler = async (
-  event: APIGatewayProxyEventV2WithJWTAuthorizer
-): Promise<APIGatewayProxyResultV2> => {
+  event: APIGatewayEvent
+): Promise<APIGatewayProxyResult> => {
   const userId = getUserId(event);
   const qs = event.queryStringParameters ?? {};
   const from = qs.from;

@@ -17,6 +17,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly fetchUserTemperatureBoundsFn: NodejsFunction;
   public readonly deleteUserDeviceFn: NodejsFunction;
   public readonly authProtectedFn: lambda.Function;
+  public readonly registerDeviceFn: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
@@ -101,6 +102,19 @@ export class LambdaStack extends cdk.Stack {
       }
     );
     temperaturesTable.grantReadData(this.fetchUserTemperatureBoundsFn);
+
+    // Lambda function for registering a device
+    this.registerDeviceFn = new NodejsFunction(this, "RegisterDeviceFn", {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      entry: path.join(
+        __dirname,
+        "../../lambdas/registerDevice/registerDevice.ts"
+      ),
+      environment: {
+        DEVICES_TABLE: deviceUserTable.tableName,
+      },
+    });
+    deviceUserTable.grantWriteData(this.registerDeviceFn);
 
     // Lambda function for deleting a user's device
     this.deleteUserDeviceFn = new NodejsFunction(
