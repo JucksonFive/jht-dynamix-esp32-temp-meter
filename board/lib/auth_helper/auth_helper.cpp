@@ -1,3 +1,7 @@
+// Auth helper implementation
+// Breaks the monolithic authenticateUser flow into smaller focused helpers.
+// Public API remains: bool AuthHelper::authenticateUser(const String&, const String&)
+
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include "cert_helper.h"
@@ -5,80 +9,125 @@
 #include <LittleFS.h>
 #include <storage_helper.h>
 
-String authUrl;
+String authUrl; // cached auth URL from config
+
+namespace
+{
+    constexpr uint32_t CLIENT_TIMEOUT_MS = 10000; // TLS socket timeout
+    constexpr uint32_t HTTP_TIMEOUT_MS = 15000;   // HTTP request timeout
+    constexpr char USER_FILE_PATH[] = "/user.json";
+    constexpr char CONFIG_PATH[] = "/config/config.json";
+    constexpr char CONFIG_KEY_AUTH_URL[] = "auth_url";
+
+    bool ensureWifiConnected()
+    {
+        if (WiFi.status() != WL_CONNECTED)
+        {
+            Serial.println(F("[Auth] ERROR: WiFi not connected"));
+            return false;
+        }
+        Serial.printf("[Auth] WiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
+        return true;
+    }
+
+    bool beginHttps(HTTPClient &https, WiFiClientSecure &client, String &outAuthUrl)
+    {
+        Serial.println(F("[Auth] Beginning HTTPS connection..."));
+        outAuthUrl = StorageHelper::getConfigValue(CONFIG_PATH, CONFIG_KEY_AUTH_URL);
+        if (outAuthUrl.isEmpty())
+        {
+            Serial.println(F("[Auth] ERROR: auth_url missing in config"));
+            return false;
+        }
+        if (!https.begin(client, outAuthUrl))
+        {
+            Serial.println(F("[Auth] ERROR: Failed to begin HTTPS connection"));
+            return false;
+        }
+        Serial.println(F("[Auth] HTTPS connection established"));
+        return true;
+    }
+
+    String buildPayload(const String &username, const String &password)
+    {
+        // Avoid dynamic String concatenation in multiple steps to reduce fragmentation.
+        String payload;
+        payload.reserve(username.length() + password.length() + 32);
+        payload = F("{\"username\":\"");
+        payload += username;
+        payload += F("\",\"password\":\"");
+        payload += password;
+        payload += F("\"}");
+        return payload;
+    }
+
+    bool saveUserResponse(const String &response)
+    {
+        File file = LittleFS.open(USER_FILE_PATH, "w");
+        if (!file)
+        {
+            Serial.printf("[Auth] ERROR: Failed to open %s for writing\n", USER_FILE_PATH);
+            return false;
+        }
+        file.print(response);
+        file.close();
+        Serial.println(F("[Auth] User data saved successfully"));
+        return true;
+    }
+
+    void logHttpError(HTTPClient &https, int code)
+    {
+        if (code > 0)
+        {
+            String response = https.getString();
+            Serial.printf("[Auth] Error response: %s\n", response.c_str());
+        }
+        else
+        {
+            Serial.printf("[Auth] HTTP error: %s\n", https.errorToString(code).c_str());
+        }
+    }
+}
 
 bool AuthHelper::authenticateUser(const String &username, const String &password)
 {
     Serial.printf("[Auth] Authenticating user '%s'\n", username.c_str());
     Serial.printf("[Auth] Password: '%s'\n", password.c_str());
 
-    // Check WiFi connection first
-    if (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.println("[Auth] ERROR: WiFi not connected");
+    if (!ensureWifiConnected())
         return false;
-    }
-    Serial.printf("[Auth] WiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
 
     WiFiClientSecure client;
-    Serial.println("[Auth] Setting up secure client...");
+    Serial.println(F("[Auth] Setting up secure client..."));
+    client.setTimeout(CLIENT_TIMEOUT_MS);
 
-    // Set timeouts
-    client.setTimeout(10000); // 10 seconds timeout
-
-    // Attach certificates
-    Serial.println("[Auth] Attaching root CA...");
     CertHelper::attachRootCA(client);
-    Serial.println("[Auth] Root CA attached");
 
     HTTPClient https;
-    Serial.println("[Auth] Beginning HTTPS connection...");
-    authUrl = StorageHelper::getConfigValue("/config/config.json", "auth_url");
-    if (!https.begin(client, authUrl))
-    {
-        Serial.println("[Auth] ERROR: Failed to begin HTTPS connection");
+    if (!beginHttps(https, client, authUrl))
         return false;
-    }
-    Serial.println("[Auth] HTTPS connection established");
 
-    https.addHeader("Content-Type", "application/json");
-    https.setTimeout(15000); // 15 seconds timeout for HTTP request
+    https.addHeader(F("Content-Type"), F("application/json"));
+    https.setTimeout(HTTP_TIMEOUT_MS);
 
-    String payload = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
+    const String payload = buildPayload(username, password);
     Serial.printf("[Auth] Sending POST request with payload: %s\n", payload.c_str());
 
-    int httpCode = https.POST(payload);
+    const int httpCode = https.POST(payload);
     Serial.printf("[Auth] HTTP POST response code: %d\n", httpCode);
 
+    bool success = false;
     if (httpCode == 200)
     {
-        String response = https.getString();
+        const String response = https.getString();
         Serial.printf("[Auth] Response: %s\n", response.c_str());
-
-        File file = LittleFS.open("/user.json", "w");
-        if (file)
-        {
-            file.print(response);
-            file.close();
-            Serial.println("[Auth] User data saved successfully");
-            https.end();
-            return true;
-        }
-        else
-        {
-            Serial.println("[Auth] ERROR: Failed to open /user.json for writing");
-        }
-    }
-    else if (httpCode > 0)
-    {
-        String response = https.getString();
-        Serial.printf("[Auth] Error response: %s\n", response.c_str());
+        success = saveUserResponse(response);
     }
     else
     {
-        Serial.printf("[Auth] HTTP error: %s\n", https.errorToString(httpCode).c_str());
+        logHttpError(https, httpCode);
     }
 
-    https.end(); // Clean up
-    return false;
+    https.end();
+    return success;
 }
