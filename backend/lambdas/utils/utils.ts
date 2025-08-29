@@ -1,8 +1,4 @@
-import {
-  APIGatewayProxyEventV2,
-  APIGatewayEvent,
-  APIGatewayProxyEvent,
-} from "aws-lambda";
+import { APIGatewayProxyEvent } from "aws-lambda";
 
 const ALLOWED_ORIGINS = new Set([
   "http://localhost:5173",

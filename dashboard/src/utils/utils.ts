@@ -42,6 +42,7 @@ export function spanMs(r: Range) {
 }
 
 export function pickBucketMs(ms: number) {
+  if (ms <= 3600_000) return 60_000; // 1 min for intervals <= 1h
   if (ms <= 12 * 3600_000) return 5 * 60_000; // 5 min
   if (ms <= 3 * 86400_000) return 15 * 60_000; // 15 min
   if (ms <= 14 * 86400_000) return 60 * 60_000; // 1 hour

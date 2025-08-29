@@ -1,15 +1,17 @@
 import { isAfter, isBefore } from "date-fns";
 import React, { useMemo } from "react";
+import strings from "../../locale/strings";
+import { Device } from "../../services/types";
 import { Bounds, DeviceData, Range } from "../../utils/types";
 import { fmtYMD, parseYMD } from "../../utils/utils";
 import { DateRangePicker } from "./Components/DateRangePicker";
+import { HeaderBar } from "./Components/HeaderBar";
 import { SidePanel } from "./Components/SidePanel";
 import { TemperatureChart } from "./Components/TemperatureChart";
-import { HeaderBar } from "./Components/HeaderBar";
-import strings from "../../locale/strings";
 
 interface DashboardProps {
   data: DeviceData[];
+  devices: Device[];
   bounds: Bounds | null;
   range: Range;
   onRangeChange: (r: Range) => void;
@@ -17,27 +19,20 @@ interface DashboardProps {
   setSelectedDeviceIds: React.Dispatch<React.SetStateAction<string[]>>;
   handleLogout: () => void;
   loading: boolean;
+  onDeviceDeleted: (id: string) => void;
 }
 
 export const Dashboard = ({
   data,
+  devices,
   bounds,
   range,
   onRangeChange,
   selectedDeviceIds,
   setSelectedDeviceIds,
   handleLogout,
+  onDeviceDeleted,
 }: DashboardProps) => {
-  const lastSeenMap = new Map<string, string>();
-  for (const d of data) {
-    const prev = lastSeenMap.get(d.id);
-    if (!prev || prev < d.timestamp) lastSeenMap.set(d.id, d.timestamp);
-  }
-  const devices = Array.from(lastSeenMap, ([id, lastSeen]) => ({
-    id,
-    lastSeen,
-  }));
-
   const selectedData =
     selectedDeviceIds.length > 0
       ? data.filter((d) => selectedDeviceIds.includes(d.id))
@@ -85,13 +80,14 @@ export const Dashboard = ({
         {/* Main layout (mobile: stacked, desktop: side-by-side) */}
         <div className="flex flex-col xl:flex-row gap-8 items-stretch">
           <div className="xl:w-72">
-            <div className="h-full bg-midnight-800/70 backdrop-blur-xl ring-1 ring-white/10 shadow-inner-soft rounded-2xl">
+            <div className="h-full bg-midnight-800/70 backdrop-blur-xl shadow-inner-soft rounded-2xl">
               <SidePanel
                 devices={devices}
                 selectedIds={selectedDeviceIds}
                 onSelectSingle={selectSingle}
                 onToggleMulti={toggleMulti}
                 className="bg-transparent border-0 w-full max-h-[unset] text-gray-200"
+                onDeviceDeleted={onDeviceDeleted}
               />
             </div>
           </div>
