@@ -3,6 +3,9 @@
 #include "cert_helper.h"
 #include "auth_helper.h"
 #include <LittleFS.h>
+#include <storage_helper.h>
+
+String authUrl;
 
 bool AuthHelper::authenticateUser(const String &username, const String &password)
 {
@@ -30,8 +33,8 @@ bool AuthHelper::authenticateUser(const String &username, const String &password
 
     HTTPClient https;
     Serial.println("[Auth] Beginning HTTPS connection...");
-
-    if (!https.begin(client, "https://kk7xec5sb9.execute-api.eu-north-1.amazonaws.com/prod/auth/login"))
+    authUrl = StorageHelper::getConfigValue("/config/config.json", "auth_url");
+    if (!https.begin(client, authUrl))
     {
         Serial.println("[Auth] ERROR: Failed to begin HTTPS connection");
         return false;
