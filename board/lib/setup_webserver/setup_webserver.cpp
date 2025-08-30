@@ -8,6 +8,7 @@
 #include <time_helper.h>
 #include <wifi_scan_helper.h>
 #include <storage_helper.h>
+#include <device_helper.h>
 
 namespace
 {
@@ -96,7 +97,12 @@ void startSetupWebServer()
     request->send(500, "text/plain", "Failed to save device link");
     return;
   }
-  request->send(200, "text/plain", "Device linked successfully"); });
+
+  if (DeviceHelper::registerDevice(deviceId)) {
+    request->send(200, "text/plain", "Device linked successfully");
+  } else {
+    request->send(500, "text/plain", "Failed to link device");
+  } });
 
   server.on("/complete-setup", HTTP_POST, [](AsyncWebServerRequest *request)
             {
