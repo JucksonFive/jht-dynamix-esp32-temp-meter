@@ -50,6 +50,21 @@ bool StorageHelper::saveJsonValue(const char *path, const char *key, const Strin
     return true;
 }
 
+bool StorageHelper::saveUserResponse(const char *path, const String &response)
+{
+    File file = LittleFS.open(path, "w");
+    if (!file)
+    {
+        Serial.printf("[Auth] ERROR: Failed to open %s for writing\n", path);
+        return false;
+    }
+    Serial.printf("[Auth] Saving user data to %s\n", path);
+    file.print(response);
+    file.close();
+    Serial.println(F("[Auth] User data saved successfully"));
+    return true;
+}
+
 bool StorageHelper::buildPayload(char *out, size_t outSize,
                                  const String &deviceId,
                                  float temperature,

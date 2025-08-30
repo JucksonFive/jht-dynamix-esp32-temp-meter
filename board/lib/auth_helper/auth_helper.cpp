@@ -61,20 +61,6 @@ namespace
         return payload;
     }
 
-    bool saveUserResponse(const String &response)
-    {
-        File file = LittleFS.open(USER_FILE_PATH, "w");
-        if (!file)
-        {
-            Serial.printf("[Auth] ERROR: Failed to open %s for writing\n", USER_FILE_PATH);
-            return false;
-        }
-        file.print(response);
-        file.close();
-        Serial.println(F("[Auth] User data saved successfully"));
-        return true;
-    }
-
     void logHttpError(HTTPClient &https, int code)
     {
         if (code > 0)
@@ -121,7 +107,7 @@ bool AuthHelper::authenticateUser(const String &username, const String &password
     {
         const String response = https.getString();
         Serial.printf("[Auth] Response: %s\n", response.c_str());
-        success = saveUserResponse(response);
+        success = StorageHelper::saveUserResponse(USER_FILE_PATH, response);
     }
     else
     {
