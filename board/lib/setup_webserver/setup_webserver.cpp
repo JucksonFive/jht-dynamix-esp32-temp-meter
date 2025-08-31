@@ -98,14 +98,20 @@ void startSetupWebServer()
     return;
   }
 
-  if (DeviceHelper::registerDevice(deviceId)) {
-    request->send(200, "text/plain", "Device linked successfully");
-  } else {
-    request->send(500, "text/plain", "Failed to link device");
-  } });
+
+  request->send(200, "text/plain", "Device linked successfully"); });
 
   server.on("/complete-setup", HTTP_POST, [](AsyncWebServerRequest *request)
             {
+  String deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+  if (deviceId.isEmpty()) {
+    request->send(400, "text/plain", "Missing deviceId");
+    return;
+  }
+  if (!DeviceHelper::registerDevice(deviceId)) {
+    request->send(500, "text/plain", "Device registration failed");
+    return;
+  }
   setupComplete = true;
 
   request->send(200, "text/plain", "Setup completed. Restarting...");

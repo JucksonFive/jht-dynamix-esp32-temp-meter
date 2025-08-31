@@ -4,6 +4,7 @@
 #include <HTTPClient.h>
 #include <http_helper.h>
 #include <storage_helper.h>
+#include <cert_helper.h>
 
 namespace
 {
@@ -12,20 +13,7 @@ namespace
     constexpr char USER_FILE_PATH[] = "/user.json";
     constexpr char DEVICE_FILE_PATH[] = "/device.json";
     constexpr char CONFIG_PATH[] = "/config/config.json";
-    constexpr char CONFIG_KEY_AUTH_URL[] = "auth_url";
     constexpr char CONFIG_KEY_DEVICES_URL[] = "devices_url";
-
-    String buildPayload(const String &username, const String &password)
-    {
-        String payload;
-        payload.reserve(username.length() + password.length() + 32);
-        payload = F("{\"username\":\"");
-        payload += username;
-        payload += F("\",\"password\":\"");
-        payload += password;
-        payload += F("\"}");
-        return payload;
-    }
 
     String buildDevicePayload(const String &deviceId)
     {
@@ -71,6 +59,8 @@ bool DeviceHelper::registerDevice(const String &deviceId)
 
     WiFiClientSecure client;
     client.setTimeout(CLIENT_TIMEOUT_MS);
+
+    CertHelper::attachRootCA(client);
 
     HTTPClient https;
     if (!HttpHelper::beginHttps(https, client, devicesUrl, F("[Device]")))
