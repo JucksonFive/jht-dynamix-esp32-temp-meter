@@ -76,7 +76,7 @@ bool DeviceHelper::registerDevice(const String &deviceId)
     Serial.printf("[Device] HTTP code: %d\n", code);
 
     bool success = false;
-    if (code == 201)
+    if (code == 201 || code == 200)
     {
         String resp = https.getString();
         Serial.printf("[Device] Response: %s\n", resp.c_str());
