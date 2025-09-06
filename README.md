@@ -1,55 +1,49 @@
-# ESP32 Temperature & Humidity Monitoring System
+# JHT-Dynamix ESP32 Temperature Meter
 
-Scalable IoT solution for monitoring temperature and humidity using ESP32 devices. Data is transmitted securely to AWS IoT Core and stored in DynamoDB via Lambda functions. A TypeScript-based simulator is also included for development and testing purposes.
+This repository contains the complete source code for the JHT-Dynamix ESP32 Temperature Meter, a comprehensive IoT solution for real-time temperature monitoring. The system is composed of three main components: an ESP32-based sensor device, a serverless AWS backend, and a React-based web dashboard.
 
-## 📦 Project Structure
+## Project Structure
 
-```
-jht-dynamix-esp32-temp-meter/
-├── backend/
-│   ├── cdk/                  # AWS CDK infrastructure definitions
-│   ├── lambdas/              # Lambda function source code
-│   └── package.json          # CDK project metadata
-├── board/                    # Firmware for esp32
-└── README.md
-```
+The repository is organized into three main directories:
 
-## 🚀 Features
+- `board/`: Contains the firmware for the ESP32 device, developed using PlatformIO and the Arduino framework.
+- `backend/`: Includes the AWS CDK code for deploying the serverless backend infrastructure, along with the Lambda function source code.
+- `dashboard/`: Contains the source code for the React-based web dashboard, built with Vite and TypeScript.
 
-- 🌡️ Collect temperature and humidity readings from ESP32 (or simulator)
-- 🔐 Secure MQTT communication using TLS certificates
-- ☁️ AWS IoT Core integration
-- 🧠 AWS Lambda functions to process and store readings
-- 🗃️ DynamoDB for scalable storage
-- 🔎 REST API for fetching sensor data (via Lambda + API Gateway)
+## Architecture Overview
 
-## 🛠️ Technologies Used
+The system follows a modern, event-driven architecture:
 
-- ESP32
-- TypeScript
-- AWS CDK
-- AWS IoT Core
-- AWS Lambda
-- Amazon DynamoDB
-- API Gateway (for frontend access)
+1.  **ESP32 Device**: The ESP32 device reads temperature data from a sensor and publishes it to a secure MQTT topic on AWS IoT Core.
+2.  **AWS IoT Core**: An IoT Rule is configured to listen for incoming messages on the `sensors/temperature` topic.
+3.  **Lambda Function**: The rule triggers a Lambda function that processes the incoming data and stores it in a DynamoDB table.
+4.  **DynamoDB**: The temperature readings are stored in a DynamoDB table, partitioned by device ID and sorted by timestamp.
+5.  **API Gateway**: An API Gateway provides a secure REST API for accessing the stored temperature data.
+6.  **React Dashboard**: The web dashboard uses AWS Amplify to authenticate users and fetch data from the API Gateway, providing a visual representation of the temperature readings.
 
-The simulator publishes random temperature/humidity values to the `sensors/temperature` MQTT topic using AWS IoT endpoint and certificates.
+## Features
 
-## 📡 Lambda Functions
+- **Real-time Monitoring**: View temperature data in real-time on a user-friendly dashboard.
+- **Secure Communication**: All data is transmitted over MQTT with TLS encryption, ensuring data privacy and integrity.
+- **Scalable Backend**: The serverless architecture on AWS ensures that the system can handle a large number of devices and readings.
+- **User Authentication**: The dashboard uses Amazon Cognito for secure user authentication and authorization.
+- **Device Management**: The system supports multiple devices, with the ability to view data from all or selected devices.
 
-- **SaveToDynamoFunction**: Stores MQTT payloads into DynamoDB
-- **FetchFromDynamoFunction**: Retrieves all or filtered readings from DynamoDB
+## Getting Started
 
-## API Usage
+To get started with this project, you will need to set up each component individually. Please refer to the `README.md` files in each directory for detailed instructions:
 
-All API requests are made through the following base path: https://mrcc16s8zk.execute-api.eu-north-1.amazonaws.com/prod
+- [board/README.md](board/README.md)
+- [backend/README.md](backend/README.md)
+- [dashboard/README.md](dashboard/README.md)
 
-### 🔹 Endpoints
+## Technologies Used
 
-- `GET /readings` — Fetch all readings
+- **Hardware**: ESP32
+- **Firmware**: C++ (Arduino Framework), PlatformIO
+- **Backend**: TypeScript, AWS CDK, AWS IoT Core, Lambda, DynamoDB, API Gateway
+- **Frontend**: React, TypeScript, Vite, AWS Amplify, Tailwind CSS
 
-All requests require an API key in the headers:
+## License
 
-```bash
-curl -H "x-api-key: <YOUR_API_KEY>" https://mrcc16s8zk.execute-api.eu-north-1.amazonaws.com/prod/readings
-```
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
