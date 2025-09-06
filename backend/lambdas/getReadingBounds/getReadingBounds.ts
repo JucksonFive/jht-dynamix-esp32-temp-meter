@@ -2,14 +2,14 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayEvent } from "aws-lambda";
-import { makeResponse } from "../utils/utils";
+import { getUserId, makeResponse } from "../utils/utils";
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE_NAME = process.env.TABLE_NAME!;
 const GSI_NAME = "userId-timestamp-index";
 
 export const handler = async (event: APIGatewayEvent) => {
-  const userId = event.requestContext?.authorizer?.claims?.sub; // Cognito sub
+  const userId = getUserId(event);
   if (!userId) return makeResponse(event)(401, { message: "Unauthorized" });
 
   const earliestQ = await client.send(

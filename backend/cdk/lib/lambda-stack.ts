@@ -4,7 +4,8 @@ import * as dynamoDb from "aws-cdk-lib/aws-dynamodb";
 import * as path from "path";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 export interface LambdaStackProps extends cdk.StackProps {
   temperaturesTable: dynamoDb.Table;
   deviceUserTable: dynamoDb.Table;
@@ -18,11 +19,22 @@ export class LambdaStack extends cdk.Stack {
   public readonly deleteUserDeviceFn: NodejsFunction;
   public readonly authProtectedFn: lambda.Function;
   public readonly registerDeviceFn: NodejsFunction;
+  public readonly getAllDevicesFn: NodejsFunction;
+  public readonly purgeDeviceReadingsFn: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
     const { temperaturesTable, deviceUserTable } = props;
+
+    const purgeDlq = new sqs.Queue(this, "DeleteReadingsDLQ", {
+      retentionPeriod: cdk.Duration.days(14),
+    });
+
+    const purgeQueue = new sqs.Queue(this, "DeleteReadingsQueue", {
+      visibilityTimeout: cdk.Duration.minutes(5),
+      deadLetterQueue: { queue: purgeDlq, maxReceiveCount: 5 },
+    });
 
     // Lambda function for saving temperature data to DynamoDB
     this.saveToDynamoFn = new NodejsFunction(this, "SaveToDynamoFunction", {
@@ -41,6 +53,13 @@ export class LambdaStack extends cdk.Stack {
     // Grant permissions for the save function
     temperaturesTable.grantWriteData(this.saveToDynamoFn);
     deviceUserTable.grantReadData(this.saveToDynamoFn);
+
+    temperaturesTable.addGlobalSecondaryIndex({
+      indexName: "deviceId-timestamp-index",
+      partitionKey: { name: "deviceId", type: dynamoDb.AttributeType.STRING },
+      sortKey: { name: "timestamp", type: dynamoDb.AttributeType.STRING },
+      projectionType: dynamoDb.ProjectionType.KEYS_ONLY,
+    });
 
     // Lambda function for fetching temperature data from DynamoDB
     this.fetchFromDynamoFn = new NodejsFunction(
@@ -103,6 +122,21 @@ export class LambdaStack extends cdk.Stack {
     );
     temperaturesTable.grantReadData(this.fetchUserTemperatureBoundsFn);
 
+    // Lambda to get all devices for a user
+    this.getAllDevicesFn = new NodejsFunction(this, "GetAllDevicesFunction", {
+      functionName: "GetAllDevicesFunction",
+      entry: path.join(
+        __dirname,
+        "../../lambdas/getAllDevices/getAllDevices.ts"
+      ),
+      handler: "handler",
+      runtime: lambda.Runtime.NODEJS_22_X,
+      environment: {
+        DEVICES_TABLE: deviceUserTable.tableName,
+      },
+    });
+    deviceUserTable.grantReadData(this.getAllDevicesFn);
+
     // Lambda function for registering a device
     this.registerDeviceFn = new NodejsFunction(this, "RegisterDeviceFn", {
       runtime: lambda.Runtime.NODEJS_22_X,
@@ -129,12 +163,38 @@ export class LambdaStack extends cdk.Stack {
         handler: "handler",
         runtime: lambda.Runtime.NODEJS_22_X,
         environment: {
-          TABLE_NAME: temperaturesTable.tableName,
-          GSI_NAME: "userId-timestamp-index",
+          DEVICES_TABLE: deviceUserTable.tableName,
+          DELETE_QUEUE_URL: purgeQueue.queueUrl,
         },
       }
     );
-    temperaturesTable.grantWriteData(this.deleteUserDeviceFn);
+    deviceUserTable.grantWriteData(this.deleteUserDeviceFn);
+    purgeQueue.grantSendMessages(this.deleteUserDeviceFn);
+
+    this.purgeDeviceReadingsFn = new NodejsFunction(
+      this,
+      "PurgeDeviceReadingsFn",
+      {
+        entry: path.join(
+          __dirname,
+          "../../lambdas/purgeDeviceReadings/purgeDeviceReadings.ts"
+        ),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        timeout: cdk.Duration.minutes(5),
+        memorySize: 1024,
+        environment: {
+          TABLE_NAME: temperaturesTable.tableName,
+          GSI_NAME: "deviceId-timestamp-index",
+        },
+      }
+    );
+    this.purgeDeviceReadingsFn.addEventSource(
+      new SqsEventSource(purgeQueue, {
+        batchSize: 10,
+      })
+    );
+    temperaturesTable.grantReadWriteData(this.purgeDeviceReadingsFn);
 
     // Auth protected Lambda function
     this.authProtectedFn = new NodejsFunction(this, "AuthProtectedLambda", {

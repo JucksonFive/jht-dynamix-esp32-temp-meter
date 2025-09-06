@@ -3,6 +3,7 @@ import { deleteUserDevice } from "../../../../services/api";
 import { FiTrash2 } from "react-icons/fi";
 import strings from "../../../../locale/strings";
 import ConfirmDialog from "../../../../ui/Elements/Modal/ConfirmDialog";
+import ErrorIndicator from "./ErrorIndicator";
 
 interface DeleteDeviceButtonProps {
   deviceId: string;
@@ -51,11 +52,7 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
       >
         <FiTrash2 size={size} />
       </button>
-      {error && (
-        <span className="ml-1 text-[10px] text-red-400" title={error}>
-          !
-        </span>
-      )}
+      {error && <ErrorIndicator title={error} size={14} className="ml-1" />}
       <ConfirmDialog
         open={open}
         title={strings.deleteDevice}

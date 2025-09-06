@@ -9,3 +9,10 @@ export type ReadingsResponse = {
   items: Reading[];
   nextKey?: string | null;
 };
+
+export interface Device {
+  deviceId: string;
+  userId: string;
+  createdAt: string; // ISO8601
+  updatedAt: string; // ISO8601
+}

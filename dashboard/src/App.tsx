@@ -10,6 +10,7 @@ import { useReadingBounds } from "./hooks/useReadingBounds";
 import { useReadings } from "./hooks/useReadings";
 import { type Range } from "./utils/types";
 import strings from "./locale/strings";
+import { useDevices } from "./hooks/useDevices";
 
 const THREE_WEEKS = 21 * 864e5;
 const MINUTE = 60 * 1000;
@@ -37,6 +38,13 @@ function App() {
     loading: boundsLoading,
     error: boundsError,
   } = useReadingBounds(user);
+
+  const {
+    devices,
+    loading: devicesLoading,
+    error: devicesError,
+    removeDevice,
+  } = useDevices(user);
 
   // range (init kun bounds ladattu)
   const [range, setRange] = useState<Range>(() => {
@@ -73,6 +81,11 @@ function App() {
     setUser(null);
   };
 
+  const handleDeviceDeleted = (id: string) => {
+    removeDevice(id);
+    setSelectedDeviceId((prev) => prev.filter((did) => did !== id));
+  };
+
   if (bootLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -94,13 +107,15 @@ function App() {
 
       <Dashboard
         data={data}
+        devices={devices}
         bounds={bounds}
         range={clampedRange}
         onRangeChange={(r) => setRange(r)}
         selectedDeviceIds={selectedDeviceIds}
         setSelectedDeviceIds={setSelectedDeviceId}
         handleLogout={handleLogout}
-        loading={boundsLoading || dataLoading}
+        loading={boundsLoading || dataLoading || devicesLoading}
+        onDeviceDeleted={handleDeviceDeleted}
       />
     </>
   );

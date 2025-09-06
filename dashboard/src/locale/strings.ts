@@ -33,6 +33,7 @@ export interface LocaleStrings {
   unselectAll: string;
   tooltipSelectAll: string;
   authError: string;
+  fetchDevicesError: string;
 }
 
 // Default language bundle.
@@ -73,6 +74,7 @@ export const strings: LocaleStrings = {
   unselectAll: "Unselect All",
   tooltipSelectAll: "Toggle select / unselect all devices",
   authError: "Authentication failed. Please try again.",
+  fetchDevicesError: "Failed to fetch devices.",
 };
 
 export default strings;

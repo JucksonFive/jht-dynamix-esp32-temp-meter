@@ -4,19 +4,17 @@ import { InfoButton } from "./Buttons/InfoButton";
 import { DeviceSelectButton } from "./Buttons/DeviceSelectButton";
 import DeleteDeviceButton from "./Buttons/DeleteDeviceButton";
 import SelectAllDevicesButton from "./Buttons/SelectAllDevicesButton";
-
-export interface SidePanelDevice {
-  id: string;
-  lastSeen?: string;
-}
+import { Device } from "../../../services/types";
+import DeviceMultiToggle from "./Buttons/DeviceMultiToggle";
 
 export interface SidePanelProps {
-  devices: SidePanelDevice[];
+  devices: Device[];
   selectedIds: string[];
   onSelectSingle: (id: string) => void;
   onToggleMulti: (id: string) => void;
   title?: string;
   className?: string;
+  onDeviceDeleted: (id: string) => void;
 }
 
 export const SidePanel: React.FC<SidePanelProps> = ({
@@ -25,18 +23,38 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   onSelectSingle,
   onToggleMulti,
   title = strings.sidePanelTitle,
+  onDeviceDeleted,
   className = "",
 }) => {
+  const handleSelectAll = () => {
+    devices.forEach((d) => {
+      if (!selectedIds.includes(d.deviceId)) {
+        onToggleMulti(d.deviceId);
+      }
+    });
+  };
+  const handleUnselectAll = () => {
+    devices.forEach((d) => {
+      if (selectedIds.includes(d.deviceId)) {
+        onToggleMulti(d.deviceId);
+      }
+    });
+  };
   return (
     <aside
       className={[
-        // Mobile: full width card; Desktop: fixed width panel with full-height scroll
-        "bg-gray-50 rounded-lg border border-gray-200 lg:border-r lg:rounded-lg",
+        "relative",
         "w-full lg:w-72 shrink-0",
         "max-h-[22rem] lg:max-h-none overflow-y-auto",
+        "rounded-2xl bg-midnight-800/70 backdrop-blur-xl",
+        "ring-1 ring-white/10",
         className,
       ].join(" ")}
     >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-0 w-[3px] rounded-r-2xl bg-gradient-to-b from-neon-pink via-neon-purple to-neon-cyan shadow-[0_0_8px_-1px_rgba(236,72,153,0.6)]"
+      />
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -46,29 +64,15 @@ export const SidePanel: React.FC<SidePanelProps> = ({
           <SelectAllDevicesButton
             total={devices.length}
             selected={selectedIds.length}
-            onSelectAll={() => {
-              // select all devices that are not yet selected by toggling them on
-              devices.forEach((d) => {
-                if (!selectedIds.includes(d.id)) {
-                  onToggleMulti(d.id);
-                }
-              });
-            }}
-            onUnselectAll={() => {
-              // unselect all currently selected devices by toggling them off
-              devices.forEach((d) => {
-                if (selectedIds.includes(d.id)) {
-                  onToggleMulti(d.id);
-                }
-              });
-            }}
+            onSelectAll={handleSelectAll}
+            onUnselectAll={handleUnselectAll}
           />
         </div>
         <ul className="space-y-2">
           {devices.map((d) => {
-            const isActive = selectedIds.includes(d.id);
+            const isActive = selectedIds.includes(d.deviceId);
             return (
-              <li key={d.id}>
+              <li key={d.deviceId}>
                 <div
                   className={[
                     "flex items-center gap-2 rounded-lg px-2.5 py-2 transition-colors group",
@@ -78,25 +82,21 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                   ].join(" ")}
                 >
                   <DeviceSelectButton
-                    id={d.id}
-                    lastSeen={d.lastSeen}
+                    id={d.deviceId}
+                    lastSeen={d.updatedAt}
                     active={isActive}
                     onSelect={onSelectSingle}
                     title={strings.tooltipSelectSingle}
                   />
                   <div className="flex items-center gap-2">
-                    <label
-                      className="flex items-center cursor-pointer"
-                      title={strings.tooltipToggleMulti}
-                    >
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-neon-purple focus:ring-neon-purple/50"
-                        checked={isActive}
-                        onChange={() => onToggleMulti(d.id)}
-                      />
-                    </label>
-                    <DeleteDeviceButton deviceId={d.id} />
+                    <DeviceMultiToggle
+                      active={isActive}
+                      onToggle={() => onToggleMulti(d.deviceId)}
+                    />
+                    <DeleteDeviceButton
+                      deviceId={d.deviceId}
+                      onDeleted={onDeviceDeleted}
+                    />
                   </div>
                 </div>
               </li>
