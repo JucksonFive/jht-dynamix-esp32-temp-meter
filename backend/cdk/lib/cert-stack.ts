@@ -19,10 +19,9 @@ export class CertStack extends cdk.Stack {
       domainName: props.domainName,
     });
 
-    const cert = new acm.DnsValidatedCertificate(this, "SiteCert", {
+    const cert = new acm.Certificate(this, "SiteCert", {
       domainName: props.siteDomain,
-      hostedZone,
-      region: "us-east-1", // important for CloudFront
+      validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 
     this.certificateArn = cert.certificateArn;

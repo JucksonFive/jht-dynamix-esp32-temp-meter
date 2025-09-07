@@ -32,8 +32,10 @@ export class DashboardHostingStack extends cdk.Stack {
       // optional: removalPolicy: cdk.RemovalPolicy.DESTROY, autoDeleteObjects: true
     });
 
-    const originAccessIdentity = new cf.OriginAccessIdentity(this, "OAI");
-    siteBucket.grantRead(originAccessIdentity);
+    // Create Origin Access Control (OAC) - modern replacement for OAI
+    const originAccessControl = new cf.S3OriginAccessControl(this, "OAC", {
+      description: "OAC for dashboard hosting bucket",
+    });
 
     const certificate = acm.Certificate.fromCertificateArn(
       this,
@@ -47,7 +49,9 @@ export class DashboardHostingStack extends cdk.Stack {
       certificate,
       minimumProtocolVersion: cf.SecurityPolicyProtocol.TLS_V1_2_2021,
       defaultBehavior: {
-        origin: new origins.S3Origin(siteBucket, { originAccessIdentity }),
+        origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
+          originAccessControl,
+        }),
         viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         compress: true,
       },
@@ -67,6 +71,21 @@ export class DashboardHostingStack extends cdk.Stack {
         },
       ],
     });
+
+    // Grant the Origin Access Control permission to read from the bucket
+    siteBucket.addToResourcePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        principals: [new cdk.aws_iam.ServicePrincipal("cloudfront.amazonaws.com")],
+        actions: ["s3:GetObject"],
+        resources: [`${siteBucket.bucketArn}/*`],
+        conditions: {
+          StringEquals: {
+            "AWS:SourceArn": `arn:aws:cloudfront::${this.account}:distribution/${distribution.distributionId}`,
+          },
+        },
+      })
+    );
 
     new route53.ARecord(this, "AliasRecord", {
       zone: hostedZone,
