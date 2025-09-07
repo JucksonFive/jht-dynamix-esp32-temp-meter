@@ -76,7 +76,9 @@ export class DashboardHostingStack extends cdk.Stack {
     siteBucket.addToResourcePolicy(
       new cdk.aws_iam.PolicyStatement({
         effect: cdk.aws_iam.Effect.ALLOW,
-        principals: [new cdk.aws_iam.ServicePrincipal("cloudfront.amazonaws.com")],
+        principals: [
+          new cdk.aws_iam.ServicePrincipal("cloudfront.amazonaws.com"),
+        ],
         actions: ["s3:GetObject"],
         resources: [`${siteBucket.bucketArn}/*`],
         conditions: {
