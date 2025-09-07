@@ -12,7 +12,6 @@ import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 interface Props extends cdk.StackProps {
   domainName: string;
   siteDomain: string;
-  certificateArn: string;
 }
 
 export class DashboardHostingStack extends cdk.Stack {
@@ -37,26 +36,65 @@ export class DashboardHostingStack extends cdk.Stack {
       description: "OAC for dashboard hosting bucket",
     });
 
-    const certificate = acm.Certificate.fromCertificateArn(
+    const certificate = new acm.Certificate(this, "SiteCert", {
+      domainName: props.siteDomain,
+      validation: acm.CertificateValidation.fromDns(hostedZone),
+      // CloudFront requires cert in us-east-1; deploy this stack in us-east-1
+    });
+
+    // 1. Parannus: Lisää turvallisuusotsakkeet
+    const responseHeadersPolicy = new cf.ResponseHeadersPolicy(
       this,
-      "ImportedCert",
-      props.certificateArn
+      "SecurityHeadersPolicy",
+      {
+        securityHeadersBehavior: {
+          strictTransportSecurity: {
+            override: true,
+            accessControlMaxAge: cdk.Duration.days(365),
+            includeSubdomains: true,
+            preload: true,
+          },
+          contentTypeOptions: { override: true },
+          frameOptions: {
+            frameOption: cf.HeadersFrameOption.DENY,
+            override: true,
+          },
+          xssProtection: {
+            protection: true,
+            modeBlock: true,
+            override: true,
+          },
+        },
+      }
     );
+
+    // 2. Parannus: Ota lokitus käyttöön (valinnainen, mutta suositeltu)
+    const logBucket = new s3.Bucket(this, "LogBucket", {
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      // Elinkaarisääntö poistaa vanhat lokit automaattisesti
+      lifecycleRules: [{ expiration: cdk.Duration.days(90) }],
+    });
 
     const distribution = new cf.Distribution(this, "SiteDistribution", {
       defaultRootObject: "index.html",
       domainNames: [props.siteDomain],
       certificate,
       minimumProtocolVersion: cf.SecurityPolicyProtocol.TLS_V1_2_2021,
+      // Lisää lokitus ja turvallisuusotsakkeet
+      enableLogging: true,
+      logBucket: logBucket,
+      logFilePrefix: "distribution-access-logs/",
       defaultBehavior: {
         origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
           originAccessControl,
         }),
         viewerProtocolPolicy: cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         compress: true,
+        responseHeadersPolicy: responseHeadersPolicy, // Liitä policy tähän
       },
       errorResponses: [
-        // SPA: ohjaa 403/404 -> index.html
         {
           httpStatus: 403,
           responseHttpStatus: 200,
@@ -72,7 +110,6 @@ export class DashboardHostingStack extends cdk.Stack {
       ],
     });
 
-    // Grant the Origin Access Control permission to read from the bucket
     siteBucket.addToResourcePolicy(
       new cdk.aws_iam.PolicyStatement({
         effect: cdk.aws_iam.Effect.ALLOW,
