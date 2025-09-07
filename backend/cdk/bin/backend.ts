@@ -6,9 +6,17 @@ import { LambdaStack } from "../lib/lambda-stack";
 import { InfrastructureStack } from "../lib/infrastructure-stack";
 import { EspAuthStack } from "../lib/esp-auth-stack";
 import * as dotenv from "dotenv";
+import { CertStack } from "../lib/cert-stack";
+import { DashboardHostingStack } from "../lib/dashboard-hosting-stack";
 
-dotenv.config();
+dotenv.config({ path: "../.env" });
 const app = new cdk.App();
+
+const domainName = process.env.DOMAIN_NAME!;
+const subdomain = process.env.SUBDOMAIN!;
+const siteDomain = `${subdomain}.${domainName}`;
+const region = process.env.AWS_REGION!;
+const account = process.env.CDK_DEFAULT_ACCOUNT;
 
 // Create infrastructure stack with DynamoDB tables first
 const infraStack = new InfrastructureStack(app, "InfrastructureStack");
@@ -37,6 +45,18 @@ const backendStack = new BackendStack(app, "BackendStack", {
 new EspAuthStack(app, "EspAuthStack", {
   userPoolId: authStack.userPool.userPoolId,
   clientId: authStack.userPoolClient.userPoolClientId,
+});
+const certStack = new CertStack(app, "DashboardCertStack", {
+  env: { account, region: "us-east-1" }, // ACM for CloudFront must be in us-east-1
+  domainName,
+  siteDomain,
+});
+
+new DashboardHostingStack(app, "DashboardHostingStack", {
+  env: { account, region },
+  domainName,
+  siteDomain,
+  certificateArn: certStack.certificateArn, // cross-stack ref
 });
 // Add dependencies
 lambdaStack.addDependency(infraStack);
