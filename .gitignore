@@ -37,7 +37,6 @@ dashboard/npm-debug.log*
 dashboard/yarn-debug.log*
 dashboard/yarn-error.log*
 dashboard/.env
-.github
 board/data/mqtt.json
 board/.vscode/extensions.json
 .vscode/settings.json

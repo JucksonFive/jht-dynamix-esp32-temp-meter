@@ -7,8 +7,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
-    "cdk": "cdk"
+    "test": "jest --coverage",
+    "cdk": "cdk",
+    "lint": "eslint --ext .ts src"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.149",

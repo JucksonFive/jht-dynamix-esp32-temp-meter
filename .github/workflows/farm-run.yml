@@ -1,0 +1,40 @@
+name: farm-run
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+  actions: read
+  checks: read
+jobs:
+  run:
+    if: contains(github.event.comment.body, '/farm run')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install deps (root)
+        run: |
+          corepack enable || true
+          pnpm -v || npm i -g pnpm || true
+          pnpm i -w || npm i -w
+      - name: Setup Python (optional)
+        uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Start Orchestrator
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+        run: node ./.farm/runners/orchestrator.js
+      - name: Open PR if branch exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: node ./.farm/runners/open-pr.js
