@@ -70,10 +70,9 @@ export class DashboardHostingStack extends cdk.Stack {
 
     // 2. Parannus: Ota lokitus käyttöön (valinnainen, mutta suositeltu)
     const logBucket = new s3.Bucket(this, "LogBucket", {
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       encryption: s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true,
-      // Elinkaarisääntö poistaa vanhat lokit automaattisesti
+      objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
       lifecycleRules: [{ expiration: cdk.Duration.days(90) }],
     });
 
