@@ -12,6 +12,7 @@ import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 interface Props extends cdk.StackProps {
   domainName: string;
   siteDomain: string;
+  certificateArn: string;
 }
 
 export class DashboardHostingStack extends cdk.Stack {
@@ -36,11 +37,11 @@ export class DashboardHostingStack extends cdk.Stack {
       description: "OAC for dashboard hosting bucket",
     });
 
-    const certificate = new acm.Certificate(this, "SiteCert", {
-      domainName: props.siteDomain,
-      validation: acm.CertificateValidation.fromDns(hostedZone),
-      // CloudFront requires cert in us-east-1; deploy this stack in us-east-1
-    });
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      "SiteCert",
+      props.certificateArn
+    );
 
     // 1. Parannus: Lisää turvallisuusotsakkeet
     const responseHeadersPolicy = new cf.ResponseHeadersPolicy(
