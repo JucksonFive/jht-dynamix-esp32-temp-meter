@@ -65,6 +65,7 @@ new DashboardHostingStack(app, "DashboardHostingStack", {
   domainName,
   siteDomain,
   certificateArn: certStack.certificateArn,
+  crossRegionReferences: true,
 });
 // Add dependencies
 lambdaStack.addDependency(infraStack);
