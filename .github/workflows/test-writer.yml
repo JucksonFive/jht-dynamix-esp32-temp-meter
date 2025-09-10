@@ -1,0 +1,25 @@
+name: test-writer
+on:
+  workflow_dispatch:
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install deps
+        run: |
+          corepack enable || true
+          pnpm -v || npm i -g pnpm || true
+          pnpm i -w || npm i -w
+      - name: Generate test stubs
+        run: node agents/tasks/generate-tests.mjs
+      - name: Commit changes (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "chore: add auto-generated test stubs"
+          git push || true

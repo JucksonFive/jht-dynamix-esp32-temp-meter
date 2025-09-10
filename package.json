@@ -1,0 +1,9 @@
+{
+  "name": "jht-dynamix-esp32-temp-meter-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "dashboard"
+  ]
+}
