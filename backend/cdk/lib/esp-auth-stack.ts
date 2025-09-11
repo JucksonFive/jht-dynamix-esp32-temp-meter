@@ -23,12 +23,18 @@ export class EspAuthStack extends Stack {
         CLIENT_ID: props.clientId,
       },
     });
-
+    const ALLOWED_ORIGIN = "https://app.jt-dynamix.com";
     const api = new apigateway.RestApi(this, "EspAuthApi", {
       restApiName: "EspAuthApi",
       defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowOrigins: [ALLOWED_ORIGIN],
         allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS.concat([
+          "X-Amz-Date",
+          "X-Api-Key",
+          "X-Amz-Security-Token",
+          "Authorization",
+        ]),
       },
     });
 

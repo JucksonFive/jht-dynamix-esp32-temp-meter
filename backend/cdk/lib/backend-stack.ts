@@ -55,7 +55,11 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    // API Gateway REST API
+    // cdk deploy -c allowedOrigin=http://localhost:5173   (dev)
+    // cdk deploy -c allowedOrigin=https://app.jt-dynamix.com   (prod)
+    const ALLOWED_ORIGIN =
+      this.node.tryGetContext("allowedOrigin") || "https://app.jt-dynamix.com";
+
     const api = new apigateway.RestApi(this, "TemperatureApi", {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
@@ -84,6 +88,7 @@ export class BackendStack extends cdk.Stack {
         "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
       },
     });
+
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {

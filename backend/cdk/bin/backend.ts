@@ -9,21 +9,27 @@ import { InfrastructureStack } from "../lib/infrastructure-stack";
 import { LambdaStack } from "../lib/lambda-stack";
 import { CertStack } from "../lib/cert-stack";
 
-dotenv.config({ path: "../.env" });
+dotenv.config({ path: require("path").resolve(__dirname, "../../.env") });
 const app = new cdk.App();
 
-const domainName = process.env.DOMAIN_NAME!;
-const subdomain = process.env.SUBDOMAIN!;
-const siteDomain = `${subdomain}.${domainName}`;
+const domainName = process.env.DOMAIN_NAME;
+const subdomain = process.env.SUBDOMAIN;
+const siteDomain =
+  domainName && subdomain ? `${subdomain}.${domainName}` : undefined;
 const region = process.env.AWS_REGION!;
 const account = process.env.CDK_DEFAULT_ACCOUNT;
+const skipCertCreation =
+  (process.env.SKIP_CERTIFICATE_CREATION || "false").toLowerCase() === "true";
 
-// Stack for the certificate in us-east-1
-const certStack = new CertStack(app, "CertStack", {
-  env: { account, region: "us-east-1" },
-  domainName,
-  siteDomain,
-});
+// Stack for the certificate in us-east-1 (optional)
+let certStack: CertStack | undefined;
+if (!skipCertCreation && domainName && siteDomain) {
+  certStack = new CertStack(app, "CertStack", {
+    env: { account, region: "us-east-1" },
+    domainName,
+    siteDomain,
+  });
+}
 
 // Create infrastructure stack with DynamoDB tables first
 const infraStack = new InfrastructureStack(app, "InfrastructureStack", {
@@ -60,13 +66,15 @@ new EspAuthStack(app, "EspAuthStack", {
   clientId: authStack.userPoolClient.userPoolClientId,
 });
 
-new DashboardHostingStack(app, "DashboardHostingStack", {
-  env: { account, region },
-  domainName,
-  siteDomain,
-  certificateArn: certStack.certificateArn,
-  crossRegionReferences: true,
-});
+if (domainName && siteDomain && certStack?.certificateArn) {
+  new DashboardHostingStack(app, "DashboardHostingStack", {
+    env: { account, region },
+    domainName,
+    siteDomain,
+    certificateArn: certStack.certificateArn,
+    crossRegionReferences: true,
+  });
+}
 // Add dependencies
 lambdaStack.addDependency(infraStack);
 backendStack.addDependency(lambdaStack);
