@@ -2,7 +2,8 @@ import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { Device, ReadingsResponse } from "./types";
 
-const BASE_URL = "https://xgacqgcwb9.execute-api.eu-north-1.amazonaws.com/prod";
+const BASE_URL = process.env.VITE_API_URL!;
+if (!BASE_URL) throw new Error("VITE_API_URL is not defined");
 
 // Yleinen autentikoitu API-pyyntö
 async function apiRequest<T>(opts: {
