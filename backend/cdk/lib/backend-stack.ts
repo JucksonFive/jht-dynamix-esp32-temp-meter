@@ -65,8 +65,7 @@ export class BackendStack extends cdk.Stack {
             {
               statusCode: "204",
               responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin":
-                  "method.request.header.Origin",
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
                 "method.response.header.Access-Control-Allow-Methods":
                   "'GET,POST,PUT,DELETE,OPTIONS'",
                 "method.response.header.Access-Control-Allow-Headers":
@@ -91,16 +90,13 @@ export class BackendStack extends cdk.Stack {
                 "method.response.header.Access-Control-Allow-Origin": true,
                 "method.response.header.Access-Control-Allow-Methods": true,
                 "method.response.header.Access-Control-Allow-Headers": true,
-                "method.response.header.Access-Control-Allow-Credentials": true,
+                "method.response.header.Access-Control-Allow-Credentials":
+                  false,
                 "method.response.header.Vary": true,
               },
             },
           ],
-          requestParameters: {
-            "method.request.header.Origin": true,
-            "method.request.header.Access-Control-Request-Method": false,
-            "method.request.header.Access-Control-Request-Headers": false,
-          },
+          // No request parameters needed for wildcard CORS
         }
       );
     }
@@ -127,7 +123,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "'*'",
         "Access-Control-Allow-Headers":
           "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
         "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
@@ -137,7 +133,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "'*'",
         "Access-Control-Allow-Headers":
           "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
         "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",

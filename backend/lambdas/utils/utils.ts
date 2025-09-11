@@ -1,10 +1,6 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 
-const ALLOWED_ORIGINS = new Set([
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "https://app.jt-dynamix.com",
-]);
+const ALLOWED_ORIGINS = new Set(["https://app.jt-dynamix.com"]);
 
 export const makeResponse =
   (event: APIGatewayProxyEvent) =>
@@ -26,7 +22,7 @@ export const makeResponse =
     return {
       statusCode,
       headers: {
-        "Access-Control-Allow-Origin": "*", // echo allowed origin
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Credentials": "false", // bearer-auth ei tarvitse credentialsia
         "Access-Control-Allow-Headers":
           "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
