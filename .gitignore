@@ -3,6 +3,7 @@ event.json
 certs_output.json
 response.json
 backend/.env
+backend/*.out
 backend/cdk/*.js
 backend/cdk/!jest.config.js
 backend/cdk/*.d.ts
