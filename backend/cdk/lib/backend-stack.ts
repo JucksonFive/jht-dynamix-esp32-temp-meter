@@ -60,34 +60,37 @@ export class BackendStack extends cdk.Stack {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
       defaultCorsPreflightOptions: {
-        allowOrigins: ["http://localhost:5173", "http://127.0.0.1:5173"],
-        allowMethods: ["GET", "OPTIONS", "DELETE"],
-        allowHeaders: [
-          "Content-Type",
-          "Authorization",
+        allowOrigins: [
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+          "https://app.jt-dynamix.com",
+        ],
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS.concat([
           "X-Amz-Date",
           "X-Api-Key",
           "X-Amz-Security-Token",
-        ],
+          "Authorization",
+        ]),
       },
     });
 
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "'*'",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers":
-          "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
-        "Access-Control-Allow-Methods": "'GET,OPTIONS,DELETE'",
+          "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
+        "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
       },
     });
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "'*'",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers":
-          "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
-        "Access-Control-Allow-Methods": "'GET,OPTIONS,DELETE'",
+          "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
+        "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
       },
     });
 
