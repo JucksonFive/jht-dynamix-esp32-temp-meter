@@ -2,15 +2,15 @@ import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { Device, ReadingsResponse } from "./types";
 
-const BASE_URL = "https://xgacqgcwb9.execute-api.eu-north-1.amazonaws.com/prod";
+const BASE_URL = import.meta.env.VITE_API_URL!;
+if (!BASE_URL) throw new Error("VITE_API_URL is not defined");
 
-// Yleinen autentikoitu API-pyyntö
 async function apiRequest<T>(opts: {
   method?: "GET" | "POST" | "DELETE" | "PUT";
   path: string; // esim. "/user-readings"
   params?: Record<string, any>;
   data?: any;
-  signal?: AbortSignal; // Lisää tämä
+  signal?: AbortSignal;
 }): Promise<T> {
   const session = await fetchAuthSession();
   const token =
@@ -24,14 +24,13 @@ async function apiRequest<T>(opts: {
       url: `${BASE_URL}${opts.path}`,
       params: opts.params,
       data: opts.data,
-      signal: opts.signal, // Lisää tämä
+      signal: opts.signal,
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     return res.data;
   } catch (err: any) {
-    // Voit lisätä hienostuneemman virheenkäsittelyn myöhemmin
     throw err;
   }
 }
@@ -96,7 +95,6 @@ export async function fetchUserDevices(opts?: {
   });
 }
 
-// Delete a single user device (and its data server-side) by deviceId
 export async function deleteUserDevice(
   deviceId: string
 ): Promise<{ message: string }> {

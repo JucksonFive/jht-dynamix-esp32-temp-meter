@@ -5,6 +5,7 @@ import {
   ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
+import { makeResponse } from "lambdas/utils/utils";
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -26,31 +27,16 @@ export const handler = async (
         })
       );
 
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify(result.Items),
-      };
+      return makeResponse(event)(200, result.Items);
     }
 
     const result = await client.send(
       new ScanCommand({ TableName: TABLE_NAME })
     );
 
-    return {
-      statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify(result.Items),
-    };
+    return makeResponse(event)(200, result.Items);
   } catch (err) {
     console.error("Error fetching data:", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: "Server error" }),
-    };
+    return makeResponse(event)(500, { message: "Internal Server Error" });
   }
 };

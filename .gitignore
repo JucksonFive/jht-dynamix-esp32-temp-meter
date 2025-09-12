@@ -3,7 +3,6 @@ event.json
 certs_output.json
 response.json
 backend/.env
-backend/*.out
 backend/cdk/*.js
 backend/cdk/!jest.config.js
 backend/cdk/*.d.ts
@@ -33,7 +32,7 @@ dashboard/.env.local
 dashboard/.env.development.local
 dashboard/.env.test.local
 dashboard/.env.production.local
-
+dashboard/node_modules
 dashboard/npm-debug.log*
 dashboard/yarn-debug.log*
 dashboard/yarn-error.log*
@@ -42,4 +41,8 @@ board/data/mqtt.json
 board/.vscode/extensions.json
 .vscode/settings.json
 dashboard/dist/*
-/node_modules
+backend/cdk/cdk.context.json
+node_modules/*
+backend/cdk.out/*
+.github/instructions/instructions.md.instructions.md
+AGENTS.md
