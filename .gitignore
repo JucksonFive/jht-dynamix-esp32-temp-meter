@@ -41,4 +41,8 @@ board/data/mqtt.json
 board/.vscode/extensions.json
 .vscode/settings.json
 dashboard/dist/*
-/node_modules
+backend/cdk/cdk.context.json
+node_modules/*
+backend/cdk.out/*
+.github/instructions/instructions.md.instructions.md
+AGENTS.md
