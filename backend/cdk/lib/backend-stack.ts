@@ -55,52 +55,9 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    function addDynamicCors(resource: apigateway.IResource) {
-      resource.addMethod(
-        "OPTIONS",
-        new apigateway.MockIntegration({
-          requestTemplates: { "application/json": '{"statusCode": 204}' },
-          // Vastauksen headereihin peilataan Origin + Vary
-          integrationResponses: [
-            {
-              statusCode: "204",
-              responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin": "'*'",
-                "method.response.header.Access-Control-Allow-Methods":
-                  "'GET,POST,PUT,DELETE,OPTIONS'",
-                "method.response.header.Access-Control-Allow-Headers":
-                  "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
-                "method.response.header.Access-Control-Allow-Credentials":
-                  "'false'",
-                "method.response.header.Vary":
-                  "'Origin,Access-Control-Request-Method,Access-Control-Request-Headers'",
-              },
-            },
-          ],
-          passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-        }),
-        {
-          methodResponses: [
-            {
-              statusCode: "204",
-              responseModels: {
-                "application/json": apigateway.Model.EMPTY_MODEL,
-              },
-              responseParameters: {
-                "method.response.header.Access-Control-Allow-Origin": true,
-                "method.response.header.Access-Control-Allow-Methods": true,
-                "method.response.header.Access-Control-Allow-Headers": true,
-                "method.response.header.Access-Control-Allow-Credentials":
-                  false,
-                "method.response.header.Vary": true,
-              },
-            },
-          ],
-          // No request parameters needed for wildcard CORS
-        }
-      );
-    }
+    const ALLOWED_ORIGIN = "https://app.jt-dynamix.com";
 
+    // API Gateway REST API
     const api = new apigateway.RestApi(this, "TemperatureApi", {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
@@ -123,7 +80,11 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "'*'",
+        "Access-Control-Allow-Origin": `'${
+          process.env.NODE_ENV === "production"
+            ? "https://app.jt-dynamix.com"
+            : "http://localhost:5173"
+        }'`,
         "Access-Control-Allow-Headers":
           "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
         "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
@@ -133,7 +94,11 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": "'*'",
+        "Access-Control-Allow-Origin": `'${
+          process.env.NODE_ENV === "production"
+            ? "https://app.jt-dynamix.com"
+            : "http://localhost:5173"
+        }'`,
         "Access-Control-Allow-Headers":
           "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
         "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
@@ -148,71 +113,68 @@ export class BackendStack extends cdk.Stack {
       }
     );
 
-    addDynamicCors(api.root);
-
-    // /readings
-    const readingsRes = api.root.addResource("readings");
-    addDynamicCors(readingsRes);
-    readingsRes.addMethod(
-      "GET",
-      new apigateway.LambdaIntegration(fetchFromDynamoFn),
-      {
+    api.root
+      .addResource("readings")
+      .addMethod("GET", new apigateway.LambdaIntegration(fetchFromDynamoFn), {
         apiKeyRequired: true,
-      }
-    );
+      });
 
-    // /user-readings
-    const userReadingsRes = api.root.addResource("user-readings");
-    addDynamicCors(userReadingsRes);
-    userReadingsRes.addMethod(
-      "GET",
-      new apigateway.LambdaIntegration(fetchUserTemperaturesFn),
-      {
-        authorizer,
-        authorizationType: apigateway.AuthorizationType.COGNITO,
-      }
-    );
-    const boundsRes = api.root.addResource("bounds");
-    addDynamicCors(boundsRes);
-    boundsRes.addMethod(
-      "GET",
-      new apigateway.LambdaIntegration(fetchUserTemperatureBoundsFn),
-      {
-        authorizer,
-        authorizationType: apigateway.AuthorizationType.COGNITO,
-      }
-    );
+    api.root
+      .addResource("user-readings")
+      .addMethod(
+        "GET",
+        new apigateway.LambdaIntegration(fetchUserTemperaturesFn),
+        {
+          authorizer,
+          authorizationType: apigateway.AuthorizationType.COGNITO,
+          apiKeyRequired: false,
+        }
+      );
+    api.root
+      .addResource("bounds")
+      .addMethod(
+        "GET",
+        new apigateway.LambdaIntegration(fetchUserTemperatureBoundsFn),
+        {
+          authorizer,
+          authorizationType: apigateway.AuthorizationType.COGNITO,
+          apiKeyRequired: false,
+        }
+      );
 
-    // /devices
     const devicesResource = api.root.addResource("devices");
-    addDynamicCors(devicesResource);
+
     devicesResource.addMethod(
       "POST",
       new apigateway.LambdaIntegration(registerDeviceFn),
       {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,
+        apiKeyRequired: false,
       }
     );
+
     devicesResource.addMethod(
       "GET",
       new apigateway.LambdaIntegration(getAllDevicesFn),
       {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,
+        apiKeyRequired: false,
       }
     );
 
-    const delRes = api.root.addResource("delete-user-device");
-    addDynamicCors(delRes);
-    delRes.addMethod(
-      "DELETE",
-      new apigateway.LambdaIntegration(deleteUserDeviceFn),
-      {
-        authorizer,
-        authorizationType: apigateway.AuthorizationType.COGNITO,
-      }
-    );
+    api.root
+      .addResource("delete-user-device")
+      .addMethod(
+        "DELETE",
+        new apigateway.LambdaIntegration(deleteUserDeviceFn),
+        {
+          authorizer,
+          authorizationType: apigateway.AuthorizationType.COGNITO,
+          apiKeyRequired: false,
+        }
+      );
 
     const apikey = api.addApiKey("Esp32ApiKey", {
       apiKeyName: "Esp32ApiKey",

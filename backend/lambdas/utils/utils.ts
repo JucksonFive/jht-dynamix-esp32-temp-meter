@@ -1,6 +1,10 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 
-const ALLOWED_ORIGINS = new Set(["https://app.jt-dynamix.com"]);
+const ALLOWED_ORIGINS = new Set([
+  "https://app.jt-dynamix.com",
+  "http://localhost:5137",
+  "http://127.0.0.1:5173/",
+]);
 
 export const makeResponse =
   (event: APIGatewayProxyEvent) =>
@@ -8,7 +12,6 @@ export const makeResponse =
     const origin = event.headers.origin ?? event.headers.Origin ?? "";
 
     if (!ALLOWED_ORIGINS.has(origin)) {
-      // Ei paljasteta CORS-allow-originia väärille
       return {
         statusCode: 403,
         headers: {
@@ -22,8 +25,8 @@ export const makeResponse =
     return {
       statusCode,
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": "false", // bearer-auth ei tarvitse credentialsia
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "false",
         "Access-Control-Allow-Headers":
           "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
