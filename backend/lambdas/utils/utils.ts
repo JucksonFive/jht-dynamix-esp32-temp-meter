@@ -3,7 +3,7 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 const ALLOWED_ORIGINS = new Set([
   "https://app.jt-dynamix.com",
   "http://localhost:5137",
-  "http://127.0.0.1:5173/",
+  "http://127.0.0.1:5173",
 ]);
 
 export const makeResponse =
@@ -26,7 +26,6 @@ export const makeResponse =
       statusCode,
       headers: {
         "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Credentials": "false",
         "Access-Control-Allow-Headers":
           "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
         "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
@@ -39,11 +38,7 @@ export const makeResponse =
   };
 
 export const getUserId = (event: APIGatewayProxyEvent) => {
-  // REST API (CUP authorizer)
-  // @ts-ignore
   const rest = event.requestContext?.authorizer?.claims?.sub;
-  // HTTP API (JWT authorizer)
-  // @ts-ignore
   const http = event.requestContext?.authorizer?.jwt?.claims?.sub;
   return rest ?? http;
 };

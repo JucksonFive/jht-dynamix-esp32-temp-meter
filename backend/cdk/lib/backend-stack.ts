@@ -55,18 +55,12 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    const ALLOWED_ORIGIN = "https://app.jt-dynamix.com";
-
     // API Gateway REST API
     const api = new apigateway.RestApi(this, "TemperatureApi", {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
       defaultCorsPreflightOptions: {
-        allowOrigins: [
-          "http://localhost:5173",
-          "http://127.0.0.1:5173",
-          "https://app.jt-dynamix.com",
-        ],
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: apigateway.Cors.DEFAULT_HEADERS.concat([
           "X-Amz-Date",
@@ -80,28 +74,22 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": `'${
-          process.env.NODE_ENV === "production"
-            ? "https://app.jt-dynamix.com"
-            : "http://localhost:5173"
-        }'`,
-        "Access-Control-Allow-Headers":
-          "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
-        "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Headers":
+          "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Methods":
+          "'GET,OPTIONS,DELETE,POST,PUT'",
       },
     });
 
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "Access-Control-Allow-Origin": `'${
-          process.env.NODE_ENV === "production"
-            ? "https://app.jt-dynamix.com"
-            : "http://localhost:5173"
-        }'`,
-        "Access-Control-Allow-Headers":
-          "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
-        "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Headers":
+          "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Methods":
+          "'GET,OPTIONS,DELETE,POST,PUT'",
       },
     });
 
