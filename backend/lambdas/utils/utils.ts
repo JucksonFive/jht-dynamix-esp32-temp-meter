@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 
 const ALLOWED_ORIGINS = new Set([
   "https://app.jt-dynamix.com",
-  "http://localhost:5137",
+  "http://localhost:5173",
   "http://127.0.0.1:5173",
 ]);
 
