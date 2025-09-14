@@ -48,3 +48,7 @@ backend/cdk.out/*
 AGENTS.md
 .idea/
 .vscode/
+board/.pio
+board/.vscode
+board/.farm
+board/agents
