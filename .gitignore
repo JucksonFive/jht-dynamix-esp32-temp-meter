@@ -46,3 +46,5 @@ node_modules/*
 backend/cdk.out/*
 .github/instructions/instructions.md.instructions.md
 AGENTS.md
+.idea/
+.vscode/
