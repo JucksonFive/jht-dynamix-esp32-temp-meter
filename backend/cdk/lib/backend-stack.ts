@@ -56,7 +56,8 @@ export class BackendStack extends cdk.Stack {
     });
 
     // API Gateway REST API
-    const webAppOrigin = "https://app.jt-dynamix.com";
+    // Origin can be supplied via CDK context (e.g. -c webAppOrigin=...) or environment WEB_APP_ORIGIN
+    const webAppOrigin = process.env.WEB_APP_ORIGIN!;
 
     const api = new apigateway.RestApi(this, "TemperatureApi", {
       restApiName: "Temperature Service",
@@ -76,8 +77,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "method.response.header.Access-Control-Allow-Origin":
-          "'https://app.jt-dynamix.com'",
+        "method.response.header.Access-Control-Allow-Origin": `'${webAppOrigin}'`,
         "method.response.header.Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         "method.response.header.Access-Control-Allow-Methods":
@@ -88,8 +88,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "method.response.header.Access-Control-Allow-Origin":
-          "'https://app.jt-dynamix.com'",
+        "method.response.header.Access-Control-Allow-Origin": `'${webAppOrigin}'`,
         "method.response.header.Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         "method.response.header.Access-Control-Allow-Methods":
