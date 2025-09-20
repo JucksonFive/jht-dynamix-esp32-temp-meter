@@ -1,7 +1,7 @@
 export type Reading = {
   deviceId: string;
-  timestamp: string; // ISO8601
-  temperature: number; // Celsius
+  timestamp: string;
+  temperature: number;
   userId: string;
 };
 
@@ -13,6 +13,6 @@ export type ReadingsResponse = {
 export interface Device {
   deviceId: string;
   userId: string;
-  createdAt: string; // ISO8601
-  updatedAt: string; // ISO8601
+  createdAt: string;
+  updatedAt: string;
 }
