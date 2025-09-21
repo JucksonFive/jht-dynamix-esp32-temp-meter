@@ -25,9 +25,15 @@ const Shell: React.FC = () => {
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <a
             href="/"
-            className="font-extrabold text-lg tracking-wider gradient-brand"
+            className="flex items-center group"
+            aria-label={t.app.name}
           >
-            {t.app.name}
+            <img
+              src="/jt-dynamix-logo.svg"
+              alt="JT-DYNAMIX"
+              className="h-8 w-auto select-none transition-opacity group-hover:opacity-90"
+              draggable={false}
+            />
           </a>
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <a
