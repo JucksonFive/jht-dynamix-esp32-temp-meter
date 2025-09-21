@@ -18,6 +18,11 @@ module.exports = {
           blue: "#6366f1",
           cyan: "#06b6d4",
         },
+        brand: {
+          primary: "#6366f1", // reuse neon blue
+          accent: "#d946ef",
+          dark: "#1f2937",
+        },
       },
       backgroundImage: {
         "gradient-dashboard":
@@ -27,6 +32,7 @@ module.exports = {
         "glow-purple":
           "0 0 0 1px rgba(124,58,237,0.4), 0 4px 24px -4px rgba(124,58,237,0.35)",
         "inner-soft": "inset 0 1px 0 0 rgba(255,255,255,0.04)",
+        card: "0 2px 4px -2px rgba(0,0,0,0.06), 0 4px 12px -2px rgba(0,0,0,0.04)",
       },
       keyframes: {
         "pulse-glow": {

@@ -60,7 +60,7 @@ export const MediaCarousel: React.FC<{
 
   const baseClasses = background
     ? "absolute inset-0 w-full h-full overflow-hidden"
-    : "relative w-full aspect-[4/3] md:aspect-[5/4] lg:aspect-[4/3] overflow-hidden rounded-2xl border border-white/10 bg-midnight-800/40 backdrop-blur shadow-glow-purple";
+    : "relative w-full aspect-[4/3] md:aspect-[5/4] lg:aspect-[4/3] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-card";
 
   return (
     <div className={`${baseClasses} ${className}`.trim()}>
@@ -105,8 +105,8 @@ export const MediaCarousel: React.FC<{
               onClick={() => setIndex(i)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 i === index
-                  ? "bg-neon-pink w-8"
-                  : "bg-white/25 w-2 hover:bg-white/40"
+                  ? "bg-brand-primary w-8"
+                  : "bg-gray-300 w-2 hover:bg-gray-400"
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />

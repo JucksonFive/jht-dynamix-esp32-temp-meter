@@ -3,12 +3,13 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { font-family: system-ui, sans-serif; }
+body { font-family: system-ui, sans-serif; background: #ffffff; color: #1f2937; }
 
+/* Subtle light grid (used if needed) */
 .bg-grid {
   background-image:
-    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
@@ -17,5 +18,9 @@ body { font-family: system-ui, sans-serif; }
 }
 
 .card-glow {
-  @apply bg-midnight-800/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-glow-purple hover:border-neon-purple/40 transition-colors;
+  @apply bg-white border border-gray-200 rounded-2xl p-6 shadow-card hover:shadow-lg transition-shadow;
+}
+
+.gradient-brand {
+  @apply bg-gradient-to-r from-brand-primary via-neon-pink to-brand-accent text-transparent bg-clip-text;
 }
