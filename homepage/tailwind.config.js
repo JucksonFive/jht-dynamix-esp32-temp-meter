@@ -28,6 +28,15 @@ module.exports = {
           "0 0 0 1px rgba(124,58,237,0.4), 0 4px 24px -4px rgba(124,58,237,0.35)",
         "inner-soft": "inset 0 1px 0 0 rgba(255,255,255,0.04)",
       },
+      keyframes: {
+        "pulse-glow": {
+          "0%,100%": { opacity: "0.55", transform: "scale(1)" },
+          "50%": { opacity: "0.9", transform: "scale(1.03)" },
+        },
+      },
+      animation: {
+        "pulse-glow": "pulse-glow 6s ease-in-out infinite",
+      },
     },
   },
   plugins: [require("@tailwindcss/forms")],
