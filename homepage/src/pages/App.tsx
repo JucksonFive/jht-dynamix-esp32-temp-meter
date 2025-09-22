@@ -6,13 +6,28 @@ import { I18nProvider, useI18n } from "../locales/I18nProvider";
 
 const LanguageSwitcher: React.FC = () => {
   const { lang, toggle, t } = useI18n();
+  const nextLang = lang === "fi" ? "en" : "fi";
+  const flag = lang === "fi" ? "🇫🇮" : "🇬🇧"; // current language flag
+  const nextFlag = nextLang === "fi" ? "🇫🇮" : "🇬🇧"; // flag shown as target (optional)
   return (
     <button
       onClick={toggle}
-      className="text-xs font-medium px-3 py-2 rounded-lg border border-gray-300 hover:border-brand-primary bg-white text-gray-600 hover:text-gray-900 shadow-sm transition"
+      className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg border border-gray-300 hover:border-brand-primary bg-white text-body hover:text-heading shadow-sm transition"
       aria-label={t.app.lang.switch}
+      title={t.app.lang.switch}
     >
-      {lang === "fi" ? t.app.lang.en : t.app.lang.fi}
+      <span aria-hidden className="text-base leading-none">
+        {flag}
+      </span>
+      <span className="hidden sm:inline">
+        {lang === "fi" ? t.app.lang.fi : t.app.lang.en}
+      </span>
+      <span aria-hidden className="text-[10px] opacity-60 hidden sm:inline">
+        →
+      </span>
+      <span aria-hidden className="text-base leading-none hidden sm:inline">
+        {nextFlag}
+      </span>
     </button>
   );
 };
