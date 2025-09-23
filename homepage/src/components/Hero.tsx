@@ -26,7 +26,8 @@ export const Hero: React.FC = () => {
             <span className="block">{line1}</span>
             {line2 && (
               <span className="block mt-2">
-                {line2} {highlight && (
+                {line2}{" "}
+                {highlight && (
                   <span className="text-gray-900">{highlight}</span>
                 )}
               </span>
