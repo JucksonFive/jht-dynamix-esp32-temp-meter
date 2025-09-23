@@ -27,6 +27,8 @@ module.exports = {
       backgroundImage: {
         "gradient-dashboard":
           "radial-gradient(circle at 20% 20%, rgba(124,58,237,0.15), transparent 60%), radial-gradient(circle at 80% 30%, rgba(6,182,212,0.12), transparent 65%), linear-gradient(135deg, #111827 0%, #1f2937 60%, #0f172a 100%)",
+        "hero-light":
+          "radial-gradient(circle at 18% 25%, rgba(99,102,241,0.14), transparent 55%), radial-gradient(circle at 82% 70%, rgba(6,182,212,0.12), transparent 60%), linear-gradient(180deg,#ffffff 0%, #f8fafc 85%)",
       },
       boxShadow: {
         "glow-purple":
