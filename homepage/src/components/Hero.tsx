@@ -48,7 +48,7 @@ export const Hero: React.FC = () => {
               {t.app.hero.ctaFeatures}
             </a>
             <a
-              href="/dashboard"
+              href="https://app.jt-dynamix.com"
               className="inline-flex items-center gap-2 rounded-full bg-white text-gray-900 px-8 py-3 text-sm font-semibold shadow-sm hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-white/40"
             >
               {t.app.hero.ctaDashboard}

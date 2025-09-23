@@ -8,7 +8,7 @@ export const Features: React.FC = () => {
     <section id="ominaisuudet" className="relative py-24 bg-white">
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-gray-50 to-transparent" />
       <div className="relative max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-bold gradient-brand mb-12 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
           {t.app.features.heading}
         </h2>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
