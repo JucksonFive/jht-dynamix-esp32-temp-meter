@@ -13,6 +13,21 @@ export const en = {
         "Smart IoT platform for monitoring temperature, devices and environment. Fast to deploy, secure and extensible.",
       ctaFeatures: "Explore features",
       ctaDashboard: "Open Dashboard",
+      headline: {
+        line1: "All Your Device",
+        line2: "Monitoring Needs in a",
+        highlight: "Simple Platform",
+      },
+      actions: [
+        { label: "Watch Demo", href: "#demo", icon: "▶" },
+        { label: "Docs", href: "#docs", icon: "📘" },
+        { label: "GitHub", href: "https://github.com", icon: "💻" },
+      ],
+      statBlocks: [
+        { title: "Devices", value: "24" },
+        { title: "Readings / day", value: "18k" },
+        { title: "Latency", value: "<1s" },
+      ],
     },
     features: {
       heading: "Key Features",

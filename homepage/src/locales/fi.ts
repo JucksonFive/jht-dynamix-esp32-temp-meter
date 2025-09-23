@@ -13,6 +13,21 @@ export const fi = {
         "Älykäs IoT-alusta lämpötilan, laitteiden ja ympäristön seurantaan. Nopeasti käyttöönotettava, turvallinen ja laajennettava.",
       ctaFeatures: "Tutustu ominaisuuksiin",
       ctaDashboard: "Avaa Dashboard",
+      headline: {
+        line1: "Kaikki testaus-",
+        line2: "ja seuranta tarpeesi",
+        highlight: "yhdellä alustalla",
+      },
+      actions: [
+        { label: "Katso demo", href: "#demo", icon: "▶" },
+        { label: "Dokumentaatio", href: "#docs", icon: "📘" },
+        { label: "GitHub", href: "https://github.com", icon: "💻" },
+      ],
+      statBlocks: [
+        { title: "Laitteita", value: "24" },
+        { title: "Lukemia / pv", value: "18k" },
+        { title: "Viive", value: "<1s" },
+      ],
     },
     features: {
       heading: "Keskeiset ominaisuudet",
