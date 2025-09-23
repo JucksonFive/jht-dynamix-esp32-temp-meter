@@ -53,3 +53,4 @@ board/.vscode
 board/.farm
 board/agents
 homepage/node_modules/
+homepage/dist/assets/**
