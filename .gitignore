@@ -54,3 +54,4 @@ board/.farm
 board/agents
 homepage/node_modules/
 homepage/dist/assets/**
+homepage/src/media
