@@ -54,3 +54,18 @@ On the first boot, the device will start in Access Point (AP) mode.
 4.  The configuration will be saved to `mqtt.json` in the LittleFS filesystem.
 
 After configuration, the device will restart and connect to the configured WiFi and MQTT broker.
+
+
+<p align="center">
+	<img src="Untitled diagram _ Mermaid Chart-2025-09-25-123502.png" alt="Initial provisioning and configuration flow diagram" width="680" />
+	<br />
+	<em>Figure 1. Device first‑boot provisioning: the ESP32 starts in AP mode, user connects to the setup portal, submits WiFi + MQTT credentials, which are persisted to LittleFS before the device reboots into normal operation.</em>
+</p>
+
+
+
+<p align="center">
+	<img src="Untitled diagram _ Mermaid Chart-2025-09-25-123912.png" alt="Normal operation data flow diagram" width="680" />
+	<br />
+	<em>Figure 2. Normal runtime data path: sensor → ESP32 (periodic read & validation) → MQTT publish → backend / consumers; includes reconnection handling and status reporting.</em>
+</p>
