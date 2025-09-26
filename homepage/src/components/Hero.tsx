@@ -1,5 +1,6 @@
 import React from "react";
 import { useI18n } from "../locales/I18nProvider";
+import { MediaCarousel } from "./MediaCarousel";
 
 export const Hero: React.FC = () => {
   const { t } = useI18n();
@@ -9,15 +10,7 @@ export const Hero: React.FC = () => {
 
   return (
     <section className="relative overflow-hidden min-h-[80vh] md:min-h-[92vh] flex items-stretch">
-      <video
-        className="absolute inset-0 w-full h-full object-cover"
-        src="/media/demo.mp4"
-        poster="/media/slide-1.svg"
-        autoPlay
-        playsInline
-        muted
-        loop
-      />
+      <MediaCarousel background className="absolute inset-0" />
       <div
         aria-hidden
         className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/0"

@@ -20,22 +20,14 @@ type Slide = ImageSlide | VideoSlide;
 const slides: Slide[] = [
   {
     id: "s1",
-    type: "image",
-    src: "/media/slide-1.svg",
-    alt: "JT-DYNAMIX gradient brand",
+    type: "video",
+    src: "/media/output.mp4",
   },
   {
     id: "s2",
-    type: "image",
-    src: "/media/slide-2.svg",
-    alt: "Platform feature highlights",
-  },
-  {
-    id: "s3",
     type: "video",
-    src: "/media/demo.mp4",
-    poster: "/media/slide-1.svg",
-  }, // replace with actual video
+    src: "/media/rain.mp4",
+  },
 ];
 
 const INTERVAL = 6500;
@@ -46,7 +38,6 @@ export const MediaCarousel: React.FC<{
 }> = ({ background = false, className = "" }) => {
   const [index, setIndex] = useState(0);
   const timerRef = useRef<number | null>(null);
-  const active = slides[index];
 
   useEffect(() => {
     if (timerRef.current) window.clearTimeout(timerRef.current);
@@ -77,7 +68,7 @@ export const MediaCarousel: React.FC<{
             {s.type === "image" ? (
               <img
                 src={s.src}
-                alt={(s as ImageSlide).alt}
+                alt={s.alt}
                 className="w-full h-full object-cover object-center select-none"
                 draggable={false}
               />
@@ -86,7 +77,7 @@ export const MediaCarousel: React.FC<{
                 key={s.src}
                 className="w-full h-full object-cover"
                 src={s.src}
-                poster={(s as VideoSlide).poster}
+                poster={s.poster}
                 autoPlay
                 playsInline
                 muted
