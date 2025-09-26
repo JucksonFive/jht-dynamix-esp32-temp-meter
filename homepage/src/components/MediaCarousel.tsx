@@ -28,6 +28,11 @@ const slides: Slide[] = [
     type: "video",
     src: "/media/rain.mp4",
   },
+  {
+    id: "s3",
+    type: "video",
+    src: "/media/couple_output.mp4",
+  },
 ];
 
 const INTERVAL = 6500;
