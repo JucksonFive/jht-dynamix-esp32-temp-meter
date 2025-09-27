@@ -55,4 +55,8 @@ board/agents
 homepage/node_modules/
 homepage/dist/assets/**
 homepage/src/media
-homepage/public/media/*
+homepage/dist/media/
+homepage/dist/media/*.mp4
+homepage/public/media/output.mp4
+homepage/public/media/rain.mp4
+homepage/public/media/couple_output.mp4
