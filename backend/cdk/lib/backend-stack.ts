@@ -55,13 +55,11 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    const webAppOrigin = process.env.WEB_APP_ORIGIN!;
-
     const api = new apigateway.RestApi(this, "TemperatureApi", {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
       defaultCorsPreflightOptions: {
-        allowOrigins: [webAppOrigin],
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: apigateway.Cors.DEFAULT_HEADERS.concat([
           "X-Amz-Date",
@@ -75,7 +73,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        "method.response.header.Access-Control-Allow-Origin": `'${webAppOrigin}'`,
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
         "method.response.header.Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         "method.response.header.Access-Control-Allow-Methods":
@@ -86,7 +84,7 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default5xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
-        "method.response.header.Access-Control-Allow-Origin": `'${webAppOrigin}'`,
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
         "method.response.header.Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         "method.response.header.Access-Control-Allow-Methods":
