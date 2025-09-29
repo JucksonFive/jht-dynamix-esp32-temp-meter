@@ -1,16 +1,17 @@
-import React from "react";
+import { format } from "date-fns";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { format } from "date-fns";
-import strings from "../../../locale/strings";
+import { useTranslation } from "react-i18next";
 
 type DateStr = string;
+
 interface Props {
   value: { from: DateStr; to: DateStr };
   onChange: (r: { from: DateStr; to: DateStr }) => void;
 }
 
 export const DateRangePicker = ({ value, onChange }: Props) => {
+  const { t } = useTranslation();
   const fromDate = value.from ? new Date(value.from) : null;
   const toDate = value.to ? new Date(value.to) : null;
 
@@ -18,7 +19,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
     <div className="flex flex-col gap-3 relative z-30 text-xs">
       <div className="flex flex-col gap-1 w-full">
         <label className="block text-[10px] uppercase tracking-wide font-semibold text-gray-400">
-          {strings.fromLabel}
+          {t("fromLabel")}
         </label>
         <div className="relative group">
           <DatePicker
@@ -42,7 +43,7 @@ export const DateRangePicker = ({ value, onChange }: Props) => {
       </div>
       <div className="flex flex-col gap-1 w-full">
         <label className="block text-[10px] uppercase tracking-wide font-semibold text-gray-400">
-          {strings.toLabel}
+          {t("toLabel")}
         </label>
         <div className="relative group">
           <DatePicker

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { deleteUserDevice } from "../../../../services/api";
+import { useTranslation } from "react-i18next";
 import { FiTrash2 } from "react-icons/fi";
-import strings from "../../../../locale/strings";
+import { deleteUserDevice } from "../../../../services/api";
 import ConfirmDialog from "../../../../ui/Elements/Modal/ConfirmDialog";
 import ErrorIndicator from "./ErrorIndicator";
 
@@ -19,6 +19,7 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   const handleDelete = async () => {
     if (loading) return;
@@ -44,7 +45,7 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
           e.stopPropagation();
           setOpen(true);
         }}
-        title={loading ? strings.deleteAction : strings.deleteDevice}
+        title={loading ? t("deleteAction") : t("deleteDevice")}
         className={`p-1 rounded-md transition-colors text-red-400 hover:text-red-200 hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40 ${
           loading ? "opacity-60 cursor-not-allowed" : ""
         }`}
@@ -55,10 +56,10 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
       {error && <ErrorIndicator title={error} size={14} className="ml-1" />}
       <ConfirmDialog
         open={open}
-        title={strings.deleteDevice}
-        description={strings.deleteAction}
-        confirmLabel={strings.confirm}
-        cancelLabel={strings.cancel}
+        title={t("deleteDevice")}
+        description={t("deleteAction")}
+        confirmLabel={t("confirm")}
+        cancelLabel={t("cancel")}
         destructive
         icon={<FiTrash2 />}
         loading={loading}

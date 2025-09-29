@@ -60,3 +60,4 @@ homepage/dist/media/*.mp4
 homepage/public/media/output.mp4
 homepage/public/media/rain.mp4
 homepage/public/media/couple_output.mp4
+dashboard/src/.App.tsx.swp

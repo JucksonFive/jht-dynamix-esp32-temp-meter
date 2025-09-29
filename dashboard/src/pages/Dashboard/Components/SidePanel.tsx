@@ -1,11 +1,11 @@
 import React from "react";
-import strings from "../../../locale/strings";
-import { InfoButton } from "./Buttons/InfoButton";
-import { DeviceSelectButton } from "./Buttons/DeviceSelectButton";
-import DeleteDeviceButton from "./Buttons/DeleteDeviceButton";
-import SelectAllDevicesButton from "./Buttons/SelectAllDevicesButton";
+import { useTranslation } from "react-i18next";
 import { Device } from "../../../services/types";
+import DeleteDeviceButton from "./Buttons/DeleteDeviceButton";
 import DeviceMultiToggle from "./Buttons/DeviceMultiToggle";
+import { DeviceSelectButton } from "./Buttons/DeviceSelectButton";
+import { InfoButton } from "./Buttons/InfoButton";
+import SelectAllDevicesButton from "./Buttons/SelectAllDevicesButton";
 
 export interface SidePanelProps {
   devices: Device[];
@@ -22,10 +22,13 @@ export const SidePanel: React.FC<SidePanelProps> = ({
   selectedIds,
   onSelectSingle,
   onToggleMulti,
-  title = strings.sidePanelTitle,
+  title = undefined,
   onDeviceDeleted,
   className = "",
 }) => {
+  const { t } = useTranslation();
+  const panelTitle = title || t("sidePanelTitle");
+
   const handleSelectAll = () => {
     devices.forEach((d) => {
       if (!selectedIds.includes(d.deviceId)) {
@@ -57,7 +60,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
       />
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <h2 className="text-lg font-semibold">{panelTitle}</h2>
           <InfoButton />
         </div>
         <div className="mb-3">
@@ -86,7 +89,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                     lastSeen={d.updatedAt}
                     active={isActive}
                     onSelect={onSelectSingle}
-                    title={strings.tooltipSelectSingle}
+                    title={t("tooltipSelectSingle")}
                   />
                   <div className="flex items-center gap-2">
                     <DeviceMultiToggle
@@ -103,7 +106,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             );
           })}
           {devices.length === 0 && (
-            <li className="text-sm text-gray-500">{strings.noDevices}</li>
+            <li className="text-sm text-gray-500">{t("noDevices")}</li>
           )}
         </ul>
       </div>
