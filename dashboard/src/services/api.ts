@@ -2,8 +2,8 @@ import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { Device, ReadingsResponse } from "./types";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
-if (!BASE_URL) throw new Error("VITE_API_URL is not defined");
+const BASE_URL = import.meta.env.VITE_BASE_API_URL;
+if (!BASE_URL) throw new Error("VITE_BASE_API_URL is not defined");
 
 async function apiRequest<T>(opts: {
   method?: "GET" | "POST" | "DELETE" | "PUT";

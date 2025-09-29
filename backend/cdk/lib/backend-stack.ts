@@ -55,8 +55,6 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    // API Gateway REST API
-    // Origin can be supplied via CDK context (e.g. -c webAppOrigin=...) or environment WEB_APP_ORIGIN
     const webAppOrigin = process.env.WEB_APP_ORIGIN!;
 
     const api = new apigateway.RestApi(this, "TemperatureApi", {
