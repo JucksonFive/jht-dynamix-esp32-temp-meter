@@ -7,7 +7,7 @@ if (!BASE_URL) throw new Error("VITE_API_URL is not defined");
 
 async function apiRequest<T>(opts: {
   method?: "GET" | "POST" | "DELETE" | "PUT";
-  path: string; // esim. "/user-readings"
+  path: string;
   params?: Record<string, any>;
   data?: any;
   signal?: AbortSignal;
