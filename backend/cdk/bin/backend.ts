@@ -4,10 +4,12 @@ import * as dotenv from "dotenv";
 import { AuthStack } from "../lib/auth-stack";
 import { BackendStack } from "../lib/backend-stack";
 import { DashboardHostingStack } from "../lib/dashboard-hosting-stack";
+
 import { EspAuthStack } from "../lib/esp-auth-stack";
 import { InfrastructureStack } from "../lib/infrastructure-stack";
 import { LambdaStack } from "../lib/lambda-stack";
 import { CertStack } from "../lib/cert-stack";
+import { HomepageHostingStack } from "cdk/lib/homepage-hosting-stack";
 
 dotenv.config({ path: require("path").resolve(__dirname, "../../.env") });
 const app = new cdk.App();
@@ -24,10 +26,16 @@ const skipCertCreation =
 // Stack for the certificate in us-east-1 (optional)
 let certStack: CertStack | undefined;
 if (!skipCertCreation && domainName && siteDomain) {
+  // Single certificate (in us-east-1) that covers:
+  // - Dashboard subdomain (siteDomain)
+  // - Apex domain (domainName) for homepage
+  // - Wildcard for future additional sub-subdomains
+  const additionalDomains = [domainName, `*.${domainName}`];
   certStack = new CertStack(app, "CertStack", {
     env: { account, region: "us-east-1" },
     domainName,
     siteDomain,
+    additionalDomains,
   });
 }
 
@@ -60,17 +68,34 @@ const backendStack = new BackendStack(app, "BackendStack", {
   userPool: authStack.userPool,
 });
 
-new EspAuthStack(app, "EspAuthStack", {
+const espAuthStack = new EspAuthStack(app, "EspAuthStack", {
   env: { account, region },
   userPoolId: authStack.userPool.userPoolId,
   clientId: authStack.userPoolClient.userPoolClientId,
 });
 
+let dashboardHostingStack: DashboardHostingStack | undefined;
 if (domainName && siteDomain && certStack?.certificateArn) {
-  new DashboardHostingStack(app, "DashboardHostingStack", {
+  dashboardHostingStack = new DashboardHostingStack(
+    app,
+    "DashboardHostingStack",
+    {
+      env: { account, region },
+      domainName,
+      siteDomain,
+      certificateArn: certStack.certificateArn,
+      crossRegionReferences: true,
+    }
+  );
+}
+
+// Deploy homepage at the apex (root) domain using same certificate
+let homepageHostingStack: HomepageHostingStack | undefined;
+if (domainName && certStack?.certificateArn) {
+  homepageHostingStack = new HomepageHostingStack(app, "HomepageHostingStack", {
     env: { account, region },
     domainName,
-    siteDomain,
+    siteDomain: domainName, // apex domain
     certificateArn: certStack.certificateArn,
     crossRegionReferences: true,
   });
