@@ -55,6 +55,43 @@ export const en = {
       ],
     },
     footer: {
+      intro: {
+        tagline: "Connected thermal intelligence for modern operations.",
+        description:
+          "Monitor devices, temperatures and alerts from a single secure command center built on AWS.",
+        ctaLabel: "Talk to our team",
+        ctaHref: "mailto:info@jt-dynamix.com",
+      },
+      columns: {
+        product: {
+          title: "Product",
+        },
+        company: {
+          title: "Company",
+          about: "About us",
+          blog: "Updates",
+        },
+        support: {
+          title: "Support",
+        },
+      },
+      contact: {
+        emailLabel: "Email",
+        phoneLabel: "Phone",
+        addressLabel: "Office",
+        availability: "Mon–Fri 8:00–16:00 (EET)",
+        email: "info@jt-dynamix.com",
+        phone: "+358 10 123 4567",
+        address: "Helsinki, Finland",
+      },
+      social: {
+        title: "Stay in the loop",
+        linkedin: "LinkedIn",
+        linkedinUrl: "https://www.linkedin.com/company/jt-dynamix",
+        github: "GitHub",
+        githubUrl: "https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter",
+      },
+      madeIn: "Built with ❤️ in Finland",
       copyright: (year: number) => `© ${year} JT-DYNAMIX. All rights reserved.`,
     },
     lang: {

@@ -55,6 +55,43 @@ export const fi = {
       ],
     },
     footer: {
+      intro: {
+        tagline: "Lämpötilatiedon hallintaa modernille tuotannolle.",
+        description:
+          "Valvo laitteita, lämpötiloja ja hälytyksiä yhdestä turvallisesta ohjauspaneelista AWS-alustan päällä.",
+        ctaLabel: "Ota yhteyttä",
+        ctaHref: "mailto:info@jt-dynamix.com",
+      },
+      columns: {
+        product: {
+          title: "Tuote",
+        },
+        company: {
+          title: "Yritys",
+          about: "Yrityksestä",
+          blog: "Ajankohtaista",
+        },
+        support: {
+          title: "Tuki",
+        },
+      },
+      contact: {
+        emailLabel: "Sähköposti",
+        phoneLabel: "Puhelin",
+        addressLabel: "Toimisto",
+        availability: "Ma–Pe 8:00–16:00 (EET)",
+        email: "info@jt-dynamix.com",
+        phone: "+358 10 123 4567",
+        address: "Helsinki, Suomi",
+      },
+      social: {
+        title: "Seuraa meitä",
+        linkedin: "LinkedIn",
+        linkedinUrl: "https://www.linkedin.com/company/jt-dynamix",
+        github: "GitHub",
+        githubUrl: "https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter",
+      },
+      madeIn: "Rakkaudella tehty Suomessa",
       copyright: (year: number) =>
         `© ${year} JT-DYNAMIX. Kaikki oikeudet pidätetään.`,
     },
