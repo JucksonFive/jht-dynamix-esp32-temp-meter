@@ -33,11 +33,7 @@ export const Footer: React.FC = () => {
   const columns = [
     {
       title: t.app.footer.columns.product.title,
-      links: [
-        { label: t.app.nav.features, href: "#ominaisuudet" },
-        { label: t.app.nav.dashboard, href: "/dashboard" },
-        { label: t.app.nav.docs, href: "#docs" },
-      ],
+      links: [{ label: t.app.nav.dashboard, href: "/dashboard" }],
     },
     {
       title: t.app.footer.columns.company.title,
@@ -76,9 +72,9 @@ export const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="relative mt-20 border-t border-gray-200 bg-gradient-to-b from-white via-white/95 to-gray-50/80">
+    <footer className="relative mt-20 border-t border-slate-800/60 bg-gradient-to-b from-[#0f172a] via-[#111827] to-[#0b1120] text-slate-300">
       <div className="absolute inset-x-0 top-0 -translate-y-1/2">
-        <div className="mx-auto h-px w-11/12 bg-gradient-to-r from-transparent via-brand-primary/40 to-transparent" />
+        <div className="mx-auto h-px w-11/12 bg-gradient-to-r from-transparent via-brand-primary/50 to-transparent" />
       </div>
 
       <div className="relative mx-auto max-w-6xl px-6 py-16">
@@ -88,15 +84,15 @@ export const Footer: React.FC = () => {
               <span className="text-xs font-semibold uppercase tracking-[0.3em] text-brand-primary">
                 {t.app.name}
               </span>
-              <h2 className="mt-4 text-2xl font-semibold text-gray-900">
+              <h2 className="mt-4 text-2xl font-semibold text-white">
                 {t.app.footer.intro.tagline}
               </h2>
-              <p className="mt-4 text-sm text-gray-600">
+              <p className="mt-4 text-sm text-slate-300">
                 {t.app.footer.intro.description}
               </p>
               <Link
                 href={t.app.footer.intro.ctaHref}
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-gray-900 px-5 py-2 text-sm font-medium text-white shadow-sm shadow-gray-500/20 transition hover:bg-gray-700"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-medium text-slate-900 shadow-sm shadow-black/20 transition hover:bg-slate-200"
               >
                 {t.app.footer.intro.ctaLabel}
                 <span aria-hidden="true">→</span>
@@ -106,13 +102,15 @@ export const Footer: React.FC = () => {
             <div className="flex flex-1 flex-col gap-10 sm:grid sm:grid-cols-2 lg:grid-cols-3">
               {columns.map((column) => (
                 <div key={column.title}>
-                  <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                     {column.title}
                   </h3>
-                  <ul className="mt-4 space-y-3 text-sm text-gray-600">
+                  <ul className="mt-4 space-y-3 text-sm text-slate-300">
                     {column.links.map((item) => (
                       <li key={item.label}>
-                        <Link href={item.href}>{item.label}</Link>
+                        <Link href={item.href} className="text-slate-300">
+                          {item.label}
+                        </Link>
                       </li>
                     ))}
                   </ul>
@@ -120,28 +118,28 @@ export const Footer: React.FC = () => {
               ))}
 
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-400">
                   {t.app.footer.columns.support.title}
                 </h3>
-                <ul className="mt-4 space-y-3 text-sm text-gray-600">
+                <ul className="mt-4 space-y-3 text-sm text-slate-300">
                   {contactItems.map((item) => (
                     <li key={item.label}>
-                      <span className="block text-xs uppercase tracking-wide text-gray-400">
+                      <span className="block text-xs uppercase tracking-wide text-slate-400">
                         {item.label}
                       </span>
-                      <Link href={item.href} className="text-gray-700">
+                      <Link href={item.href} className="text-slate-200">
                         {item.value}
                       </Link>
                     </li>
                   ))}
                   <li>
-                    <span className="block text-xs uppercase tracking-wide text-gray-400">
+                    <span className="block text-xs uppercase tracking-wide text-slate-400">
                       {t.app.footer.contact.addressLabel}
                     </span>
-                    <p className="text-gray-700">
+                    <p className="text-slate-200">
                       {t.app.footer.contact.address}
                     </p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-slate-400">
                       {t.app.footer.contact.availability}
                     </p>
                   </li>

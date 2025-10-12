@@ -84,13 +84,6 @@ export const en = {
         phone: "+358 10 123 4567",
         address: "Helsinki, Finland",
       },
-      social: {
-        title: "Stay in the loop",
-        linkedin: "LinkedIn",
-        linkedinUrl: "https://www.linkedin.com/company/jt-dynamix",
-        github: "GitHub",
-        githubUrl: "https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter",
-      },
       madeIn: "Built with ❤️ in Finland",
       copyright: (year: number) => `© ${year} JT-DYNAMIX. All rights reserved.`,
     },
