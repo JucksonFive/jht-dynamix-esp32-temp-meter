@@ -64,3 +64,4 @@ dashboard/src/.App.tsx.swp
 .continue/agents/*.yaml
 agents/tasks/venv/*
 agents/tasks/.env
+agents/tasks/tickets/*

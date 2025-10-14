@@ -55,21 +55,76 @@ log(f"[INIT] Project root resolved to: {PROJECT_ROOT}")
 
 
 def collect_project_context(root: Path, max_bytes: int = 20000) -> str:
-    """Collects key project texts for the model."""
+    """Collects key project texts for the model from all project areas."""
     chunks = []
-    for path in sorted(root.glob("**/*")):
-        if path.is_dir() or "venv" in path.parts:
+    total_bytes = 0
+    
+    # Define important project areas to ensure coverage
+    important_areas = [
+        "backend",     # AWS CDK + Lambdas
+        "dashboard",   # React frontend
+        "homepage",    # Landing page
+        "board",       # ESP32 firmware
+        "agents",      # AI automation scripts
+    ]
+    
+    # First, collect from important areas to ensure representation
+    for area in important_areas:
+        area_path = root / area
+        if not area_path.exists():
             continue
-        if path.suffix.lower() not in {".py", ".md", ".txt", ".ts", ".tsx", }:
-            continue
-        try:
-            content = path.read_text(encoding="utf-8")
-        except (UnicodeDecodeError, OSError):
-            continue
-        snippet = content[: max_bytes // 5]
-        chunks.append(f"# File: {path.relative_to(root)}\n{snippet}\n")
-        if sum(len(chunk) for chunk in chunks) >= max_bytes:
-            break
+            
+        log(f"[CTX] Scanning {area}/...")
+        area_files = []
+        
+        for path in sorted(area_path.glob("**/*")):
+            if path.is_dir() or "venv" in path.parts or "node_modules" in path.parts:
+                continue
+            if path.suffix.lower() not in {".py", ".md", ".txt", ".ts", ".tsx", ".cpp", ".h", ".ino", ".json"}:
+                continue
+            if path.name in {"package-lock.json", ".gitignore"}:
+                continue
+                
+            try:
+                content = path.read_text(encoding="utf-8")
+                # Take a reasonable snippet from each file
+                snippet_size = min(len(content), max_bytes // (len(important_areas) * 3))
+                snippet = content[:snippet_size]
+                
+                file_info = f"# File: {path.relative_to(root)}\n{snippet}\n"
+                area_files.append((len(file_info), file_info))
+                
+            except (UnicodeDecodeError, OSError):
+                continue
+        
+        # Sort by size and add largest files first from this area
+        area_files.sort(key=lambda x: x[0], reverse=True)
+        area_budget = max_bytes // len(important_areas)
+        area_bytes = 0
+        
+        for file_size, file_content in area_files:
+            if total_bytes + file_size > max_bytes or area_bytes + file_size > area_budget:
+                break
+            chunks.append(file_content)
+            total_bytes += file_size
+            area_bytes += file_size
+            
+        log(f"[CTX] {area}: {len([f for s, f in area_files if total_bytes >= s])} files, {area_bytes} bytes")
+    
+    # Add any remaining important files from root
+    for path in sorted(root.glob("*")):
+        if path.is_file() and path.suffix.lower() in {".md", ".json", ".yaml", ".yml"}:
+            if total_bytes >= max_bytes:
+                break
+            try:
+                content = path.read_text(encoding="utf-8")
+                snippet = content[:min(len(content), max_bytes - total_bytes)]
+                file_info = f"# File: {path.relative_to(root)}\n{snippet}\n"
+                chunks.append(file_info)
+                total_bytes += len(file_info)
+            except (UnicodeDecodeError, OSError):
+                continue
+    
     return "\n".join(chunks)
 
 
@@ -84,17 +139,22 @@ log(f"[CTX] Context collected ({len(project_context)} chars) in {time.time()-_t0
 # Load previous ideas to avoid repetition
 def load_previous_ideas() -> List[str]:
     """Load previously generated ideas to avoid repetition."""
-    tickets_file = TASK_DIR / "generated_tickets.md"
+    tickets_dir = TASK_DIR / "tickets"
     previous_ideas = []
-    if tickets_file.exists():
+    if tickets_dir.exists():
         try:
-            content = tickets_file.read_text(encoding="utf-8")
-            # Extract ticket titles from markdown headers
-            for line in content.splitlines():
-                if line.startswith("## Ticket"):
-                    title = line.split(":", 1)[1].strip() if ":" in line else ""
-                    if title:
-                        previous_ideas.append(title)
+            # Read all markdown files in tickets directory
+            for ticket_file in tickets_dir.glob("*.md"):
+                content = ticket_file.read_text(encoding="utf-8")
+                # Extract ticket title from first markdown header
+                for line in content.splitlines():
+                    if line.startswith("# ") or line.startswith("## "):
+                        title = line.lstrip("# ").strip()
+                        if ":" in title:
+                            title = title.split(":", 1)[1].strip()
+                        if title:
+                            previous_ideas.append(title)
+                        break
         except Exception as e:
             log(f"[WARNING] Could not load previous ideas: {e}")
     return previous_ideas
@@ -258,11 +318,37 @@ def create_ticket(idea: str, critique: Dict[str,str], idx: int) -> str:
         return f"## Ticket {idx}: (error creating)\nError: {e}\n"
     return rsp.text
 
+def save_ticket_to_file(ticket_content: str, ticket_number: int) -> Path:
+    """Save individual ticket to its own file in tickets/ directory."""
+    tickets_dir = TASK_DIR / "tickets"
+    tickets_dir.mkdir(exist_ok=True)
+    
+    # Extract title for filename
+    title_line = ""
+    for line in ticket_content.splitlines():
+        if line.startswith("## Ticket"):
+            title_line = line.split(":", 1)[1].strip() if ":" in line else f"ticket-{ticket_number}"
+            break
+    
+    # Create safe filename
+    safe_title = "".join(c for c in title_line if c.isalnum() or c in (' ', '-', '_')).strip()
+    safe_title = safe_title.replace(' ', '-').lower()[:50]  # Max 50 chars
+    if not safe_title:
+        safe_title = f"ticket-{ticket_number}"
+    
+    filename = f"{ticket_number:03d}-{safe_title}.md"
+    file_path = tickets_dir / filename
+    
+    with file_path.open("w", encoding="utf-8") as f:
+        f.write(ticket_content)
+    
+    return file_path
+
 accepted = 0
 log("[FLOW] Starting idea round")
 idea_batch = generate_raw_ideas(min(5, MAX_IDEAS), previous_ideas)
 log(f"[FLOW] Got {len(idea_batch)} ideas for first round")
-tickets_out: List[str] = []
+ticket_files: List[Path] = []
 
 for i, original_idea in enumerate(idea_batch, start=1):
     if accepted >= MAX_TICKETS or i > MAX_IDEAS:
@@ -283,8 +369,9 @@ for i, original_idea in enumerate(idea_batch, start=1):
         if verdict == "accept":
             accepted += 1
             ticket_md = create_ticket(current_idea, critique, accepted)
-            tickets_out.append(ticket_md)
-            log(f"[RESULT] Accepted on round {iteration + 1}! Ticket #{accepted} created")
+            ticket_file = save_ticket_to_file(ticket_md, accepted)
+            ticket_files.append(ticket_file)
+            log(f"[RESULT] Accepted on round {iteration + 1}! Ticket #{accepted} saved to {ticket_file.name}")
             break
         elif verdict == "needs_improvement":
             if iteration < max_iterations - 1:  # Not the last round
@@ -301,10 +388,9 @@ for i, original_idea in enumerate(idea_batch, start=1):
             log(f"[RESULT] Unknown verdict: {verdict}, moving to next")
             break
 
-if tickets_out:
-    tickets_file = TASK_DIR / "generated_tickets.md"
-    with tickets_file.open("a", encoding="utf-8") as f:
-        f.write("\n\n".join(tickets_out) + "\n")
-    log(f"\n[DONE] {len(tickets_out)} ticket(s) saved to file: {tickets_file}")
+if ticket_files:
+    log(f"\n[DONE] {len(ticket_files)} ticket(s) saved to individual files:")
+    for ticket_file in ticket_files:
+        log(f"  - {ticket_file}")
 else:
     log("\n[DONE] No accepted ideas in this round.")
