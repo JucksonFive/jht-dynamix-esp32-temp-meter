@@ -22,16 +22,19 @@ from .config import (
 
 def generate_raw_ideas(n: int, project_context: str, previous_ideas: List[str]) -> List[str]:
     focus_areas = [
-        "testing and quality assurance",
-        "observability and monitoring",
-        "security and compliance",
-        "performance optimization",
-        "developer experience",
-        "infrastructure reliability",
-        "cost optimization",
-        "documentation and onboarding",
-        "firmware efficiency",
-        "data pipeline resilience",
+        "User interface features and improvements",
+        "Testing and quality assurance",
+        "Observability and monitoring",
+        "Security and compliance",
+        "Performance optimization",
+        "Developer experience",
+        "Infrastructure reliability",
+        "Cost optimization",
+        "Documentation and onboarding",
+        "Firmware efficiency",
+        "Data pipeline resilience",
+        "API design and usability",
+        "Automation and tooling",
     ]
     selected = random.sample(focus_areas, k=min(3, max(2, n if n < 3 else 3)))
     focus_hint = f"Prioritise these areas: {', '.join(selected)}."
