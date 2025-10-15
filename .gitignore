@@ -65,3 +65,4 @@ dashboard/src/.App.tsx.swp
 agents/tasks/venv/*
 agents/tasks/.env
 agents/tasks/tickets/*
+agents/tasks/src/__pycache__/*
