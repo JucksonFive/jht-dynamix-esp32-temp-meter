@@ -51,6 +51,17 @@ If the ticket is large, propose slices and implement only the first slice now; c
 
 Always optimize for: small, reviewable, reversible changes.
 
+## Automation
+
+This repository may auto-apply your diff output if environment variables enable it:
+
+- `ENABLE_AUTO_IMPLEMENT=1` triggers a dry-run validation followed by patch apply.
+- `ENABLE_AUTO_IMPLEMENT_GIT=1` additionally creates a branch (`ticket-<NNN>-<slug>`), commits, and pushes.
+- `AUTO_IMPLEMENT_GIT_BASE` sets the base branch (default `main`).
+- `AUTO_IMPLEMENT_GIT_REMOTE` sets the git remote (default `origin`).
+
+Design your diffs to be minimal and conflict-free. Avoid editing the same lines across multiple tickets in a single run. If a diff would be destructive or risky (large deletions, cross-cutting refactor), call that out explicitly so automation can be disabled for that ticket.
+
 ## Diff Formatting Guidance
 
 - Use unified diff format with correct file paths relative to the repository root.
