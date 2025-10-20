@@ -1,6 +1,6 @@
 import { isAfter, isBefore } from "date-fns";
 import React, { useMemo } from "react";
-import strings from "../../locale/strings";
+import { useTranslation } from "react-i18next";
 import { Device } from "../../services/types";
 import { Bounds, DeviceData, Range } from "../../utils/types";
 import { fmtYMD, parseYMD } from "../../utils/utils";
@@ -33,6 +33,7 @@ export const Dashboard = ({
   handleLogout,
   onDeviceDeleted,
 }: DashboardProps) => {
+  const { t } = useTranslation();
   const selectedData =
     selectedDeviceIds.length > 0
       ? data.filter((d) => selectedDeviceIds.includes(d.id))
@@ -51,20 +52,23 @@ export const Dashboard = ({
     const f = parseYMD(range.from);
     const t = parseYMD(range.to);
     const cf = isBefore(f, min) ? min : isAfter(f, max) ? max : f;
-    const ct = isBefore(t, min) ? min : isAfter(t, max) ? max : t;
+    let ct: Date;
+    if (isBefore(t, min)) ct = min;
+    else if (isAfter(t, max)) ct = max;
+    else ct = t;
     return { from: fmtYMD(cf), to: fmtYMD(ct) };
   }, [range.from, range.to, bounds?.min, bounds?.max]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-dashboard text-gray-100">
       <div className="mx-auto max-w-[1700px] px-5 lg:px-10 py-5 lg:py-8">
-        <HeaderBar title={strings.appTitle} onLogout={handleLogout} />
+        <HeaderBar title={t("appTitle")} onLogout={handleLogout} />
 
         {/* Filters */}
         <section className="mb-6 flex flex-col sm:flex-row sm:items-end gap-4 relative z-40">
           <div className="bg-midnight-800/70 backdrop-blur-xl rounded-2xl shadow-inner-soft ring-1 ring-white/10 p-5 w-full sm:w-auto border border-white/5">
             <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-400 mb-2">
-              {strings.dateRange}
+              {t("dateRange")}
             </div>
             <DateRangePicker
               value={clampedRange}
@@ -97,7 +101,7 @@ export const Dashboard = ({
                 <div>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h2 className="text-xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan">
-                      {strings.temperatureHistory}
+                      {t("temperatureHistory")}
                     </h2>
                     <div className="text-xs text-gray-400 flex gap-2 flex-wrap">
                       {selectedDeviceIds.map((id) => (
@@ -122,7 +126,7 @@ export const Dashboard = ({
               ) : (
                 <div className="h-full min-h-[18rem] grid place-items-center border-2 border-dashed border-white/10 rounded-xl">
                   <p className="text-gray-400 text-center px-6 text-sm">
-                    {strings.selectDeviceHelp}
+                    {t("selectDeviceHelp")}
                   </p>
                 </div>
               )}

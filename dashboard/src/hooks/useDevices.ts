@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { fetchUserDevices } from "../services/api";
 import { Device } from "../services/types";
-import strings from "../locale/strings";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 
 export function useDevices(user: any) {
+  const { t } = useTranslation();
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function useDevices(user: any) {
         setDevices(userDevices);
       } catch (err: any) {
         if (!axios.isCancel(err)) {
-          setError(strings.fetchDevicesError);
+          setError(t("fetchDevicesError"));
           console.error(err);
         }
       } finally {

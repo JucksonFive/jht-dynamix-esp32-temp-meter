@@ -1,10 +1,11 @@
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import AuthActions from "./Components/AuthActions";
-import strings from "../../locale/strings";
 import { Logo } from "./Components/Logo";
 
 export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -46,9 +47,9 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
             <Logo size={96} />
           </div>
           <h1 className="text-2xl sm:text-3xl font-semibold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan">
-            {strings.authWelcome}
+            {t("authWelcome")}
           </h1>
-          <p className="text-sm text-gray-400 mb-8">{strings.authSubtitle}</p>
+          <p className="text-sm text-gray-400 mb-8">{t("authSubtitle")}</p>
           <div className="space-y-4">
             <div>
               <input
@@ -86,7 +87,7 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
           <div className="relative flex flex-col items-center gap-8">
             <Logo size={280} />
             <p className="text-sm text-gray-400 max-w-sm text-center leading-relaxed">
-              {strings.heroTagline}
+              {t("heroTagline")}
             </p>
           </div>
         </div>

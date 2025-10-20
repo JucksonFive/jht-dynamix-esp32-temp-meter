@@ -1,5 +1,5 @@
 import React from "react";
-import strings from "../../../locale/strings";
+import { useTranslation } from "react-i18next";
 import LogoutButton from "./Buttons/LogoutButton";
 
 interface HeaderBarProps {
@@ -15,13 +15,14 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   className = "",
   actionsRight,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className={["flex justify-between items-center mb-4", className].join(
         " "
       )}
     >
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <h1 className="text-2xl font-bold">{title || t("appTitle")}</h1>
       <div className="flex items-center gap-3">
         {actionsRight}
         <LogoutButton onLogout={onLogout} />

@@ -136,7 +136,7 @@ export class DashboardHostingStack extends cdk.Stack {
 
     // Deployaa buildin S3:een ja invalaa CloudFrontin
     new s3deploy.BucketDeployment(this, "DeployWebsite", {
-      sources: [s3deploy.Source.asset("../../../dashboard/dist")],
+      sources: [s3deploy.Source.asset("../../dashboard/dist")],
       destinationBucket: siteBucket,
       distribution,
       distributionPaths: ["/*"],

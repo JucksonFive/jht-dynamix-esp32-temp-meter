@@ -1,5 +1,5 @@
 import React from "react";
-import strings from "../../../../locale/strings";
+import { useTranslation } from "react-i18next";
 
 export interface DeviceMultiToggleProps {
   active: boolean;
@@ -14,13 +14,16 @@ export interface DeviceMultiToggleProps {
 const DeviceMultiToggle: React.FC<DeviceMultiToggleProps> = ({
   active,
   onToggle,
-  title = strings.tooltipToggleMulti,
+  title,
   className = "",
 }) => {
+  const { t } = useTranslation();
+  const resolvedTitle = title || t("tooltipToggleMulti");
   return (
     <label
       className={["flex items-center cursor-pointer", className].join(" ")}
-      title={title}
+      title={resolvedTitle}
+      aria-label={resolvedTitle}
     >
       <input
         type="checkbox"

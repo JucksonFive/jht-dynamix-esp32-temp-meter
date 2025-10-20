@@ -1,6 +1,6 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { LoadingSpinner } from "../LoadingSpinner";
-import strings from "../../../../locale/strings";
 
 export interface AuthButtonContentProps {
   mode: "signin" | "signup";
@@ -11,26 +11,23 @@ export const AuthButtonContent: React.FC<AuthButtonContentProps> = ({
   mode,
   loading,
 }) => {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <>
         <LoadingSpinner
           size={20}
-          label={
-            mode === "signin" ? strings.authSigningIn : strings.authSigningUp
-          }
+          label={mode === "signin" ? t("authSigningIn") : t("authSigningUp")}
         />
         <span>
           {mode === "signin"
-            ? strings.authSigningInEllipsis
-            : strings.authSigningUpEllipsis}
+            ? t("authSigningInEllipsis")
+            : t("authSigningUpEllipsis")}
         </span>
       </>
     );
   }
-  return (
-    <span>{mode === "signin" ? strings.authSignIn : strings.authSignUp}</span>
-  );
+  return <span>{mode === "signin" ? t("authSignIn") : t("authSignUp")}</span>;
 };
 
 export default AuthButtonContent;

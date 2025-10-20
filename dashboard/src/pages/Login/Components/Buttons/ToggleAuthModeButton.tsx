@@ -1,6 +1,6 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../../../ui/Elements/Button/Button";
-import strings from "../../../../locale/strings";
 
 export interface ToggleAuthModeButtonProps {
   mode: "signin" | "signup";
@@ -13,6 +13,7 @@ export const ToggleAuthModeButton: React.FC<ToggleAuthModeButtonProps> = ({
   onToggleMode,
   className = "",
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={["flex justify-center", className].join(" ")}>
       <Button
@@ -21,9 +22,7 @@ export const ToggleAuthModeButton: React.FC<ToggleAuthModeButtonProps> = ({
         onClick={onToggleMode}
         className="text-neon-purple hover:text-neon-pink"
       >
-        {mode === "signin"
-          ? strings.authCreateAccount
-          : strings.authAlreadyAccount}
+        {mode === "signin" ? t("authCreateAccount") : t("authAlreadyAccount")}
       </Button>
     </div>
   );
