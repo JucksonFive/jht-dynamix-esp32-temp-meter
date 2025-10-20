@@ -67,3 +67,4 @@ agents/tasks/.env
 agents/tasks/tickets/*
 agents/tasks/coder_output/*
 agents/tasks/src/__pycache__/*
+agents/tasks/coder_output/
