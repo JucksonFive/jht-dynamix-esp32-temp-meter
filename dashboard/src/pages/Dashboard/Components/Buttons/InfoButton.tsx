@@ -1,5 +1,5 @@
 import React from "react";
-import strings from "../../../../locale/strings";
+import { useTranslation } from "react-i18next";
 
 interface InfoButtonProps {
   ariaLabel?: string;
@@ -9,23 +9,28 @@ interface InfoButtonProps {
 }
 
 export const InfoButton: React.FC<InfoButtonProps> = ({
-  ariaLabel = strings.sidePanelSelectionHelp,
-  title = strings.sidePanelSelectionHelp,
+  ariaLabel,
+  title,
   onClick,
   className = "",
-}) => (
-  <button
-    type="button"
-    aria-label={ariaLabel}
-    title={title}
-    onClick={onClick}
-    className={[
-      "text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition-colors",
-      className,
-    ].join(" ")}
-  >
-    <span aria-hidden>ℹ️</span>
-  </button>
-);
+}) => {
+  const { t } = useTranslation();
+  const label = ariaLabel || t("sidePanelSelectionHelp");
+  const ttl = title || t("sidePanelSelectionHelp");
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={ttl}
+      onClick={onClick}
+      className={[
+        "text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition-colors",
+        className,
+      ].join(" ")}
+    >
+      <span aria-hidden>ℹ️</span>
+    </button>
+  );
+};
 
 export default InfoButton;

@@ -4,8 +4,9 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as route53 from "aws-cdk-lib/aws-route53";
 
 interface CertStackProps extends cdk.StackProps {
-  domainName: string;
-  siteDomain: string;
+  domainName: string; // Hosted zone apex (e.g. jt-dynamix.com)
+  siteDomain: string; // Primary site (e.g. app.jt-dynamix.com for dashboard)
+  additionalDomains?: string[]; // Extra SANs: apex, wildcard, etc.
 }
 
 export class CertStack extends cdk.Stack {
@@ -20,6 +21,7 @@ export class CertStack extends cdk.Stack {
 
     const certificate = new acm.Certificate(this, "SiteCert", {
       domainName: props.siteDomain,
+      subjectAlternativeNames: props.additionalDomains,
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
 

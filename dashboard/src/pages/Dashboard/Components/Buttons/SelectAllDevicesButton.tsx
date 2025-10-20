@@ -1,5 +1,5 @@
 import React from "react";
-import strings from "../../../../locale/strings";
+import { useTranslation } from "react-i18next";
 
 interface SelectAllDevicesButtonProps {
   total: number;
@@ -14,13 +14,14 @@ export const SelectAllDevicesButton: React.FC<SelectAllDevicesButtonProps> = ({
   onSelectAll,
   onUnselectAll,
 }) => {
+  const { t } = useTranslation();
   const allSelected = total > 0 && selected === total;
   const isIndeterminate = selected > 0 && selected < total;
   return (
     <button
       type="button"
       onClick={() => (allSelected ? onUnselectAll() : onSelectAll())}
-      title={strings.tooltipSelectAll}
+      title={t("tooltipSelectAll")}
       className={[
         "w-full flex items-center justify-between text-left px-2.5 py-2 rounded-lg",
         "transition-colors border",
@@ -31,7 +32,7 @@ export const SelectAllDevicesButton: React.FC<SelectAllDevicesButtonProps> = ({
       ].join(" ")}
     >
       <span className="text-sm font-medium">
-        {allSelected ? strings.unselectAll : strings.selectAll}
+        {allSelected ? t("unselectAll") : t("selectAll")}
       </span>
       <span
         className="ml-2 w-4 h-4 flex items-center justify-center"

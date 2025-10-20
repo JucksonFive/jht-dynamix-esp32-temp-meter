@@ -13,7 +13,6 @@ export interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-// Lightweight accessible-ish confirm dialog (no portal required for this project scale)
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
   title,

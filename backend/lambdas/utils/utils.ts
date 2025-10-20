@@ -1,6 +1,13 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 
-const ALLOWED_ORIGINS = new Set(["https://app.jt-dynamix.com"]);
+const allowedOriginsEnv =
+  process.env.ALLOWED_ORIGINS! || process.env.WEB_APP_ORIGIN!;
+const ALLOWED_ORIGINS = new Set(
+  allowedOriginsEnv
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean)
+);
 
 export const makeResponse =
   (event: APIGatewayProxyEvent) =>

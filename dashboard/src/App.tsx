@@ -1,23 +1,25 @@
 import { getCurrentUser, signOut } from "aws-amplify/auth";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDevices } from "./hooks/useDevices";
+import { useReadingBounds } from "./hooks/useReadingBounds";
+import { useReadings } from "./hooks/useReadings";
+import "./locale/i18n"; // initialize i18
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Login } from "./pages/Login/Login";
+import { type Range } from "./utils/types";
 import {
   clampRange,
   toLocalOffSetIso as toLocalOffsetIso,
 } from "./utils/utils";
-import { useReadingBounds } from "./hooks/useReadingBounds";
-import { useReadings } from "./hooks/useReadings";
-import { type Range } from "./utils/types";
-import strings from "./locale/strings";
-import { useDevices } from "./hooks/useDevices";
 
 const THREE_WEEKS = 21 * 864e5;
 const MINUTE = 60 * 1000;
 
 function App() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<any>(null);
-  const [selectedDeviceIds, setSelectedDeviceId] = useState<string[]>([]);
+  const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
 
   const [bootLoading, setBootLoading] = useState(true);
   useEffect(() => {
@@ -39,12 +41,7 @@ function App() {
     error: boundsError,
   } = useReadingBounds(user);
 
-  const {
-    devices,
-    loading: devicesLoading,
-    error: devicesError,
-    removeDevice,
-  } = useDevices(user);
+  const { devices, loading: devicesLoading, removeDevice } = useDevices(user);
 
   // range (init kun bounds ladattu)
   const [range, setRange] = useState<Range>(() => {
@@ -83,13 +80,13 @@ function App() {
 
   const handleDeviceDeleted = (id: string) => {
     removeDevice(id);
-    setSelectedDeviceId((prev) => prev.filter((did) => did !== id));
+    setSelectedDeviceIds((prev) => prev.filter((did) => did !== id));
   };
 
   if (bootLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
-        {strings.loading}
+        {t("loading")}
       </div>
     );
   }
@@ -112,7 +109,7 @@ function App() {
         range={clampedRange}
         onRangeChange={(r) => setRange(r)}
         selectedDeviceIds={selectedDeviceIds}
-        setSelectedDeviceIds={setSelectedDeviceId}
+        setSelectedDeviceIds={setSelectedDeviceIds}
         handleLogout={handleLogout}
         loading={boundsLoading || dataLoading || devicesLoading}
         onDeviceDeleted={handleDeviceDeleted}
