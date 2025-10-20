@@ -1,6 +1,6 @@
 # JHT-Dynamix ESP32 Temperature Meter
 
-This repository contains the complete source code for the JHT-Dynamix ESP32 Temperature Meter, a comprehensive IoT solution for real-time temperature monitoring. The system is composed of three main components: an ESP32-based sensor device, a serverless AWS backend, and a React-based web dashboard.
+This repository contains the complete source code for the JHT-Dynamix ESP32 Temperature Meter, a comprehensive IoT solution for real-time temperature monitoring. The system is composed of three main components: an ESP32-based sensor device, a serverless AWS backend, and a React-based web dashboard (https://app.jt-dynamix.com/).
 
 ## Project Structure
 

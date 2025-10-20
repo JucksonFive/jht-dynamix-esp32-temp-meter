@@ -10,5 +10,5 @@
       "src/*": ["src/*"]
     }
   },
-  "include": ["cdk/**/*.ts", "lambdas/**/*.ts"]
+  "include": ["cdk/**/*.ts", "lambdas/**/*.ts", "cdk/lib/homepage-hosting-stack.ts"]
 }

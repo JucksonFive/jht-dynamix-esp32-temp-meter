@@ -47,6 +47,7 @@ export class LambdaStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       environment: {
         TABLE_NAME: temperaturesTable.tableName,
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
       },
     });
 
@@ -75,6 +76,7 @@ export class LambdaStack extends cdk.Stack {
         runtime: lambda.Runtime.NODEJS_22_X,
         environment: {
           TABLE_NAME: temperaturesTable.tableName,
+          ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
         },
       }
     );
@@ -97,6 +99,7 @@ export class LambdaStack extends cdk.Stack {
         environment: {
           TABLE_NAME: temperaturesTable.tableName,
           GSI_NAME: "userId-timestamp-index",
+          ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
         },
       }
     );
@@ -117,6 +120,7 @@ export class LambdaStack extends cdk.Stack {
         environment: {
           TABLE_NAME: temperaturesTable.tableName,
           GSI_NAME: "userId-timestamp-index",
+          ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
         },
       }
     );
@@ -133,6 +137,7 @@ export class LambdaStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       environment: {
         DEVICES_TABLE: deviceUserTable.tableName,
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
       },
     });
     deviceUserTable.grantReadData(this.getAllDevicesFn);
@@ -146,6 +151,7 @@ export class LambdaStack extends cdk.Stack {
       ),
       environment: {
         DEVICES_TABLE: deviceUserTable.tableName,
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
       },
     });
     deviceUserTable.grantWriteData(this.registerDeviceFn);
@@ -165,6 +171,7 @@ export class LambdaStack extends cdk.Stack {
         environment: {
           DEVICES_TABLE: deviceUserTable.tableName,
           DELETE_QUEUE_URL: purgeQueue.queueUrl,
+          ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
         },
       }
     );
@@ -186,6 +193,7 @@ export class LambdaStack extends cdk.Stack {
         environment: {
           TABLE_NAME: temperaturesTable.tableName,
           GSI_NAME: "deviceId-timestamp-index",
+          ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
         },
       }
     );
@@ -202,6 +210,9 @@ export class LambdaStack extends cdk.Stack {
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_22_X,
       functionName: "AuthProtectedLambda",
+      environment: {
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
+      },
     });
   }
 }

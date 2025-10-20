@@ -1,6 +1,0 @@
-README.md
-**/*.md
-backend/src/**/*.ts
-frontend/src/**/*.ts*
-esp32/**/src/**/*.cpp
-**/*.openapi.*
