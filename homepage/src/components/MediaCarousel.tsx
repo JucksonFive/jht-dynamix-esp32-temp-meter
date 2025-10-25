@@ -25,7 +25,6 @@ type Slide = ImageSlide | VideoSlide;
 // If you later add `couple.mp4` under `public/media/`, change the path to `/media/couple.mp4` and switch type to video.
 const slides: Slide[] = [
   { id: "s1", type: "video", src: "/output.mp4" },
-
   { id: "s2", type: "video", src: "/couple_output.mp4" },
   { id: "s3", type: "video", src: "/rain.mp4" },
 ];
