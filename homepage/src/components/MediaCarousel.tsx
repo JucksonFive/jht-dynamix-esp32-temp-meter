@@ -17,10 +17,17 @@ interface VideoSlide extends SlideBase {
 }
 type Slide = ImageSlide | VideoSlide;
 
+// NOTE:
+// Public assets in a Vite project are served from the root of the dev server.
+// We searched the workspace and found `output.mp4` in `public/` (root) but no `couple.mp4`.
+// The previous paths `/media/output.mp4` & `/media/couple.mp4` returned HTML (404) => video load failed.
+// Adjust to real existing file and add a placeholder second slide (image) until `couple.mp4` is added.
+// If you later add `couple.mp4` under `public/media/`, change the path to `/media/couple.mp4` and switch type to video.
 const slides: Slide[] = [
-  { id: "s1", type: "video", src: "/media/output.mp4" },
-  { id: "s2", type: "video", src: "/media/rain.mp4" },
-  { id: "s3", type: "video", src: "/media/couple_output.mp4" },
+  { id: "s1", type: "video", src: "/output.mp4" },
+
+  { id: "s2", type: "video", src: "/couple_output.mp4" },
+  { id: "s3", type: "video", src: "/rain.mp4" },
 ];
 
 const IMAGE_MS = 5000;
@@ -42,13 +49,13 @@ export const MediaCarousel: React.FC<{
   const next = () => setIndex((i) => (i + 1) % slides.length);
 
   const schedule = (ms: number) => {
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(next, ms);
+    if (timerRef.current) globalThis.clearTimeout(timerRef.current);
+    timerRef.current = globalThis.setTimeout(next, ms);
   };
 
   const clearAllTimers = () => {
-    if (timerRef.current) window.clearTimeout(timerRef.current);
-    if (fadeTimerRef.current) window.clearTimeout(fadeTimerRef.current);
+    if (timerRef.current) globalThis.clearTimeout(timerRef.current);
+    if (fadeTimerRef.current) globalThis.clearTimeout(fadeTimerRef.current);
     timerRef.current = null;
     fadeTimerRef.current = null;
   };
@@ -56,10 +63,10 @@ export const MediaCarousel: React.FC<{
   useEffect(() => {
     clearAllTimers();
 
-    slides.forEach((s, i) => {
-      if (s.type !== "video") return;
+    for (const [i, s] of slides.entries()) {
+      if (s.type !== "video") continue;
       const v = videoRefs.current[s.id];
-      if (!v) return;
+      if (!v) continue;
       if (i === index) {
         try {
           v.currentTime = 0;
@@ -70,7 +77,7 @@ export const MediaCarousel: React.FC<{
       } else {
         v.pause();
       }
-    });
+    }
 
     const active = slides[index];
     let ms: number;
@@ -86,7 +93,7 @@ export const MediaCarousel: React.FC<{
       ms = Math.max(raw - FADE_MS, MIN_MS);
     }
 
-    fadeTimerRef.current = window.setTimeout(() => {
+    fadeTimerRef.current = globalThis.setTimeout(() => {
       const el = document.getElementById(`slide-${active.id}`);
       if (el) el.classList.add("fading");
     }, Math.max(ms - FADE_MS, 0));
@@ -139,12 +146,18 @@ export const MediaCarousel: React.FC<{
                 preload="auto"
                 onLoadedMetadata={(e) => {
                   const v = e.currentTarget;
-                  durations.current[s.id] = isFinite(v.duration)
+                  durations.current[s.id] = Number.isFinite(v.duration)
                     ? v.duration
                     : 0;
                 }}
                 onEnded={() => {
                   next();
+                }}
+                onError={(e) => {
+                  // If the video can't load (404 or decode error), skip to next slide.
+                  console.warn("Failed to load video", s.id, s.src);
+                  // Prevent rapid loop if single slide fails.
+                  if (slides.length > 1) next();
                 }}
               />
             )}
@@ -154,9 +167,9 @@ export const MediaCarousel: React.FC<{
 
       {!background && (
         <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
-          {slides.map((_, i) => (
+          {slides.map((s, i) => (
             <button
-              key={i}
+              key={s.id}
               onClick={() => setIndex(i)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 i === index
