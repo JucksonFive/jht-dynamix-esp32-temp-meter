@@ -58,23 +58,12 @@ const Shell: React.FC = () => {
               {t.app.nav.features}
             </a>
             <a
-              href="/dashboard"
+              href="https://app.jt-dynamix.com/"
               className="text-gray-600 hover:text-gray-900 transition"
             >
               {t.app.nav.dashboard}
             </a>
-            <a
-              href="/docs"
-              className="text-gray-600 hover:text-gray-900 transition"
-            >
-              {t.app.nav.docs}
-            </a>
-            <a
-              href="/tietosuoja"
-              className="text-gray-600 hover:text-gray-900 transition"
-            >
-              {t.app.nav.privacy}
-            </a>
+
             <LanguageSwitcher />
           </nav>
         </div>

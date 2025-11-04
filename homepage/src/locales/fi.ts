@@ -4,8 +4,6 @@ export const fi = {
     nav: {
       features: "Ominaisuudet",
       dashboard: "Dashboard",
-      docs: "Dokumentaatio",
-      privacy: "Tietosuoja",
     },
     hero: {
       title: "JT-DYNAMIX",

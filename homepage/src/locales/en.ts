@@ -4,8 +4,6 @@ export const en = {
     nav: {
       features: "Features",
       dashboard: "Dashboard",
-      docs: "Documentation",
-      privacy: "Privacy",
     },
     hero: {
       title: "JT-DYNAMIX",
