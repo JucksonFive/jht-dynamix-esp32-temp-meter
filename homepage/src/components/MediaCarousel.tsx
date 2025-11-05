@@ -17,19 +17,24 @@ interface VideoSlide extends SlideBase {
 }
 type Slide = ImageSlide | VideoSlide;
 
-// NOTE:
-// Public assets in a Vite project are served from the root of the dev server.
-// We searched the workspace and found `output.mp4` in `public/` (root) but no `couple.mp4`.
-// The previous paths `/media/output.mp4` & `/media/couple.mp4` returned HTML (404) => video load failed.
-// Adjust to real existing file and add a placeholder second slide (image) until `couple.mp4` is added.
-// If you later add `couple.mp4` under `public/media/`, change the path to `/media/couple.mp4` and switch type to video.
+const FALLBACK_POSTER = "/glowing_data_poster.jpg";
+
 const slides: Slide[] = [
-  { id: "s1", type: "video", src: "/output.mp4" },
-  { id: "s2", type: "video", src: "/couple_output.mp4" },
-  { id: "s3", type: "video", src: "/rain.mp4" },
+  {
+    id: "s1",
+    type: "video",
+    src: "/glowing_data.mp4",
+    poster: "/glowing_data_poster.jpg",
+  },
+  {
+    id: "s2",
+    type: "video",
+    src: "/couple_output.mp4",
+    poster: "/couple_output_poster.jpg",
+  },
+  { id: "s3", type: "video", src: "/rain.mp4", poster: "/rain_poster.jpg" },
 ];
 
-const IMAGE_MS = 5000;
 const FADE_MS = 600;
 const MIN_MS = 1200;
 
@@ -38,23 +43,21 @@ export const MediaCarousel: React.FC<{
   className?: string;
 }> = ({ background = false, className = "" }) => {
   const [index, setIndex] = useState(0);
+  const [loaded, setLoaded] = useState<Record<string, boolean>>({});
   const timerRef = useRef<number | null>(null);
   const fadeTimerRef = useRef<number | null>(null);
-
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
-
   const durations = useRef<Record<string, number>>({});
 
   const next = () => setIndex((i) => (i + 1) % slides.length);
 
   const schedule = (ms: number) => {
-    if (timerRef.current) globalThis.clearTimeout(timerRef.current);
+    if (timerRef.current) globalThis.clearTimeout(timerRef.current!);
     timerRef.current = globalThis.setTimeout(next, ms);
   };
-
   const clearAllTimers = () => {
-    if (timerRef.current) globalThis.clearTimeout(timerRef.current);
-    if (fadeTimerRef.current) globalThis.clearTimeout(fadeTimerRef.current);
+    if (timerRef.current) globalThis.clearTimeout(timerRef.current!);
+    if (fadeTimerRef.current) globalThis.clearTimeout(fadeTimerRef.current!);
     timerRef.current = null;
     fadeTimerRef.current = null;
   };
@@ -66,13 +69,15 @@ export const MediaCarousel: React.FC<{
       if (s.type !== "video") continue;
       const v = videoRefs.current[s.id];
       if (!v) continue;
+
       if (i === index) {
         try {
           v.currentTime = 0;
         } catch {}
         v.muted = true;
-        v.playsInline = true as any;
-        v.play().catch(() => {});
+        (v as any).playsInline = true;
+        // Älä käynnistä näkyviin ennen kuin data on ladattu; onLoadedData kutsuu play()
+        if (loaded[s.id]) v.play().catch(() => {});
       } else {
         v.pause();
       }
@@ -80,15 +85,11 @@ export const MediaCarousel: React.FC<{
 
     const active = slides[index];
     let ms: number;
-
     if (active.type === "image") {
-      const imgMs = active.durationMs ?? IMAGE_MS;
-      ms = Math.max(imgMs, MIN_MS);
+      ms = Math.max(active.durationMs ?? 5000, MIN_MS);
     } else {
       const durSec = durations.current[active.id];
-
-      const fallback = 6500;
-      const raw = durSec ? durSec * 1000 : fallback;
+      const raw = durSec ? durSec * 1000 : 6500;
       ms = Math.max(raw - FADE_MS, MIN_MS);
     }
 
@@ -98,9 +99,8 @@ export const MediaCarousel: React.FC<{
     }, Math.max(ms - FADE_MS, 0));
 
     schedule(ms);
-
     return clearAllTimers;
-  }, [index]);
+  }, [index, loaded]);
 
   useEffect(() => () => clearAllTimers(), []);
 
@@ -113,51 +113,68 @@ export const MediaCarousel: React.FC<{
     (el) => {
       videoRefs.current[id] = el;
     };
+
   return (
     <div className={`${baseClasses} ${className}`.trim()}>
       {slides.map((s, i) => {
         const isActive = i === index;
+        const vidLoaded = s.type === "video" ? !!loaded[s.id] : true;
+
         return (
           <div
             id={`slide-${s.id}`}
             key={s.id}
             className={`absolute inset-0 transition-opacity duration-700 ease-out ${
               isActive ? "opacity-100" : "opacity-0"
-            } flex items-center justify-center`}
+            }`}
             aria-hidden={!isActive}
           >
-            {s.type === "image" ? (
+            {/* Poster-kerros: näkyy kunnes video on ladattu */}
+            {s.type === "video" && (
               <img
-                src={s.src}
-                alt={s.alt}
-                className="w-full h-full object-cover object-center select-none"
-                draggable={false}
+                alt=""
+                aria-hidden="true"
+                src={s.poster ?? FALLBACK_POSTER}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
+                  vidLoaded ? "opacity-0" : "opacity-100"
+                }`}
               />
-            ) : (
+            )}
+
+            {s.type === "video" ? (
               <video
                 ref={setVideoRef(s.id)}
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                  vidLoaded ? "opacity-100" : "opacity-0"
+                }`}
                 src={s.src}
-                poster={s.poster}
-                autoPlay
+                poster={s.poster ?? FALLBACK_POSTER}
+                // Ei autoplay-attribuuttia; käynnistetään vasta loadeddata-hetkellä
                 playsInline
                 muted
-                preload="auto"
+                preload="metadata"
                 onLoadedMetadata={(e) => {
                   const v = e.currentTarget;
                   durations.current[s.id] = Number.isFinite(v.duration)
                     ? v.duration
                     : 0;
                 }}
-                onEnded={() => {
-                  next();
+                onLoadedData={(e) => {
+                  setLoaded((prev) => ({ ...prev, [s.id]: true }));
+                  // Jos tämä on aktiivinen slide, aloita toisto nyt
+                  if (isActive) e.currentTarget.play().catch(() => {});
                 }}
-                onError={(e) => {
-                  // If the video can't load (404 or decode error), skip to next slide.
+                onEnded={next}
+                onError={() => {
                   console.warn("Failed to load video", s.id, s.src);
-                  // Prevent rapid loop if single slide fails.
                   if (slides.length > 1) next();
                 }}
+              />
+            ) : (
+              <img
+                alt={s.alt}
+                src={s.src}
+                className="w-full h-full object-cover"
               />
             )}
           </div>
@@ -180,8 +197,8 @@ export const MediaCarousel: React.FC<{
           ))}
         </div>
       )}
+
       <style>{`
-        /* Kun .fading lisätään aktiiviseen slidiin hieman ennen loppua */
         #slide-${slides[index].id}.fading { opacity: 0.0; transition: opacity ${FADE_MS}ms ease-out; }
       `}</style>
     </div>
