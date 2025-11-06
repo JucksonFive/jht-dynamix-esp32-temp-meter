@@ -134,6 +134,10 @@ export const Footer: React.FC = () => {
             </div>
           </div>
         </div>
+        {/* Bottom bar: only copyright */}
+        <div className="mt-12 border-t border-slate-800/60 pt-6 text-xs text-center text-slate-500">
+          {t.app.footer.copyright(year)}
+        </div>
       </div>
     </footer>
   );

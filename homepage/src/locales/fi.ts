@@ -1,4 +1,6 @@
-export const fi = {
+import { LocaleSchema } from "./types";
+
+export const fi: LocaleSchema = {
   app: {
     name: "JT-DYNAMIX",
     nav: {
@@ -82,14 +84,6 @@ export const fi = {
         phone: "+358 10 123 4567",
         address: "Helsinki, Suomi",
       },
-      social: {
-        title: "Seuraa meitä",
-        linkedin: "LinkedIn",
-        linkedinUrl: "https://www.linkedin.com/company/jt-dynamix",
-        github: "GitHub",
-        githubUrl: "https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter",
-      },
-      madeIn: "Rakkaudella tehty Suomessa",
       copyright: (year: number) =>
         `© ${year} JT-DYNAMIX. Kaikki oikeudet pidätetään.`,
     },
@@ -101,4 +95,4 @@ export const fi = {
   },
 } as const;
 
-export type FiLocale = typeof fi;
+// Shared locale type applied via LocaleSchema; FiLocale alias no longer required.

@@ -1,4 +1,6 @@
-export const en = {
+import { LocaleSchema } from "./types";
+
+export const en: LocaleSchema = {
   app: {
     name: "JT-DYNAMIX",
     nav: {
@@ -82,7 +84,7 @@ export const en = {
         phone: "+358 10 123 4567",
         address: "Helsinki, Finland",
       },
-      madeIn: "Built with ❤️ in Finland",
+
       copyright: (year: number) => `© ${year} JT-DYNAMIX. All rights reserved.`,
     },
     lang: {
@@ -92,5 +94,3 @@ export const en = {
     },
   },
 } as const;
-
-export type EnLocale = typeof en;
