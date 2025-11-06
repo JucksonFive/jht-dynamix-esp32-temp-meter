@@ -54,7 +54,25 @@ export const MediaCarousel: React.FC<{
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const durations = useRef<Record<string, number>>({});
 
-  const next = () => setIndex((i) => (i + 1) % slides.length);
+  function resetVideoToStart(v: HTMLVideoElement) {
+    v.pause();
+    // jos metadata on ladattu, seek heti, muuten odota
+    if (v.readyState >= 1) {
+      try {
+        (v as any).fastSeek?.(0);
+      } catch {}
+      v.currentTime = 0;
+    } else {
+      const onMeta = () => {
+        try {
+          (v as any).fastSeek?.(0);
+        } catch {}
+        v.currentTime = 0;
+        v.removeEventListener("loadedmetadata", onMeta);
+      };
+      v.addEventListener("loadedmetadata", onMeta, { once: true });
+    }
+  }
 
   const schedule = (ms: number) => {
     if (timerRef.current) globalThis.clearTimeout(timerRef.current!);
@@ -66,24 +84,38 @@ export const MediaCarousel: React.FC<{
     timerRef.current = null;
     fadeTimerRef.current = null;
   };
+  // next(): reset upcoming ennen indeksin vaihtoa
+  const next = () => {
+    setIndex((i) => {
+      const ni = (i + 1) % slides.length;
+      const upcoming = slides[ni];
+      if (upcoming.type === "video") {
+        const v = videoRefs.current[upcoming.id];
+        if (v) resetVideoToStart(v);
+      }
+      return ni;
+    });
+  };
 
   useEffect(() => {
     clearAllTimers();
 
+    // Käy kaikki videot läpi ja hallitse toisto deterministisesti
     for (const [i, s] of slides.entries()) {
       if (s.type !== "video") continue;
       const v = videoRefs.current[s.id];
       if (!v) continue;
 
+      v.muted = true;
+      (v as any).playsInline = true;
+
       if (i === index) {
-        try {
-          v.currentTime = 0;
-        } catch {}
-        v.muted = true;
-        (v as any).playsInline = true;
+        // aktiivinen: aloita aina alusta
+        resetVideoToStart(v);
         if (loaded[s.id]) v.play().catch(() => {});
       } else {
-        v.pause();
+        // ei-aktiivinen: pysäytä ja resetoi ettei jää "väliaikaan"
+        resetVideoToStart(v);
       }
     }
 
@@ -105,8 +137,6 @@ export const MediaCarousel: React.FC<{
     schedule(ms);
     return clearAllTimers;
   }, [index, loaded]);
-
-  useEffect(() => () => clearAllTimers(), []);
 
   const baseClasses = background
     ? "absolute inset-0 w-full h-full overflow-hidden"
@@ -155,7 +185,9 @@ export const MediaCarousel: React.FC<{
                 poster={s.poster ?? FALLBACK_POSTER}
                 playsInline
                 muted
+                // loop POIS → hallitaan ajastimella ja resetVideoToStart:lla
                 preload="metadata"
+                disablePictureInPicture
                 onLoadedMetadata={(e) => {
                   const v = e.currentTarget;
                   durations.current[s.id] = Number.isFinite(v.duration)
@@ -164,9 +196,13 @@ export const MediaCarousel: React.FC<{
                 }}
                 onLoadedData={(e) => {
                   setLoaded((prev) => ({ ...prev, [s.id]: true }));
-                  if (isActive) e.currentTarget.play().catch(() => {});
+                  // jos aktiivinen → toista
+                  if (i === index) e.currentTarget.play().catch(() => {});
                 }}
-                onEnded={next}
+                onEnded={(e) => {
+                  // varmistus: jos joskus päästään loppuun, älä jää viimeiseen frameen
+                  resetVideoToStart(e.currentTarget);
+                }}
                 onError={() => {
                   console.warn("Failed to load video", s.id, s.src);
                   if (slides.length > 1) next();
