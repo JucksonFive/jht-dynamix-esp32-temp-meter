@@ -29,10 +29,15 @@ const slides: Slide[] = [
   {
     id: "s2",
     type: "video",
-    src: "/couple_output.mp4",
-    poster: "/couple_output_poster.jpg",
+    src: "/construction_site.mp4",
   },
-  { id: "s3", type: "video", src: "/rain.mp4", poster: "/rain_poster.jpg" },
+  {
+    id: "s3",
+    type: "video",
+    src: "/couple_output.mp4",
+  },
+
+  { id: "s4", type: "video", src: "/rain.mp4" },
 ];
 
 const FADE_MS = 600;
@@ -76,7 +81,6 @@ export const MediaCarousel: React.FC<{
         } catch {}
         v.muted = true;
         (v as any).playsInline = true;
-        // Älä käynnistä näkyviin ennen kuin data on ladattu; onLoadedData kutsuu play()
         if (loaded[s.id]) v.play().catch(() => {});
       } else {
         v.pause();
@@ -149,7 +153,6 @@ export const MediaCarousel: React.FC<{
                 }`}
                 src={s.src}
                 poster={s.poster ?? FALLBACK_POSTER}
-                // Ei autoplay-attribuuttia; käynnistetään vasta loadeddata-hetkellä
                 playsInline
                 muted
                 preload="metadata"
@@ -161,7 +164,6 @@ export const MediaCarousel: React.FC<{
                 }}
                 onLoadedData={(e) => {
                   setLoaded((prev) => ({ ...prev, [s.id]: true }));
-                  // Jos tämä on aktiivinen slide, aloita toisto nyt
                   if (isActive) e.currentTarget.play().catch(() => {});
                 }}
                 onEnded={next}
