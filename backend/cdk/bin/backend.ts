@@ -9,7 +9,7 @@ import { EspAuthStack } from "../lib/esp-auth-stack";
 import { InfrastructureStack } from "../lib/infrastructure-stack";
 import { LambdaStack } from "../lib/lambda-stack";
 import { CertStack } from "../lib/cert-stack";
-import { HomepageHostingStack } from "cdk/lib/homepage-hosting-stack";
+import { HomepageHostingStack } from "../lib/homepage-hosting-stack";
 
 dotenv.config({ path: require("path").resolve(__dirname, "../../.env") });
 const app = new cdk.App();
@@ -36,6 +36,7 @@ if (!skipCertCreation && domainName && siteDomain) {
     domainName,
     siteDomain,
     additionalDomains,
+    crossRegionReferences: true,
   });
 }
 

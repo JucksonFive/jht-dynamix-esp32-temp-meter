@@ -33,22 +33,22 @@ export const fi = {
         {
           title: "Reaaliaikainen seuranta",
           desc: "Lämpötila- ja mittausdata päivittyy sekunneissa – päätöksenteko nopeutuu.",
-          icon: "🔥",
+          icon: "shield",
         },
         {
           title: "Turvallinen ja hallittu",
           desc: "Laitekohtaiset avaimet, käyttöoikeuksien hallinta ja suojattu tiedonsiirto.",
-          icon: "🔐",
+          icon: "lock",
         },
         {
           title: "Laajennettava arkkitehtuuri",
           desc: "Pilvipohjainen AWS-infra mahdollistaa skaalautuvuuden ja integraatiot.",
-          icon: "⚙️",
+          icon: "cog",
         },
         {
           title: "Historia & analytiikka",
           desc: "Rajapinnat ja visualisoinnit pitkän aikavälin seurantaan ja trendeihin.",
-          icon: "📈",
+          icon: "chart",
         },
       ],
     },

@@ -33,22 +33,22 @@ export const en = {
         {
           title: "Real-time monitoring",
           desc: "Temperature and measurement data updates in seconds – faster decisions.",
-          icon: "🔥",
+          icon: "shield",
         },
         {
           title: "Secure and controlled",
           desc: "Per-device keys, access control and protected data transfer.",
-          icon: "🔐",
+          icon: "lock",
         },
         {
           title: "Extensible architecture",
           desc: "Cloud-based AWS infra enables scalability and integrations.",
-          icon: "⚙️",
+          icon: "cog",
         },
         {
           title: "History & analytics",
           desc: "APIs and visualizations for long term tracking and trends.",
-          icon: "📈",
+          icon: "chart",
         },
       ],
     },

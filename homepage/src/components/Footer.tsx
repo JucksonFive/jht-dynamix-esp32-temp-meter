@@ -40,7 +40,6 @@ export const Footer: React.FC = () => {
       links: [
         { label: t.app.footer.columns.company.about, href: "#meista" },
         { label: t.app.footer.columns.company.blog, href: "#blogi" },
-        { label: t.app.nav.privacy, href: "/tietosuoja" },
       ],
     },
   ];
@@ -55,19 +54,6 @@ export const Footer: React.FC = () => {
       label: t.app.footer.contact.phoneLabel,
       value: t.app.footer.contact.phone,
       href: `tel:${t.app.footer.contact.phone.replace(/\s+/g, "")}`,
-    },
-  ];
-
-  const socialLinks = [
-    {
-      label: t.app.footer.social.linkedin,
-      href: t.app.footer.social.linkedinUrl,
-      icon: <LinkedinIcon />,
-    },
-    {
-      label: t.app.footer.social.github,
-      href: t.app.footer.social.githubUrl,
-      icon: <GithubIcon />,
     },
   ];
 

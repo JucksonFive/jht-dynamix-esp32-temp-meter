@@ -19,17 +19,11 @@ export class CertStack extends cdk.Stack {
       domainName: props.domainName,
     });
 
-    const certificate = new acm.Certificate(this, "SiteCert", {
+    const cert = new acm.Certificate(this, "SiteCertV2", {
       domainName: props.siteDomain,
       subjectAlternativeNames: props.additionalDomains,
       validation: acm.CertificateValidation.fromDns(hostedZone),
     });
-
-    this.certificateArn = certificate.certificateArn;
-
-    new cdk.CfnOutput(this, "CertificateArn", {
-      value: certificate.certificateArn,
-      exportName: "DashboardCertificateArn",
-    });
+    this.certificateArn = cert.certificateArn;
   }
 }
