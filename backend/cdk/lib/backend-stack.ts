@@ -12,6 +12,7 @@ export interface BackendStackProps extends cdk.StackProps {
   fetchFromDynamoFn: NodejsFunction;
   fetchUserTemperaturesFn: NodejsFunction;
   registerDeviceFn: NodejsFunction;
+  getAllDevicesFn: NodejsFunction;
   fetchUserTemperatureBoundsFn: NodejsFunction;
   deleteUserDeviceFn: NodejsFunction;
   userPool: cognito.IUserPool;
@@ -25,6 +26,7 @@ export class BackendStack extends cdk.Stack {
       fetchFromDynamoFn,
       fetchUserTemperaturesFn,
       fetchUserTemperatureBoundsFn,
+      getAllDevicesFn,
       registerDeviceFn,
       deleteUserDeviceFn,
       userPool,
@@ -58,7 +60,7 @@ export class BackendStack extends cdk.Stack {
       restApiName: "Temperature Service",
       description: "This service serves temperature data.",
       defaultCorsPreflightOptions: {
-        allowOrigins: ["http://localhost:5173", "http://127.0.0.1:5173"], // kehityksessä
+        allowOrigins: ["http://localhost:5173", "http://127.0.0.1:5173"],
         allowMethods: ["GET", "OPTIONS", "DELETE"],
         allowHeaders: [
           "Content-Type",
@@ -73,7 +75,6 @@ export class BackendStack extends cdk.Stack {
     api.addGatewayResponse("Default4xxWithCors", {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
-        // Static values must be wrapped in single quotes per API Gateway docs
         "Access-Control-Allow-Origin": "'*'",
         "Access-Control-Allow-Headers":
           "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
@@ -127,13 +128,27 @@ export class BackendStack extends cdk.Stack {
         }
       );
 
-    api.root
-      .addResource("devices")
-      .addMethod("POST", new apigateway.LambdaIntegration(registerDeviceFn), {
+    const devicesResource = api.root.addResource("devices");
+
+    devicesResource.addMethod(
+      "POST",
+      new apigateway.LambdaIntegration(registerDeviceFn),
+      {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,
         apiKeyRequired: false,
-      });
+      }
+    );
+
+    devicesResource.addMethod(
+      "GET",
+      new apigateway.LambdaIntegration(getAllDevicesFn),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+        apiKeyRequired: false,
+      }
+    );
 
     api.root
       .addResource("delete-user-device")

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
-import { ReadingsResponse } from "./types";
+import { Device, ReadingsResponse } from "./types";
 
 const BASE_URL = "https://xgacqgcwb9.execute-api.eu-north-1.amazonaws.com/prod";
 
@@ -10,6 +10,7 @@ async function apiRequest<T>(opts: {
   path: string; // esim. "/user-readings"
   params?: Record<string, any>;
   data?: any;
+  signal?: AbortSignal; // Lisää tämä
 }): Promise<T> {
   const session = await fetchAuthSession();
   const token =
@@ -23,6 +24,7 @@ async function apiRequest<T>(opts: {
       url: `${BASE_URL}${opts.path}`,
       params: opts.params,
       data: opts.data,
+      signal: opts.signal, // Lisää tämä
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -82,6 +84,15 @@ export async function fetchReadingBounds(): Promise<{
 }> {
   return apiRequest<{ min: string | null; max: string | null }>({
     path: "/bounds",
+  });
+}
+
+export async function fetchUserDevices(opts?: {
+  signal?: AbortSignal;
+}): Promise<Device[]> {
+  return apiRequest<Device[]>({
+    path: "/devices",
+    signal: opts?.signal,
   });
 }
 
