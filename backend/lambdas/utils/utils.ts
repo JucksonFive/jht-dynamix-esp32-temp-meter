@@ -14,7 +14,7 @@ export const makeResponse =
   (statusCode: number, body: unknown, extra: Record<string, string> = {}) => {
     const origin = event.headers.origin ?? event.headers.Origin ?? "";
 
-    if (!ALLOWED_ORIGINS.has(origin)) {
+    if (origin && !ALLOWED_ORIGINS.has(origin)) {
       return {
         statusCode: 403,
         headers: {
@@ -25,17 +25,23 @@ export const makeResponse =
       };
     }
 
+    const baseHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+      Vary: "Origin, Access-Control-Request-Method, Access-Control-Request-Headers",
+      ...extra,
+    };
+
+    if (origin) {
+      baseHeaders["Access-Control-Allow-Origin"] = origin;
+      baseHeaders["Access-Control-Allow-Headers"] =
+        "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token";
+      baseHeaders["Access-Control-Allow-Methods"] =
+        "GET,POST,PUT,DELETE,OPTIONS";
+    }
+
     return {
       statusCode,
-      headers: {
-        "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Headers":
-          "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-        Vary: "Origin, Access-Control-Request-Method, Access-Control-Request-Headers",
-        "Content-Type": "application/json",
-        ...extra,
-      },
+      headers: baseHeaders,
       body: JSON.stringify(body ?? {}),
     };
   };
