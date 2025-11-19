@@ -1,0 +1,6 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="64" cy="64" r="60" stroke="#2D9CDB" stroke-width="4" fill="#F2F2F2"/>
+  <path d="M64 4 A60 60 0 0 1 64 124" stroke="#27AE60" stroke-width="3" fill="none"/>
+  <path d="M4 64 A60 60 0 0 1 124 64" stroke="#EB5757" stroke-width="3" fill="none"/>
+  <text x="64" y="72" text-anchor="middle" font-size="18" fill="#333" font-family="Arial" font-weight="bold">JT-DYNAMIX</text>
+</svg>

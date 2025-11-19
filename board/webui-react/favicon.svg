@@ -1,0 +1,32 @@
+<!-- filepath: d:\Coding\JHT\jht-dynamix-esp32-temp-meter\board\data\html\favicon.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <style>
+      .spinner {
+        animation: spin 1s linear infinite;
+        transform-origin: 16px 16px;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .circle {
+        fill: none;
+        stroke: #6366f1;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 50;
+        stroke-dashoffset: 12.5;
+      }
+    </style>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="12" fill="none" stroke="#e5e7eb" stroke-width="3"/>
+  
+  <!-- Loading spinner -->
+  <circle class="spinner circle" cx="16" cy="16" r="12"/>
+  
+  <!-- Center dot -->
+  <circle cx="16" cy="16" r="2" fill="#6366f1"/>
+</svg>
