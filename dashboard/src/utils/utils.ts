@@ -52,26 +52,43 @@ export function pickBucketMs(ms: number) {
 
 export function bucketizeMulti(points: MultiPoint[], r: Range) {
   if (!points.length) return { rows: [], deviceIds: [] as string[] };
-  const ms = spanMs(r);
+
+  const getTime = (p: MultiPoint) => new Date(p.timestamp).getTime();
+  const minTs = points.reduce(
+    (acc, p) => Math.min(acc, getTime(p)),
+    Number.POSITIVE_INFINITY
+  );
+  const maxTs = points.reduce(
+    (acc, p) => Math.max(acc, getTime(p)),
+    Number.NEGATIVE_INFINITY
+  );
+
+  // käytetään pienempää: valittu range tai datan span
+  const ms = Math.max(0, Math.min(spanMs(r), maxTs - minTs) || 1);
   const bucket = pickBucketMs(ms);
+
   const acc: Record<
     number,
     { ts: number; per: Record<string, { sum: number; n: number }> }
   > = {};
   const deviceSet = new Set<string>();
+
   for (const p of points) {
-    const t = +new Date(p.timestamp);
-    const key = Math.floor(t / bucket) * bucket;
+    const t = getTime(p);
+    // bucketin alku suhteessa minTs:ään, ettei kaikki mene samaan, jos range on iso
+    const key = Math.floor((t - minTs) / bucket) * bucket + minTs;
+
     const row = (acc[key] ||= { ts: key, per: {} });
     const cell = (row.per[p.id] ||= { sum: 0, n: 0 });
     cell.sum += p.temperature;
     cell.n += 1;
     deviceSet.add(p.id);
   }
+
   const deviceIds = Array.from(deviceSet).sort();
   const rows = Object.values(acc)
     .map((row) => {
-      const out: Record<string, any> = { ts: new Date(row.ts) };
+      const out: Record<string, unknown> = { ts: new Date(row.ts) };
       for (const id of Object.keys(row.per)) {
         const c = row.per[id];
         out[id] = c.sum / c.n;
@@ -79,6 +96,8 @@ export function bucketizeMulti(points: MultiPoint[], r: Range) {
       return out;
     })
     .sort((a, b) => +(a.ts as Date) - +(b.ts as Date));
+  console.log("rows", rows.length, "deviceIds", deviceIds);
+
   return { rows, deviceIds };
 }
 

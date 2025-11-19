@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  Legend,
 } from "recharts";
 import { Range } from "../../../utils/types";
 import { MultiPoint, bucketizeMulti, fmtTime } from "../../../utils/utils";
@@ -34,11 +34,20 @@ export function TemperatureChart({
     () => bucketizeMulti(data, range),
     [data, range.from, range.to]
   );
-
-  const xDomain = [
-    new Date(range.from).getTime(),
-    new Date(range.to).getTime(),
-  ];
+  // Determine X domain: if data span is much smaller than selected range, zoom to data.
+  const dataMin = rows.length
+    ? Math.min(...rows.map((r: any) => r.ts as number))
+    : new Date(range.from).getTime();
+  const dataMax = rows.length
+    ? Math.max(...rows.map((r: any) => r.ts as number))
+    : new Date(range.to).getTime();
+  const selectedSpan =
+    new Date(range.to).getTime() - new Date(range.from).getTime();
+  const dataSpan = dataMax - dataMin;
+  const useDataDomain = dataSpan > 0 && dataSpan < selectedSpan / 5;
+  const xDomain = useDataDomain
+    ? [dataMin, dataMax]
+    : [new Date(range.from).getTime(), new Date(range.to).getTime()];
 
   return (
     <div className="w-full h-[360px] sm:h-[420px] min-h-[260px]">
@@ -83,7 +92,7 @@ export function TemperatureChart({
               type="monotone"
               dataKey={id}
               stroke={PALETTE[i % PALETTE.length]}
-              dot={false}
+              dot={{ r: 2 }}
               strokeWidth={2}
               isAnimationActive={false}
               strokeOpacity={0.95}
