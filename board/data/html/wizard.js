@@ -26,13 +26,13 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
       // renderöi lista
       const list = document.getElementById("wifi-list");
       list.innerHTML = "";
-      data.networks.forEach((network) => {
+      for (const network of data.networks) {
         const item = document.createElement("li");
         item.className = "wifi-item";
         item.textContent = network.ssid;
         item.onclick = () => openModal(network.ssid);
         list.appendChild(item);
-      });
+      }
 
       return;
     } catch (err) {
@@ -69,20 +69,23 @@ function closeModal() {
 }
 
 function showStep(step) {
-  document.querySelectorAll(".step").forEach((el, index) => {
+  const steps = document.querySelectorAll(".step");
+  let index = 0;
+  for (const el of steps) {
     const isActive = index === step - 1;
     el.classList.toggle("hidden", !isActive);
 
     // Disable inputs and remove required from inactive steps
-    el.querySelectorAll("input").forEach((input) => {
+    for (const input of el.querySelectorAll("input")) {
       input.disabled = !isActive;
       if (isActive) {
         input.setAttribute("required", "");
       } else {
         input.removeAttribute("required");
       }
-    });
-  });
+    }
+    index++;
+  }
 
   if (step === 3) {
     const form = document.getElementById("setupForm");
