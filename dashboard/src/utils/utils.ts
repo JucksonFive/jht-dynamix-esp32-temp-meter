@@ -96,7 +96,6 @@ export function bucketizeMulti(points: MultiPoint[], r: Range) {
       return out;
     })
     .sort((a, b) => +(a.ts as Date) - +(b.ts as Date));
-  console.log("rows", rows.length, "deviceIds", deviceIds);
 
   return { rows, deviceIds };
 }
