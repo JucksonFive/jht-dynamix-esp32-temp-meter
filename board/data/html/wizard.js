@@ -155,21 +155,26 @@ function submitWifi() {
     body: formData,
   })
     .then((res) => {
-      wifiSpinner.classList.add("hidden");
-      if (res.ok) {
-        wifiStatus.innerText = "✅ Connected to WiFi!";
+      if (res.status === 200) {
+        // Immediate success (already connected)
+        wifiSpinner.classList.add("hidden");
+        wifiStatus.innerText = "✅ Already connected";
         wifiStatus.className = "status success";
         wifiStatus.classList.remove("hidden");
-
         setTimeout(() => {
           currentStep++;
           showStep(currentStep);
-        }, 1500);
-      } else {
-        wifiStatus.innerText = "❌ Connection failed. Check password.";
-        wifiStatus.className = "status error";
-        wifiStatus.classList.remove("hidden");
+        }, 1200);
+        return;
       }
+      if (res.status === 202) {
+        pollWifiConnectionStatus(wifiSpinner, wifiStatus);
+        return;
+      }
+      wifiSpinner.classList.add("hidden");
+      wifiStatus.innerText = "❌ Connection request failed.";
+      wifiStatus.className = "status error";
+      wifiStatus.classList.remove("hidden");
     })
     .catch((err) => {
       console.error("WiFi error:", err);
@@ -178,6 +183,49 @@ function submitWifi() {
       wifiStatus.className = "status error";
       wifiStatus.classList.remove("hidden");
     });
+}
+
+async function pollWifiConnectionStatus(
+  spinnerEl,
+  statusEl,
+  maxAttempts = 60,
+  intervalMs = 1000
+) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const res = await fetch("/wifi-status");
+      const text = await res.text();
+      const data = JSON.parse(text);
+      const st = data.status;
+      if (st === "connected") {
+        spinnerEl.classList.add("hidden");
+        statusEl.innerText = "✅ Connected to WiFi!";
+        statusEl.className = "status success";
+        statusEl.classList.remove("hidden");
+        setTimeout(() => {
+          currentStep++;
+          showStep(currentStep);
+        }, 1500);
+        return;
+      }
+      if (st === "failed") {
+        spinnerEl.classList.add("hidden");
+        statusEl.innerText = "❌ Incorrect password or network unreachable.";
+        statusEl.className = "status error";
+        statusEl.classList.remove("hidden");
+        return;
+      }
+      // still connecting
+      statusEl.classList.add("hidden");
+    } catch (e) {
+      console.warn("Status poll error", e);
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+  spinnerEl.classList.add("hidden");
+  statusEl.innerText = "❌ Timeout waiting for WiFi connection.";
+  statusEl.className = "status error";
+  statusEl.classList.remove("hidden");
 }
 
 function handleUserAuth(username, userPassword, deviceId) {

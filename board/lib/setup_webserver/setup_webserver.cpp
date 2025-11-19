@@ -9,6 +9,7 @@
 #include <wifi_scan_helper.h>
 #include <storage_helper.h>
 #include <device_helper.h>
+#include <wifi_state.h>
 
 namespace
 {
@@ -64,6 +65,12 @@ void startSetupWebServer()
     String ssid = request->getParam("ssid", true)->value();
     String password = request->getParam("password", true)->value();
 
+    // Jos jo yhdistetty, palauta heti onnistuminen
+    if (wifiState == WifiState::Connected) {
+      request->send(200, "text/plain", "Already connected");
+      return;
+    }
+
     if (!saveWifiCredentials(ssid, password))
     {
       request->send(500, "text/plain", "Failed to save credentials");
@@ -71,7 +78,21 @@ void startSetupWebServer()
     }
 
     startWifiConnectTask(ssid, password);
-    request->send(200, "text/plain", "WiFi connected successfully"); });
+    // Palauta 202 Accepted jotta front voi pollata tilaa
+    request->send(202, "text/plain", "Connection attempt started"); });
+
+  // WiFi-yhteyden tilan pollaus
+  server.on("/wifi-status", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+    const char *statusStr = "idle";
+    switch (wifiState) {
+      case WifiState::Connecting: statusStr = "connecting"; break;
+      case WifiState::Connected: statusStr = "connected"; break;
+      case WifiState::Failed: statusStr = "failed"; break;
+      default: statusStr = "idle"; break;
+    }
+    String body = String("{\"status\":\"") + statusStr + "\"}";
+    request->send(200, "application/json", body); });
 
   server.on("/link-device", HTTP_POST, [](AsyncWebServerRequest *request)
             {
