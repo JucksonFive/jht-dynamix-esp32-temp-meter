@@ -9,7 +9,7 @@ import { Login } from "./pages/Login/Login";
 import { type Range } from "./utils/types";
 import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
 
-const THREE_WEEKS = 21 * 864e5;
+const THREE_WEEKS = 7 * 864e5;
 const MINUTE = 60 * 1000;
 
 function App() {
@@ -46,6 +46,7 @@ function App() {
   } = useReadings(user, range, {
     intervalMs: MINUTE,
   });
+  console.log("user readings data:", data);
 
   const handleLogout = async () => {
     await signOut();
