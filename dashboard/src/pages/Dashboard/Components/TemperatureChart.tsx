@@ -38,13 +38,18 @@ export function TemperatureChart({
   const dataMin = rows.length
     ? Math.min(...rows.map((r: any) => r.ts as number))
     : new Date(range.from).getTime();
+
   const dataMax = rows.length
     ? Math.max(...rows.map((r: any) => r.ts as number))
     : new Date(range.to).getTime();
+
   const selectedSpan =
     new Date(range.to).getTime() - new Date(range.from).getTime();
+
   const dataSpan = dataMax - dataMin;
+
   const useDataDomain = dataSpan > 0 && dataSpan < selectedSpan / 5;
+
   const xDomain = useDataDomain
     ? [dataMin, dataMax]
     : [new Date(range.from).getTime(), new Date(range.to).getTime()];

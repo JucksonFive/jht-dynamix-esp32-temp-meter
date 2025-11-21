@@ -1,9 +1,7 @@
-import { isAfter, isBefore } from "date-fns";
-import React, { useMemo } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { Device } from "../../services/types";
-import { Bounds, DeviceData, Range } from "../../utils/types";
-import { fmtYMD, parseYMD } from "../../utils/utils";
+import { DeviceData, Range } from "../../utils/types";
 import { DateRangePicker } from "./Components/DateRangePicker";
 import { HeaderBar } from "./Components/HeaderBar";
 import { SidePanel } from "./Components/SidePanel";
@@ -12,7 +10,6 @@ import { TemperatureChart } from "./Components/TemperatureChart";
 interface DashboardProps {
   data: DeviceData[];
   devices: Device[];
-  bounds: Bounds | null;
   range: Range;
   onRangeChange: (r: Range) => void;
   selectedDeviceIds: string[];
@@ -25,7 +22,6 @@ interface DashboardProps {
 export const Dashboard = ({
   data,
   devices,
-  bounds,
   range,
   onRangeChange,
   selectedDeviceIds,
@@ -34,6 +30,7 @@ export const Dashboard = ({
   onDeviceDeleted,
 }: DashboardProps) => {
   const { t } = useTranslation();
+
   const selectedData =
     selectedDeviceIds.length > 0
       ? data.filter((d) => selectedDeviceIds.includes(d.id))
@@ -45,19 +42,6 @@ export const Dashboard = ({
     setSelectedDeviceIds((prev: string[]) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
-  const clampedRange = useMemo(() => {
-    if (!bounds) return range;
-    const min = parseYMD(bounds.min);
-    const max = parseYMD(bounds.max);
-    const f = parseYMD(range.from);
-    const t = parseYMD(range.to);
-    const cf = isBefore(f, min) ? min : isAfter(f, max) ? max : f;
-    let ct: Date;
-    if (isBefore(t, min)) ct = min;
-    else if (isAfter(t, max)) ct = max;
-    else ct = t;
-    return { from: fmtYMD(cf), to: fmtYMD(ct) };
-  }, [range.from, range.to, bounds?.min, bounds?.max]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-dashboard text-gray-100">
@@ -71,12 +55,10 @@ export const Dashboard = ({
               {t("dateRange")}
             </div>
             <DateRangePicker
-              value={clampedRange}
+              value={range}
               onChange={onRangeChange}
               // @ts-ignore
-              allowed={
-                bounds ?? { min: clampedRange.from, max: clampedRange.to }
-              }
+              allowed={{ min: range.from, max: range.to }}
             />
           </div>
         </section>

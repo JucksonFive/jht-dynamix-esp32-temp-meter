@@ -2,11 +2,6 @@ export type DateStr = string;
 
 export type Range = { from: DateStr; to: DateStr };
 
-export type Bounds = {
-  min: DateStr;
-  max: DateStr;
-};
-
 export type DeviceData = {
   id: string;
   temperature: number;
