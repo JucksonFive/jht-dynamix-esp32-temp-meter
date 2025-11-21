@@ -1,13 +1,15 @@
 import { getCurrentUser, signOut } from "aws-amplify/auth";
-import { useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDevices } from "./hooks/useDevices";
 import { useReadings } from "./hooks/useReadings";
 import "./locale/i18n"; // initialize i18
-import { Dashboard } from "./pages/Dashboard/Dashboard";
-import { Login } from "./pages/Login/Login";
+
 import { type Range } from "./utils/types";
 import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
+
+const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
+const Login = lazy(() => import("./pages/Login/Login"));
 
 const THREE_WEEKS = 7 * 864e5;
 const MINUTE = 60 * 1000;
@@ -46,7 +48,6 @@ function App() {
   } = useReadings(user, range, {
     intervalMs: MINUTE,
   });
-  console.log("user readings data:", data);
 
   const handleLogout = async () => {
     await signOut();
@@ -79,7 +80,7 @@ function App() {
         data={data}
         devices={devices}
         range={range}
-        onRangeChange={(r) => setRange(r)}
+        onRangeChange={(r: Range) => setRange(r)}
         selectedDeviceIds={selectedDeviceIds}
         setSelectedDeviceIds={setSelectedDeviceIds}
         handleLogout={handleLogout}

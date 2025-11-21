@@ -95,3 +95,4 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
     </div>
   );
 };
+export default Login;

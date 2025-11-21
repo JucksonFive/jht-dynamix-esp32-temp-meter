@@ -13,7 +13,6 @@ interface Props {
 export const DateRangePicker = ({ value, onChange }: Props) => {
   const { t } = useTranslation();
   const fromDate = value.from ? new Date(value.from) : null;
-  console.log(fromDate);
   const toDate = value.to ? new Date(value.to) : null;
 
   return (
