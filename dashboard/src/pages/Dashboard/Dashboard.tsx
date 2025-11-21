@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Device } from "../../services/types";
-import { Bounds, DeviceData, Range } from "../../utils/types";
+import { DeviceData, Range } from "../../utils/types";
 import { DateRangePicker } from "./Components/DateRangePicker";
 import { HeaderBar } from "./Components/HeaderBar";
 import { SidePanel } from "./Components/SidePanel";
@@ -10,7 +10,6 @@ import { TemperatureChart } from "./Components/TemperatureChart";
 interface DashboardProps {
   data: DeviceData[];
   devices: Device[];
-  bounds: Bounds | null;
   range: Range;
   onRangeChange: (r: Range) => void;
   selectedDeviceIds: string[];
@@ -23,7 +22,6 @@ interface DashboardProps {
 export const Dashboard = ({
   data,
   devices,
-  bounds,
   range,
   onRangeChange,
   selectedDeviceIds,
@@ -32,6 +30,7 @@ export const Dashboard = ({
   onDeviceDeleted,
 }: DashboardProps) => {
   const { t } = useTranslation();
+
   const selectedData =
     selectedDeviceIds.length > 0
       ? data.filter((d) => selectedDeviceIds.includes(d.id))
@@ -59,7 +58,7 @@ export const Dashboard = ({
               value={range}
               onChange={onRangeChange}
               // @ts-ignore
-              allowed={bounds ?? { min: range.from, max: range.to }}
+              allowed={{ min: range.from, max: range.to }}
             />
           </div>
         </section>

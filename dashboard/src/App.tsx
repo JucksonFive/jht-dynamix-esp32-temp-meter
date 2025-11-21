@@ -2,7 +2,6 @@ import { getCurrentUser, signOut } from "aws-amplify/auth";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDevices } from "./hooks/useDevices";
-import { useReadingBounds } from "./hooks/useReadingBounds";
 import { useReadings } from "./hooks/useReadings";
 import "./locale/i18n"; // initialize i18
 import { Dashboard } from "./pages/Dashboard/Dashboard";
@@ -32,29 +31,13 @@ function App() {
     })();
   }, []);
 
-  const {
-    bounds,
-    loading: boundsLoading,
-    error: boundsError,
-  } = useReadingBounds(user);
-
   const { devices, loading: devicesLoading, removeDevice } = useDevices(user);
 
-  // range (init kun bounds ladattu)
   const [range, setRange] = useState<Range>(() => {
     const now = toLocalOffsetIso();
     const from = toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS));
     return { from, to: now };
   });
-
-  useEffect(() => {
-    if (!bounds) return;
-    const maxD = new Date(bounds.max);
-    const start = new Date(
-      Math.max(new Date(bounds.min).getTime(), maxD.getTime() - THREE_WEEKS)
-    );
-    setRange({ from: toLocalOffsetIso(start), to: toLocalOffsetIso(maxD) });
-  }, [bounds?.min, bounds?.max]); // init tai kun bounds päivittyy
 
   const {
     data,
@@ -83,26 +66,23 @@ function App() {
   }
   if (!user) return <Login setUser={setUser} />;
 
-  const error = boundsError || dataError;
-  console.log("bounds", bounds);
   return (
     <>
-      {error && (
+      {dataError && (
         <div className="p-2 mb-2 text-sm text-white bg-red-500 rounded">
-          {error}
+          {dataError}
         </div>
       )}
 
       <Dashboard
         data={data}
         devices={devices}
-        bounds={bounds}
         range={range}
         onRangeChange={(r) => setRange(r)}
         selectedDeviceIds={selectedDeviceIds}
         setSelectedDeviceIds={setSelectedDeviceIds}
         handleLogout={handleLogout}
-        loading={boundsLoading || dataLoading || devicesLoading}
+        loading={dataLoading || devicesLoading}
         onDeviceDeleted={handleDeviceDeleted}
       />
     </>
