@@ -9,8 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Range } from "../../../utils/types";
-import { MultiPoint, bucketizeMulti, fmtTime } from "../../../utils/utils";
+import { Range } from "../../../../utils/types";
+import { MultiPoint, bucketizeMulti, fmtTime } from "../../../../utils/utils";
 
 const PALETTE = [
   "#818cf8", // indigo-400
