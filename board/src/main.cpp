@@ -41,6 +41,10 @@ void setup()
     return;
   }
 
+  // Setup complete: ensure we're in STA mode only
+  WiFi.mode(WIFI_STA);
+  Serial.println("[Setup] Setup complete, switched to STA mode");
+
   if (wifiCredentialsExist())
   {
     WifiCredentials creds;
@@ -96,8 +100,9 @@ void loop()
   ResetHelper::loop();
   if (!isSetupComplete())
   {
-    Serial.println("[DEBUG] Setup not complete, skipping MQTT operations");
-    delay(1000);
+    // Process DNS requests for captive portal
+    processCaptivePortalDNS();
+    delay(10);
     return;
   }
 

@@ -10,16 +10,28 @@
 #include <storage_helper.h>
 #include <device_helper.h>
 #include <wifi_state.h>
+#include <DNSServer.h>
 
 namespace
 {
   AsyncWebServer server(80);
   bool setupComplete = false;
+  DNSServer dns;
 }
 
 void startSetupWebServer()
 {
+  // Configure AP with static IP for captive portal
+  IPAddress local_IP(192, 168, 4, 1);
+  IPAddress gateway(192, 168, 4, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  WiFi.softAPConfig(local_IP, gateway, subnet);
+
   WiFi.softAP("TempSensor-Setup");
+
+  // Start DNS server for captive portal (wildcard redirects all domains to AP IP)
+  dns.start(53, "*", WiFi.softAPIP());
+  Serial.printf("[DNS] Captive portal started on %s\n", WiFi.softAPIP().toString().c_str());
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(LittleFS, "/html/index.html", "text/html"); });
@@ -138,10 +150,26 @@ void startSetupWebServer()
   request->send(200, "text/plain", "Setup completed. Restarting...");
   Serial.println("[Setup] Completing setup and restarting...");
 
+  // Stop captive portal DNS and AP before restart
+  dns.stop();
+  WiFi.softAPdisconnect(true);
+  Serial.println("[Setup] Stopped AP and DNS");
 
   TimeHelper::scheduleRestart(5000); });
 
+  // Captive portal: redirect all unknown requests to setup page
+  server.onNotFound([](AsyncWebServerRequest *request)
+                    {
+    Serial.printf("[Captive] Redirect %s to /\n", request->host().c_str());
+    request->redirect("/"); });
+
   server.begin();
+  Serial.println("[Setup] Web server started with captive portal");
+}
+
+void processCaptivePortalDNS()
+{
+  dns.processNextRequest();
 }
 
 bool isSetupComplete()
