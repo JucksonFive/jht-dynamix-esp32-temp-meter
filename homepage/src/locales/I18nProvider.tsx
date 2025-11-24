@@ -9,6 +9,7 @@ import React, {
 import { LocaleKey, locales } from "./index";
 
 type AnyMessages = (typeof locales)[LocaleKey];
+
 interface I18nContextValue {
   lang: LocaleKey;
   t: AnyMessages;

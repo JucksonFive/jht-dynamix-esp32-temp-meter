@@ -24,14 +24,6 @@ export interface FooterColumns {
   support: { title: string };
 }
 
-export interface FooterSocial {
-  title: string;
-  linkedin: string;
-  linkedinUrl: string;
-  github: string;
-  githubUrl: string;
-}
-
 export interface LocaleSchema {
   app: {
     name: string;
