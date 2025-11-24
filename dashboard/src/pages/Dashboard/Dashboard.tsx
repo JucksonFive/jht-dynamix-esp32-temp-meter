@@ -6,11 +6,7 @@ import { SelectDeviceHelp } from "./Components/SidePanel/SelectDeviceHelp";
 import { SidePanel } from "./Components/SidePanel/SidePanel";
 import { TemperatureHistoryPanel } from "./Components/TemperatureChart/TemperatureHistoryPanel";
 
-interface DashboardProps {
-  loading: boolean;
-}
-
-export const Dashboard = ({ loading }: DashboardProps) => {
+export const Dashboard = () => {
   const { t } = useTranslation();
   const { selectedDeviceIds, handleLogout } = useAppContext();
 
