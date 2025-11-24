@@ -5,14 +5,14 @@ export const en: LocaleSchema = {
     name: "JT-DYNAMIX",
     nav: {
       features: "Features",
-      dashboard: "Dashboard",
+      dashboard: "Dynlink Dashboard",
     },
     hero: {
       title: "JT-DYNAMIX",
       tagline:
         "Smart IoT platform for monitoring temperature, devices and environment. Fast to deploy, secure and extensible.",
       ctaFeatures: "Explore features",
-      ctaDashboard: "Open Dashboard",
+      ctaDashboard: "Open Dynlink Dashboard",
       headline: {
         line1: "All Your Device",
         line2: "Monitoring Needs in a",

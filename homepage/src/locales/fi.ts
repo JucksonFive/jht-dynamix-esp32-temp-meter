@@ -5,14 +5,14 @@ export const fi: LocaleSchema = {
     name: "JT-DYNAMIX",
     nav: {
       features: "Ominaisuudet",
-      dashboard: "Dashboard",
+      dashboard: "Dynlink Hallintapaneeli",
     },
     hero: {
       title: "JT-DYNAMIX",
       tagline:
         "Älykäs IoT-alusta lämpötilan, laitteiden ja ympäristön seurantaan. Nopeasti käyttöönotettava, turvallinen ja laajennettava.",
       ctaFeatures: "Tutustu ominaisuuksiin",
-      ctaDashboard: "Avaa Dashboard",
+      ctaDashboard: "Avaa Dynlink Hallintapaneeli",
       headline: {
         line1: "Kaikki testaus-",
         line2: "ja seuranta tarpeesi",
