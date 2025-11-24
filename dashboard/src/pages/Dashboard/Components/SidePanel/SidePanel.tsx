@@ -1,39 +1,38 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Device } from "../../../../services/types";
+import { useAppContext } from "../../../../contexts/AppContext";
 import DeleteDeviceButton from "../Buttons/DeleteDeviceButton";
 import DeviceMultiToggle from "../Buttons/DeviceMultiToggle";
 import { DeviceSelectButton } from "../Buttons/DeviceSelectButton";
 import SelectAllDevicesButton from "../Buttons/SelectAllDevicesButton";
 import { SidePanelHeader } from "./SidePanelHeader";
 
-export interface SidePanelProps {
-  devices: Device[];
-  selectedIds: string[];
-  onSelectSingle: (id: string) => void;
-  onToggleMulti: (id: string) => void;
-  onDeviceDeleted: (id: string) => void;
-}
-
-export const SidePanel: React.FC<SidePanelProps> = ({
-  devices,
-  selectedIds,
-  onSelectSingle,
-  onToggleMulti,
-  onDeviceDeleted,
-}) => {
+export const SidePanel: React.FC = () => {
   const { t } = useTranslation();
+  const {
+    devices,
+    selectedDeviceIds,
+    setSelectedDeviceIds,
+    handleDeviceDeleted,
+  } = useAppContext();
+
+  const onSelectSingle = (id: string) => setSelectedDeviceIds([id]);
+
+  const onToggleMulti = (id: string) =>
+    setSelectedDeviceIds((prev: string[]) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
 
   const handleSelectAll = () => {
     devices.forEach((d) => {
-      if (!selectedIds.includes(d.deviceId)) {
+      if (!selectedDeviceIds.includes(d.deviceId)) {
         onToggleMulti(d.deviceId);
       }
     });
   };
   const handleUnselectAll = () => {
     devices.forEach((d) => {
-      if (selectedIds.includes(d.deviceId)) {
+      if (selectedDeviceIds.includes(d.deviceId)) {
         onToggleMulti(d.deviceId);
       }
     });
@@ -59,13 +58,13 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             <SidePanelHeader title={t("sidePanelTitle")} />
             <SelectAllDevicesButton
               total={devices.length}
-              selected={selectedIds.length}
+              selected={selectedDeviceIds.length}
               onSelectAll={handleSelectAll}
               onUnselectAll={handleUnselectAll}
             />
             <ul className="space-y-2">
               {devices.map((d) => {
-                const isActive = selectedIds.includes(d.deviceId);
+                const isActive = selectedDeviceIds.includes(d.deviceId);
                 return (
                   <li key={d.deviceId}>
                     <div
@@ -90,7 +89,7 @@ export const SidePanel: React.FC<SidePanelProps> = ({
                         />
                         <DeleteDeviceButton
                           deviceId={d.deviceId}
-                          onDeleted={onDeviceDeleted}
+                          onDeleted={handleDeviceDeleted}
                         />
                       </div>
                     </div>

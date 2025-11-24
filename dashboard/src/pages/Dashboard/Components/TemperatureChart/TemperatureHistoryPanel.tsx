@@ -1,17 +1,15 @@
 import React from "react";
-import { DeviceData, Range } from "../../../../utils/types";
+import { useAppContext } from "../../../../contexts/AppContext";
 import { TemperatureChart } from "./TemperatureChart";
 import { TemperatureHistoryHeader } from "./TemperatureHistoryHeader";
 
-interface TemperatureHistoryPanelProps {
-  selectedData: DeviceData[];
-  range: Range;
-  selectedDeviceIds: string[];
-}
+export const TemperatureHistoryPanel: React.FC = () => {
+  const { data, range, selectedDeviceIds } = useAppContext();
 
-export const TemperatureHistoryPanel: React.FC<
-  TemperatureHistoryPanelProps
-> = ({ selectedData, range, selectedDeviceIds }) => {
+  const selectedData =
+    selectedDeviceIds.length > 0
+      ? data.filter((d) => selectedDeviceIds.includes(d.id))
+      : [];
   return (
     <div>
       <TemperatureHistoryHeader selectedDeviceIds={selectedDeviceIds} />

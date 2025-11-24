@@ -5,11 +5,14 @@ import "./index.css";
 
 import { Amplify } from "aws-amplify";
 import amplifyConfig from "./amplify-config";
+import { AppProvider } from "./contexts/AppContext";
 
 Amplify.configure(amplifyConfig);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <AppProvider>
+      <App />
+    </AppProvider>
   </React.StrictMode>
 );

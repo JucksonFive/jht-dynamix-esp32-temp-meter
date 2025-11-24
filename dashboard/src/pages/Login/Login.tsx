@@ -1,15 +1,16 @@
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Nullable } from "../../utils/types";
 import AuthActions from "./Components/AuthActions";
 import { Logo } from "./Components/Logo";
 
-export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
+export const Login = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
   const [loading, setLoading] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -28,7 +29,10 @@ export const Login = ({ setUser }: { setUser: (user: any) => void }) => {
         });
       }
       const user = await getCurrentUser().catch(() => null);
-      if (user) setUser(user);
+      if (user) {
+        // Trigger re-authentication by signing out and letting context re-initialize
+        window.location.reload();
+      }
     } catch (err: any) {
       console.error("Auth failed", err);
       setError(err.message || "Authentication failed");

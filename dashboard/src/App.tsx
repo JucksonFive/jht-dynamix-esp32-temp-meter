@@ -1,63 +1,15 @@
-import { getCurrentUser, signOut } from "aws-amplify/auth";
-import { lazy, useEffect, useState } from "react";
+import { lazy } from "react";
 import { useTranslation } from "react-i18next";
-import { useDevices } from "./hooks/useDevices";
-import { useReadings } from "./hooks/useReadings";
+import { useAppContext } from "./contexts/AppContext";
 import "./locale/i18n"; // initialize i18
-
-import { type Range } from "./utils/types";
-import { toLocalOffSetIso as toLocalOffsetIso } from "./utils/utils";
 
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const Login = lazy(() => import("./pages/Login/Login"));
 
-const THREE_WEEKS = 7 * 864e5;
-const MINUTE = 60 * 1000;
-
 function App() {
   const { t } = useTranslation();
-  const [user, setUser] = useState<any>(null);
-  const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
-
-  const [bootLoading, setBootLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      try {
-        const u = await getCurrentUser();
-        setUser(u);
-      } catch {
-        setUser(null);
-      } finally {
-        setBootLoading(false);
-      }
-    })();
-  }, []);
-
-  const { devices, loading: devicesLoading, removeDevice } = useDevices(user);
-
-  const [range, setRange] = useState<Range>(() => {
-    const now = toLocalOffsetIso();
-    const from = toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS));
-    return { from, to: now };
-  });
-
-  const {
-    data,
-    loading: dataLoading,
-    error: dataError,
-  } = useReadings(user, range, {
-    intervalMs: MINUTE,
-  });
-
-  const handleLogout = async () => {
-    await signOut();
-    setUser(null);
-  };
-
-  const handleDeviceDeleted = (id: string) => {
-    removeDevice(id);
-    setSelectedDeviceIds((prev) => prev.filter((did) => did !== id));
-  };
+  const { user, bootLoading, dataError, dataLoading, devicesLoading } =
+    useAppContext();
 
   if (bootLoading) {
     return (
@@ -66,7 +18,7 @@ function App() {
       </div>
     );
   }
-  if (!user) return <Login setUser={setUser} />;
+  if (!user) return <Login />;
 
   return (
     <>
@@ -76,17 +28,7 @@ function App() {
         </div>
       )}
 
-      <Dashboard
-        data={data}
-        devices={devices}
-        range={range}
-        onRangeChange={(r: Range) => setRange(r)}
-        selectedDeviceIds={selectedDeviceIds}
-        setSelectedDeviceIds={setSelectedDeviceIds}
-        handleLogout={handleLogout}
-        loading={dataLoading || devicesLoading}
-        onDeviceDeleted={handleDeviceDeleted}
-      />
+      <Dashboard loading={dataLoading || devicesLoading} />
     </>
   );
 }
