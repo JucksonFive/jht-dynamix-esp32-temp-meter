@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { FiTrash2 } from "react-icons/fi";
 import { deleteUserDevice } from "../../../../services/api";
 import ConfirmDialog from "../../../../ui/Elements/Modal/ConfirmDialog";
+import { Nullable } from "../../../../utils/types";
 import ErrorIndicator from "./ErrorIndicator";
 
 interface DeleteDeviceButtonProps {
@@ -17,7 +18,7 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
   size = 16,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
 

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchAllUserReadings } from "../services/api";
 import type { Reading } from "../services/types";
-import type { Range } from "../utils/types";
+import type { Nullable, Range } from "../utils/types";
 
 export interface DeviceData {
   id: string;
@@ -16,9 +16,9 @@ export function useReadings(
   { intervalMs = 60000 } = {}
 ) {
   const [data, setData] = useState<DeviceData[]>([]);
-  const [error, setErr] = useState<string | null>(null);
+  const [error, setErr] = useState<Nullable<string>>(null);
   const [loading, setLoading] = useState(false);
-  const timerRef = useRef<number | null>(null);
+  const timerRef = useRef<Nullable<number>>(null);
 
   const load = async (signal?: AbortSignal, r = range) => {
     try {

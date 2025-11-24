@@ -1,8 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Nullable } from "../../../utils/types";
 
 export interface AuthErrorMessageProps {
-  error?: string | null;
+  error?: Nullable<string>;
   className?: string;
 }
 

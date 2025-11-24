@@ -1,13 +1,14 @@
 import React from "react";
 import { Button } from "../../../ui/Elements/Button/Button";
-import { AuthButtonContent } from "./Buttons/AuthButtonContent";
+import { Nullable } from "../../../utils/types";
 import { AuthErrorMessage } from "./AuthErrorMessage";
+import { AuthButtonContent } from "./Buttons/AuthButtonContent";
 import { ToggleAuthModeButton } from "./Buttons/ToggleAuthModeButton";
 
 export interface AuthActionsProps {
   mode: "signin" | "signup";
   loading: boolean;
-  error?: string | null;
+  error?: Nullable<string>;
   disabled?: boolean;
   onAuth: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onToggleMode: () => void;

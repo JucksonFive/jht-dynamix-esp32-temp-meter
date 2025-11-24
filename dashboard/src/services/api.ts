@@ -1,6 +1,7 @@
 import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { Device, ReadingsResponse } from "./types";
+import { Nullable } from "../utils/types";
 
 const BASE_URL = import.meta.env.VITE_BASE_API_URL;
 if (!BASE_URL) throw new Error("VITE_BASE_API_URL is not defined");
@@ -40,7 +41,7 @@ export async function fetchUserReadings(params?: {
   to?: string;
   deviceIds?: string[];
   limit?: number;
-  nextKey?: string | null;
+  nextKey?: Nullable<string>;
 }): Promise<ReadingsResponse> {
   const query: Record<string, string> = {};
   if (params?.from) query.from = params.from;
@@ -61,7 +62,7 @@ export async function fetchAllUserReadings(opts?: {
   deviceIds?: string[];
   pageSize?: number;
 }) {
-  let nextKey: string | null | undefined = undefined;
+  let nextKey: ReadingsResponse["nextKey"] = null;
   const items: ReadingsResponse["items"] = [];
   do {
     const page = await fetchUserReadings({
@@ -78,10 +79,10 @@ export async function fetchAllUserReadings(opts?: {
 }
 
 export async function fetchReadingBounds(): Promise<{
-  min: string | null;
-  max: string | null;
+  min: Nullable<string>;
+  max: Nullable<string>;
 }> {
-  return apiRequest<{ min: string | null; max: string | null }>({
+  return apiRequest<{ min: Nullable<string>; max: Nullable<string> }>({
     path: "/bounds",
   });
 }

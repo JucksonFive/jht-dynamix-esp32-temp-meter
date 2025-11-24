@@ -1,3 +1,5 @@
+import { Nullable } from "../utils/types";
+
 export type Reading = {
   deviceId: string;
   timestamp: string;
@@ -7,7 +9,7 @@ export type Reading = {
 
 export type ReadingsResponse = {
   items: Reading[];
-  nextKey?: string | null;
+  nextKey?: Nullable<string>;
 };
 
 export interface Device {

@@ -3,12 +3,13 @@ import { fetchUserDevices } from "../services/api";
 import { Device } from "../services/types";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { Nullable } from "../utils/types";
 
 export function useDevices(user: any) {
   const { t } = useTranslation();
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Nullable<string>>(null);
 
   const removeDevice = useCallback((deviceId: string) => {
     setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { Nullable } from "../../../utils/types";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -25,8 +26,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  const cancelRef = useRef<HTMLButtonElement | null>(null);
-  const firstFocusRef = useRef<HTMLDivElement | null>(null);
+  const cancelRef = useRef<Nullable<HTMLButtonElement>>(null);
+  const firstFocusRef = useRef<Nullable<HTMLDivElement>>(null);
 
   useEffect(() => {
     if (open) {
