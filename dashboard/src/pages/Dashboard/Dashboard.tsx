@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import { useAppContext } from "../../contexts/AppContext";
 import { DateRangeFilter } from "./Components/DateRange/DateRangeFilter";
 import { HeaderBar } from "./Components/HeaderBar";
@@ -7,7 +6,6 @@ import { SidePanel } from "./Components/SidePanel/SidePanel";
 import { TemperatureHistoryPanel } from "./Components/TemperatureChart/TemperatureHistoryPanel";
 
 export const Dashboard = () => {
-  const { t } = useTranslation();
   const { selectedDeviceIds, handleLogout } = useAppContext();
 
   return (

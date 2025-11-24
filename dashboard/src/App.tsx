@@ -8,8 +8,7 @@ const Login = lazy(() => import("./pages/Login/Login"));
 
 function App() {
   const { t } = useTranslation();
-  const { user, bootLoading, dataError, dataLoading, devicesLoading } =
-    useAppContext();
+  const { user, bootLoading, dataError } = useAppContext();
 
   if (bootLoading) {
     return (
@@ -28,7 +27,7 @@ function App() {
         </div>
       )}
 
-      <Dashboard loading={dataLoading || devicesLoading} />
+      <Dashboard />
     </>
   );
 }
