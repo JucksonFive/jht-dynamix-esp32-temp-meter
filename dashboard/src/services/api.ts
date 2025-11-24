@@ -1,7 +1,7 @@
 import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { Device, ReadingsResponse } from "./types";
-import { Nullable } from "../utils/types";
+import { Nullable, QueryParams } from "../utils/types";
 
 const BASE_URL = import.meta.env.VITE_BASE_API_URL;
 if (!BASE_URL) throw new Error("VITE_BASE_API_URL is not defined");
@@ -9,8 +9,8 @@ if (!BASE_URL) throw new Error("VITE_BASE_API_URL is not defined");
 async function apiRequest<T>(opts: {
   method?: "GET" | "POST" | "DELETE" | "PUT";
   path: string;
-  params?: Record<string, any>;
-  data?: any;
+  params?: QueryParams;
+  data?: unknown;
   signal?: AbortSignal;
 }): Promise<T> {
   const session = await fetchAuthSession();
@@ -43,7 +43,7 @@ export async function fetchUserReadings(params?: {
   limit?: number;
   nextKey?: Nullable<string>;
 }): Promise<ReadingsResponse> {
-  const query: Record<string, string> = {};
+  const query: QueryParams = {};
   if (params?.from) query.from = params.from;
   if (params?.to) query.to = params.to;
   if (params?.deviceIds?.length) query.deviceId = params.deviceIds.join(",");

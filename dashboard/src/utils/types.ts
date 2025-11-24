@@ -4,6 +4,8 @@ export type Range = { from: DateStr; to: DateStr };
 
 export type Nullable<T> = T | null;
 
+export type QueryParams = Record<string, string | number | boolean | undefined>;
+
 export type DeviceData = {
   id: string;
   temperature: number;
