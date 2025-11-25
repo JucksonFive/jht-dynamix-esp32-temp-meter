@@ -4,9 +4,6 @@ import { MediaCarousel } from "./MediaCarousel";
 
 export const Hero: React.FC = () => {
   const { t } = useI18n();
-  const line1 = t.app.hero.headline?.line1 ?? t.app.hero.title;
-  const line2 = t.app.hero.headline?.line2 ?? "";
-  const highlight = t.app.hero.headline?.highlight ?? "";
 
   return (
     <section className="relative overflow-hidden min-h-[80vh] md:min-h-[92vh] flex items-stretch">
@@ -22,13 +19,14 @@ export const Hero: React.FC = () => {
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-10 flex items-center">
         <div className="max-w-xl md:max-w-2xl py-28 md:py-40">
           <h1 className="font-semibold text-white tracking-tight leading-[1.05] text-[clamp(2.5rem,6vw+0.5rem,4.75rem)]">
-            <span className="block">{line1}</span>
-            {line2 && (
-              <span className="block mt-2">
-                {line2}{" "}
-                {highlight && <span className="text-white">{highlight}</span>}
+            <span className="block">{t.app.hero.headline?.line1}</span>
+
+            <span className="block mt-2">
+              {t.app.hero.headline.line2}
+              <span className="text-white">
+                {t.app.hero.headline.highlight}
               </span>
-            )}
+            </span>
           </h1>
           <p className="mt-8 text-lg md:text-xl text-white/85 max-w-2xl">
             {t.app.hero.tagline}
