@@ -85,3 +85,69 @@ button:hover { transform: scale(1.05); box-shadow: 0 0 20px #cc66ff; }
 .register-link a:hover { text-decoration: underline; }
 
 pre { text-align:left; background:#1e0a2e; padding:1rem; border-radius:8px; font-size:0.75rem; }
+
+/* Offline Mode Step Styles */
+.offline-mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.option-card {
+  background-color: #3a1a5d;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease, transform 0.2s ease;
+}
+
+.option-card:hover {
+  border-color: #7f00ff;
+  transform: translateY(-2px);
+}
+
+.option-card h3 {
+  margin-top: 0;
+  color: #d9b3ff;
+  font-size: 1.2rem;
+}
+
+.option-card p {
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.option-card ul {
+  text-align: left;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.option-card ul li {
+  margin-bottom: 0.5rem;
+}
+
+.option-card button {
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #2D9CDB, #4FC3F7);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 20px #4FC3F7;
+}
+
+.btn-secondary {
+  background: linear-gradient(to right, #666, #888);
+}
+
+.btn-secondary:hover {
+  box-shadow: 0 0 20px #999;
+}
