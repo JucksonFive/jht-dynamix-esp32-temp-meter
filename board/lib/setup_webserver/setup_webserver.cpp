@@ -134,6 +134,62 @@ void startSetupWebServer()
 
   request->send(200, "text/plain", "Device linked successfully"); });
 
+  // Enable offline mode (skip WiFi/MQTT setup)
+  server.on("/enable-offline-mode", HTTP_POST, [](AsyncWebServerRequest *request)
+            {
+  if (StorageHelper::enableOfflineMode()) {
+    setupComplete = true;
+    request->send(200, "text/plain", "Offline mode enabled. Restarting...");
+    
+    Serial.println("[Setup] Offline mode enabled, restarting...");
+    
+    // Stop captive portal DNS and AP before restart
+    dns.stop();
+    WiFi.softAPdisconnect(true);
+    Serial.println("[Setup] Stopped AP and DNS");
+    
+    TimeHelper::scheduleRestart(5000);
+  } else {
+    request->send(500, "text/plain", "Failed to enable offline mode");
+  } });
+
+  // Disable offline mode (return to normal operation requiring WiFi/MQTT)
+  server.on("/disable-offline-mode", HTTP_POST, [](AsyncWebServerRequest *request)
+            {
+  if (StorageHelper::disableOfflineMode()) {
+    request->send(200, "text/plain", "Offline mode disabled. Please reconfigure WiFi.");
+    
+    Serial.println("[Setup] Offline mode disabled");
+    
+    // Remove WiFi credentials to force reconfiguration
+    if (LittleFS.exists("/wifi.json")) {
+      LittleFS.remove("/wifi.json");
+    }
+    if (LittleFS.exists("/device.json")) {
+      LittleFS.remove("/device.json");
+    }
+    
+    setupComplete = false;
+    
+    // Restart to enter setup mode again
+    TimeHelper::scheduleRestart(3000);
+  } else {
+    request->send(500, "text/plain", "Failed to disable offline mode");
+  } });
+
+  // Check offline mode status
+  server.on("/offline-mode-status", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+  bool enabled = StorageHelper::isOfflineModeEnabled();
+  int count = StorageHelper::getOfflineReadingCount();
+  size_t fileSize = StorageHelper::getOfflineFileSize();
+  
+  String json = "{\"enabled\":" + String(enabled ? "true" : "false") + 
+                ",\"readingCount\":" + String(count) + 
+                ",\"fileSize\":" + String(fileSize) + "}";
+  
+  request->send(200, "application/json", json); });
+
   server.on("/complete-setup", HTTP_POST, [](AsyncWebServerRequest *request)
             {
   String deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
@@ -180,6 +236,15 @@ bool isSetupComplete()
 
   if (setupChecked)
   {
+    return setupResult;
+  }
+
+  // Check if offline mode is enabled (setup is complete in offline mode)
+  if (StorageHelper::isOfflineModeEnabled())
+  {
+    Serial.println("[Setup] Offline mode enabled, setup is complete");
+    setupResult = true;
+    setupChecked = true;
     return setupResult;
   }
 

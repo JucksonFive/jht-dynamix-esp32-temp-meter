@@ -1,4 +1,4 @@
-let currentStep = 1;
+let currentStep = 0; // Start with mode selection
 let selectedSSID = "";
 
 const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
@@ -68,11 +68,101 @@ function closeModal() {
   scanSpinner.classList.add("hidden");
 }
 
+function selectOnlineMode() {
+  currentStep = 1;
+  showStep(currentStep);
+  loadWifiList();
+}
+
+function enableOfflineMode() {
+  if (
+    !confirm(
+      "Enable Offline Mode?\n\n" +
+        "The device will:\n" +
+        "• Store readings locally\n" +
+        "• Work without WiFi\n" +
+        "• Save up to ~10,000 readings\n\n" +
+        "Device will restart in 5 seconds."
+    )
+  ) {
+    return;
+  }
+
+  fetch("/enable-offline-mode", {
+    method: "POST",
+  })
+    .then((res) => {
+      if (res.ok) {
+        alert(
+          "✅ Offline mode enabled!\n\n" +
+            "The device will now:\n" +
+            "• Store readings locally\n" +
+            "• Work without WiFi\n" +
+            "• Save up to ~10,000 readings\n\n" +
+            "Device will restart in 5 seconds."
+        );
+      } else {
+        return res.text().then((text) => {
+          alert("❌ Failed to enable offline mode: " + text);
+        });
+      }
+    })
+    .catch((err) => {
+      console.error("Offline mode request failed:", err);
+      alert("❌ Network error: " + err.message);
+    });
+}
+
+function selectOnlineMode() {
+  currentStep = 1;
+  showStep(currentStep);
+  loadWifiList();
+}
+
+function enableOfflineMode() {
+  if (
+    !confirm(
+      "Enable Offline Mode?\n\n" +
+        "The device will:\n" +
+        "• Store readings locally\n" +
+        "• Work without WiFi\n" +
+        "• Save up to ~10,000 readings\n\n" +
+        "Device will restart in 5 seconds."
+    )
+  ) {
+    return;
+  }
+
+  fetch("/enable-offline-mode", {
+    method: "POST",
+  })
+    .then((res) => {
+      if (res.ok) {
+        alert(
+          "✅ Offline mode enabled!\n\n" +
+            "The device will now:\n" +
+            "• Store readings locally\n" +
+            "• Work without WiFi\n" +
+            "• Save up to ~10,000 readings\n\n" +
+            "Device will restart in 5 seconds."
+        );
+      } else {
+        return res.text().then((text) => {
+          alert("❌ Failed to enable offline mode: " + text);
+        });
+      }
+    })
+    .catch((err) => {
+      console.error("Offline mode request failed:", err);
+      alert("❌ Network error: " + err.message);
+    });
+}
+
 function showStep(step) {
   const steps = document.querySelectorAll(".step");
   let index = 0;
   for (const el of steps) {
-    const isActive = index === step - 1;
+    const isActive = index === step;
     el.classList.toggle("hidden", !isActive);
 
     // Disable inputs and remove required from inactive steps
@@ -129,7 +219,7 @@ function nextStep() {
 }
 
 function prevStep() {
-  if (currentStep > 1) {
+  if (currentStep > 0) {
     currentStep--;
     showStep(currentStep);
   }
@@ -278,7 +368,8 @@ function handleUserAuth(username, userPassword, deviceId) {
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
   showStep(currentStep);
-  if (currentStep === 1) loadWifiList();
+  // Don't auto-load WiFi list anymore, wait for user to select online mode
+
   // Global key handler for Enter inside password modal
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {

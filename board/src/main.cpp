@@ -41,6 +41,32 @@ void setup()
     return;
   }
 
+  // Check if offline mode is enabled
+  if (StorageHelper::isOfflineModeEnabled())
+  {
+    Serial.println("[Offline] Offline mode enabled, skipping WiFi/MQTT setup");
+    Serial.println("[Offline] Device will store readings locally");
+
+    // Initialize temperature sensor only
+    TempSensor::setup();
+
+    // Get device info or use default
+    deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+    if (deviceId.isEmpty())
+    {
+      deviceId = "offline-" + String(WiFi.macAddress());
+      Serial.printf("[Offline] Using device ID: %s\n", deviceId.c_str());
+    }
+
+    userId = StorageHelper::getConfigValue("/user.json", "userId");
+    if (userId.isEmpty())
+    {
+      userId = "offline-user";
+    }
+
+    return;
+  }
+
   // Setup complete: ensure we're in STA mode only
   WiFi.mode(WIFI_STA);
   Serial.println("[Setup] Setup complete, switched to STA mode");
@@ -106,11 +132,87 @@ void loop()
     return;
   }
 
-  if (!MQTT::isConnected())
+  // If offline mode is enabled, just collect and store readings
+  if (StorageHelper::isOfflineModeEnabled())
   {
-    MQTT::ensureConnection(clientId.c_str());
+    float temp = TempSensor::readCelsius();
+    if (temp == DEVICE_DISCONNECTED_C)
+    {
+      Serial.println("[Offline] Sensor error");
+    }
+    else
+    {
+      // Use simple timestamp (millis) since we don't have time sync
+      char timestamp[32];
+      snprintf(timestamp, sizeof(timestamp), "%lu", millis());
+
+      StorageHelper::appendOfflineReading(deviceId.c_str(), temp, timestamp, userId.c_str());
+
+      int count = StorageHelper::getOfflineReadingCount();
+      size_t fileSize = StorageHelper::getOfflineFileSize();
+      Serial.printf("[Offline] Temp: %.2f°C | Stored: %d readings, %u bytes\n",
+                    temp, count, (unsigned)fileSize);
+    }
+
+    delay(10000);
+    return;
   }
-  MQTT::loop();
+
+  // Normal online operation
+  // Check if WiFi is connected
+  bool wifiConnected = (WiFi.status() == WL_CONNECTED);
+  bool mqttConnected = false;
+
+  if (wifiConnected)
+  {
+    if (!MQTT::isConnected())
+    {
+      MQTT::ensureConnection(clientId.c_str());
+    }
+    mqttConnected = MQTT::isConnected();
+    MQTT::loop();
+
+    // Try to send offline readings if we have connection
+    if (mqttConnected)
+    {
+      int offlineCount = StorageHelper::getOfflineReadingCount();
+      if (offlineCount > 0)
+      {
+        Serial.printf("[Offline] Found %d offline readings, sending to cloud...\n", offlineCount);
+
+        String offlineData = StorageHelper::getOfflineReadings();
+        int startPos = 0;
+        int sentCount = 0;
+
+        // Send each line (JSONL format)
+        while (startPos < offlineData.length())
+        {
+          int endPos = offlineData.indexOf('\n', startPos);
+          if (endPos == -1)
+          {
+            endPos = offlineData.length();
+          }
+
+          String line = offlineData.substring(startPos, endPos);
+          line.trim();
+
+          if (line.length() > 0)
+          {
+            MQTT::publish(mqtt_topic_str.c_str(), line.c_str());
+            Serial.printf("[Offline] Sent reading %d/%d\n", sentCount + 1, offlineCount);
+            sentCount++;
+            delay(100); // Small delay between sends
+          }
+
+          startPos = endPos + 1;
+        }
+
+        // Clear offline storage after successful send
+        StorageHelper::clearOfflineReadings();
+        Serial.printf("[Offline] Successfully sent %d offline readings\n", sentCount);
+      }
+    }
+  }
 
   float temp = TempSensor::readCelsius();
   if (temp == DEVICE_DISCONNECTED_C)
@@ -131,9 +233,25 @@ void loop()
       return;
     }
 
-    MQTT::publish(mqtt_topic_str.c_str(), payload);
-    Serial.printf("[MQTT] publish topic=%s len=%u | %s\n",
-                  mqtt_topic_str.c_str(), (unsigned)strlen(payload), payload);
+    // If online, publish directly. If offline, store locally.
+    if (wifiConnected && mqttConnected)
+    {
+      MQTT::publish(mqtt_topic_str.c_str(), payload);
+      Serial.printf("[MQTT] publish topic=%s len=%u | %s\n",
+                    mqtt_topic_str.c_str(), (unsigned)strlen(payload), payload);
+    }
+    else
+    {
+      // Store offline
+      Serial.println("[Offline] No connection, storing reading locally");
+      StorageHelper::appendOfflineReading(deviceId.c_str(), temp, ts, userId.c_str());
+
+      // Report status
+      int count = StorageHelper::getOfflineReadingCount();
+      size_t fileSize = StorageHelper::getOfflineFileSize();
+      Serial.printf("[Offline] Total stored: %d readings, %u bytes\n", count, (unsigned)fileSize);
+    }
+
     delay(10000);
   }
 }

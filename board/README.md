@@ -13,6 +13,8 @@ This firmware is designed to run on an ESP32 DOIT DEVKIT V1 board. It reads temp
 -   **Temperature Sensing:** Reads temperature from a DS18B20 sensor.
 -   **Web Server:** A simple async web server for configuration and status monitoring.
 -   **LittleFS Storage:** Uses LittleFS to store configuration files (`mqtt.json`).
+-   **Offline Mode:** Operate without WiFi/internet connection by storing readings locally.
+-   **Automatic Sync:** When connection is restored, automatically uploads stored offline readings.
 
 ## Hardware Requirements
 
@@ -48,12 +50,38 @@ This project is built using [PlatformIO](https://platformio.org/).
 
 On the first boot, the device will start in Access Point (AP) mode.
 
-1.  Connect to the WiFi network named `ESP32-Temp-Meter-Setup`.
-2.  Open a browser and navigate to `http://192.168.4.1`.
-3.  Follow the on-screen wizard to connect the device to your local WiFi network and configure the MQTT broker settings.
-4.  The configuration will be saved to `mqtt.json` in the LittleFS filesystem.
+1.  Connect to the WiFi network named `TempSensor-Setup`.
+2.  Open a browser and navigate to `http://192.168.4.1` (captive portal should redirect automatically).
+3.  Choose operation mode:
+    -   **Online Mode:** Configure WiFi and cloud connection for real-time data transmission
+    -   **Offline Mode:** Skip WiFi setup and store readings locally (perfect for locations without network)
+4.  For Online Mode: Follow the wizard to connect to WiFi, authenticate with your account, and link the device.
+5.  The configuration will be saved to LittleFS filesystem.
 
-After configuration, the device will restart and connect to the configured WiFi and MQTT broker.
+After configuration, the device will restart and begin operation in the selected mode.
+
+### Offline Mode
+
+When offline mode is enabled:
+-   Device operates without WiFi/MQTT connection
+-   Readings are stored locally in `/offline_readings.jsonl`
+-   Storage capacity: ~10,000 readings (~1 day at 10-second intervals, ~30 days at 5-minute intervals)
+-   File size is monitored and limited to 1 MB to prevent memory issues
+-   Timestamps use `millis()` instead of real-time clock
+
+To **exit offline mode** and configure network:
+1.  Long-press (3 seconds) the BOOT button (GPIO0) to factory reset
+2.  Device will restart in setup mode
+3.  Connect and select Online Mode
+4.  When connection is restored, any stored offline readings will be automatically uploaded to the cloud
+
+### Factory Reset
+
+Hold the BOOT button (GPIO0) for 3 seconds to perform a factory reset. This will:
+-   Clear all WiFi credentials
+-   Clear device linking
+-   Clear offline mode settings
+-   Restart the device in setup mode
 
 
 <p align="center">

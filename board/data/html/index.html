@@ -17,8 +17,36 @@
     <h1>Device Configuration</h1>
     <!-- WiFi Configuration -->
     <form id="setupForm">
+      <!-- Step 0: Mode Selection -->
+      <div class="step" id="step-0">
+        <h2>Device Mode Selection</h2>
+        <p>Choose how you want to use this device:</p>
+        <div class="offline-mode-options">
+          <div class="option-card">
+            <h3>🌐 Online Mode</h3>
+            <p>
+              Connect to WiFi and send data to the cloud in real-time. Requires
+              internet connection and user account.
+            </p>
+            <button type="button" onclick="selectOnlineMode()">Configure WiFi & Cloud</button>
+          </div>
+          <div class="option-card">
+            <h3>📴 Offline Mode</h3>
+            <p>
+              Store readings locally on the device. No WiFi or internet required.
+              Perfect for remote locations.
+            </p>
+            <ul>
+              <li>Stores up to ~10,000 readings (~1 day at 10s interval)</li>
+              <li>Data can be synced later when online</li>
+              <li>Can exit offline mode anytime</li>
+            </ul>
+            <button type="button" class="btn-secondary" onclick="enableOfflineMode()">Enable Offline Mode</button>
+          </div>
+        </div>
+      </div>
       <!-- Step 1: WiFi -->
-      <div class="step" id="step-1">
+      <div class="step hidden" id="step-1">
         <h2>1. WiFi Settings</h2>
         <div id="wifi-list-container">
           <ul id="wifi-list"></ul>

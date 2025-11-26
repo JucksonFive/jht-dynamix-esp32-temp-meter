@@ -12,4 +12,16 @@ public:
                              float temperature,
                              const char *ts,
                              const String &userId);
+
+    // Offline data storage functions
+    static bool appendOfflineReading(const char *deviceId, float temperature, const char *timestamp, const char *userId);
+    static String getOfflineReadings();
+    static bool clearOfflineReadings();
+    static int getOfflineReadingCount();
+    static size_t getOfflineFileSize();
+
+    // Offline mode configuration
+    static bool enableOfflineMode();
+    static bool disableOfflineMode();
+    static bool isOfflineModeEnabled();
 };
