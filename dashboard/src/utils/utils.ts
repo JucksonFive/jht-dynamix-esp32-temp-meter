@@ -1,21 +1,4 @@
-import { format, parseISO } from "date-fns";
 import { Range } from "./types";
-
-export const toLocalOffSetIso = (date: Date = new Date()) =>
-  format(date, "yyyy-MM-dd'T'HH:mm:ssXXX");
-
-export const parseYMD = (s: string) => parseISO(s);
-export const fmtYMD = (d: Date) => format(d, "yyyy-MM-dd");
-
-// ---------------- Temperature chart helpers ----------------
-
-export const fmtTime = (d: Date) =>
-  new Intl.DateTimeFormat(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-    day: "2-digit",
-  }).format(d);
 
 export interface MultiPoint {
   id: string;

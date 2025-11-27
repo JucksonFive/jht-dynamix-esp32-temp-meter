@@ -1,4 +1,5 @@
 import React from "react";
+import { formatDateTime } from "../../../../utils/dateFormatter";
 
 interface DeviceSelectButtonProps {
   id: string;
@@ -15,6 +16,7 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
   onSelect,
   title,
 }) => {
+  console.log("lastSeen", lastSeen);
   return (
     <button
       type="button"
@@ -32,7 +34,7 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
       <span>{id}</span>
       {lastSeen && (
         <span className="block text-[10px] text-gray-500">
-          {new Date(lastSeen).toLocaleTimeString()}
+          {formatDateTime(lastSeen)}
         </span>
       )}
     </button>
