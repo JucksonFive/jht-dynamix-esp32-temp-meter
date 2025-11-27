@@ -1,6 +1,6 @@
-import { t } from "i18next";
 import React from "react";
-import { formatDateTime } from "../../../../utils/dateFormatter";
+import DeviceInfo from "./DeviceInfo";
+import DeviceStatusIndicator from "./DeviceStatusIndicator";
 
 interface DeviceSelectButtonProps {
   id: string;
@@ -37,25 +37,8 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
       title={title}
     >
       <div className="flex items-center gap-2">
-        <div className="relative">
-          <div
-            className={[
-              "w-2 h-2 rounded-full",
-              isOnline
-                ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"
-                : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]",
-              "animate-pulse",
-            ].join(" ")}
-          />
-        </div>
-        <div className="flex-1">
-          <span>{id}</span>
-          {lastSeen && (
-            <span className="block text-[10px] text-gray-500">
-              {t("lastSeen")}: {formatDateTime(lastSeen)}
-            </span>
-          )}
-        </div>
+        <DeviceStatusIndicator isOnline={isOnline} />
+        <DeviceInfo id={id} lastSeen={lastSeen} />
       </div>
     </button>
   );
