@@ -1,10 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAppContext } from "../../../../contexts/AppContext";
-import DeleteDeviceButton from "../Buttons/DeleteDeviceButton";
-import DeviceMultiToggle from "../Buttons/DeviceMultiToggle";
-import { DeviceSelectButton } from "../Buttons/DeviceSelectButton";
 import SelectAllDevicesButton from "../Buttons/SelectAllDevicesButton";
+import { DeviceList } from "./DeviceList";
 import { SidePanelHeader } from "./SidePanelHeader";
 
 export const SidePanel: React.FC = () => {
@@ -62,44 +60,13 @@ export const SidePanel: React.FC = () => {
               onSelectAll={handleSelectAll}
               onUnselectAll={handleUnselectAll}
             />
-            <ul className="space-y-2">
-              {devices.map((d) => {
-                const isActive = selectedDeviceIds.includes(d.deviceId);
-                return (
-                  <li key={d.deviceId}>
-                    <div
-                      className={[
-                        "flex items-center gap-2 rounded-lg px-2.5 py-2 transition-colors group",
-                        isActive
-                          ? "bg-gradient-to-r from-neon-purple/25 via-neon-pink/25 to-neon-cyan/25 border border-neon-purple/40 shadow-glow-purple"
-                          : "bg-white/5 border border-white/10 hover:border-neon-purple/40 hover:bg-white/10",
-                      ].join(" ")}
-                    >
-                      <DeviceSelectButton
-                        id={d.deviceId}
-                        lastSeen={d.updatedAt}
-                        active={isActive}
-                        onSelect={onSelectSingle}
-                        title={t("tooltipSelectSingle")}
-                      />
-                      <div className="flex items-center gap-2">
-                        <DeviceMultiToggle
-                          active={isActive}
-                          onToggle={() => onToggleMulti(d.deviceId)}
-                        />
-                        <DeleteDeviceButton
-                          deviceId={d.deviceId}
-                          onDeleted={handleDeviceDeleted}
-                        />
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-              {devices.length === 0 && (
-                <li className="text-sm text-gray-500">{t("noDevices")}</li>
-              )}
-            </ul>
+            <DeviceList
+              devices={devices}
+              selectedDeviceIds={selectedDeviceIds}
+              onSelectSingle={onSelectSingle}
+              onToggleMulti={onToggleMulti}
+              onDeviceDeleted={handleDeviceDeleted}
+            />
           </div>
         </aside>
       </div>
