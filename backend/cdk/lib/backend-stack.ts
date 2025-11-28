@@ -15,6 +15,7 @@ export interface BackendStackProps extends cdk.StackProps {
   getAllDevicesFn: NodejsFunction;
   fetchUserTemperatureBoundsFn: NodejsFunction;
   deleteUserDeviceFn: NodejsFunction;
+  updateDeviceStatusFn: NodejsFunction;
   userPool: cognito.IUserPool;
 }
 
@@ -29,6 +30,7 @@ export class BackendStack extends cdk.Stack {
       getAllDevicesFn,
       registerDeviceFn,
       deleteUserDeviceFn,
+      updateDeviceStatusFn,
       userPool,
     } = props;
 
@@ -211,6 +213,39 @@ export class BackendStack extends cdk.Stack {
       functionName: saveToDynamoFn.functionName,
       principal: "iot.amazonaws.com",
       sourceArn: `arn:aws:iot:${this.region}:${this.account}:rule/temperature_rule`,
+    });
+
+    // 🔹 IoT Rule Role for device status updates
+    const iotStatusRuleRole = new iam.Role(this, "IoTStatusRuleRole", {
+      assumedBy: new iam.ServicePrincipal("iot.amazonaws.com"),
+    });
+    updateDeviceStatusFn.grantInvoke(iotStatusRuleRole);
+
+    // 🔹 Create IoT Topic Rule for device status
+    new iot.CfnTopicRule(this, "DeviceStatusRule", {
+      ruleName: "device_status_rule",
+      topicRulePayload: {
+        sql: "SELECT * FROM 'devices/+/status'",
+        actions: [
+          {
+            lambda: {
+              functionArn: updateDeviceStatusFn.functionArn,
+            },
+          },
+        ],
+        awsIotSqlVersion: "2016-03-23",
+        ruleDisabled: false,
+      },
+      // @ts-expect-error: roleArn is not documented but required for Lambda actions
+      roleArn: iotStatusRuleRole.roleArn,
+    });
+
+    // 🔹 Explicit permission for IoT to invoke the device status Lambda
+    new lambda.CfnPermission(this, "AllowIoTInvokeStatusLambda", {
+      action: "lambda:InvokeFunction",
+      functionName: updateDeviceStatusFn.functionName,
+      principal: "iot.amazonaws.com",
+      sourceArn: `arn:aws:iot:${this.region}:${this.account}:rule/device_status_rule`,
     });
   }
 }

@@ -21,6 +21,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly registerDeviceFn: NodejsFunction;
   public readonly getAllDevicesFn: NodejsFunction;
   public readonly purgeDeviceReadingsFn: NodejsFunction;
+  public readonly updateDeviceStatusFn: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
@@ -47,6 +48,7 @@ export class LambdaStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       environment: {
         TABLE_NAME: temperaturesTable.tableName,
+        DEVICES_TABLE: deviceUserTable.tableName,
         ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
       },
     });
@@ -203,6 +205,25 @@ export class LambdaStack extends cdk.Stack {
       })
     );
     temperaturesTable.grantReadWriteData(this.purgeDeviceReadingsFn);
+
+    // Lambda function for updating device status from IoT
+    this.updateDeviceStatusFn = new NodejsFunction(
+      this,
+      "UpdateDeviceStatusFn",
+      {
+        functionName: "UpdateDeviceStatusFunction",
+        entry: path.join(
+          __dirname,
+          "../../lambdas/updateDeviceStatus/updateDeviceStatus.ts"
+        ),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        environment: {
+          DEVICES_TABLE: deviceUserTable.tableName,
+        },
+      }
+    );
+    deviceUserTable.grantWriteData(this.updateDeviceStatusFn);
 
     // Auth protected Lambda function
     this.authProtectedFn = new NodejsFunction(this, "AuthProtectedLambda", {
