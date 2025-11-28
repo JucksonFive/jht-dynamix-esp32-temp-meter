@@ -42,8 +42,8 @@ ESP32 devices should publish to: `devices/{deviceId}/status`
 ## Dashboard Integration
 
 The dashboard displays device status based on the `lastSeen` field:
-- **Online**: if `lastSeen` is within the last 5 minutes
-- **Offline**: if `lastSeen` is older than 5 minutes or not set
+- **Online**: if `lastSeen` is within the last 90 seconds
+- **Offline**: if `lastSeen` is older than 90 seconds or not set
 
 ## Performance Considerations
 
@@ -76,14 +76,14 @@ void publishStatus(const char* status) {
 }
 ```
 
-## Heartbeat Pattern (Recommended)
+## Heartbeat Pattern (Implemented)
 
-For production use, implement a heartbeat pattern:
+The ESP32 firmware implements a heartbeat pattern for near real-time status:
 ```cpp
-// Send "online" status every 2-3 minutes
+// Send "online" status every 30 seconds
 void loop() {
   static unsigned long lastHeartbeat = 0;
-  if (millis() - lastHeartbeat > 120000) {  // 2 minutes
+  if (millis() - lastHeartbeat > 30000) {  // 30 seconds
     publishStatus("online");
     lastHeartbeat = millis();
   }
@@ -91,4 +91,7 @@ void loop() {
 }
 ```
 
-This ensures the dashboard accurately reflects device connectivity status.
+This ensures the dashboard accurately reflects device connectivity status in near real-time. The 30-second interval provides a good balance between:
+- **Responsiveness**: Status updates appear quickly on the dashboard
+- **Efficiency**: Minimal MQTT/AWS IoT overhead
+- **Reliability**: 90-second timeout (3x heartbeat) allows for network delays without false offline status
