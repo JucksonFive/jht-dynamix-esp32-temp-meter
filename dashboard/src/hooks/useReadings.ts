@@ -1,6 +1,9 @@
 // hooks/useReadings.ts
 import { useEffect, useRef, useState } from "react";
-import { fetchAllUserReadings } from "../services/api";
+import {
+  fetchAllUserReadings,
+  getLatestReadingPerDevice,
+} from "../services/api";
 import type { Reading } from "../services/types";
 import type { Nullable, Range } from "../utils/types";
 
@@ -19,7 +22,7 @@ export function useReadings(
   const [error, setErr] = useState<Nullable<string>>(null);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<Nullable<number>>(null);
-
+  const [lastSeen, setLastSeen] = useState<Map<string, string>>(new Map());
   const load = async (signal?: AbortSignal, r = range) => {
     try {
       setErr(null);
@@ -30,6 +33,9 @@ export function useReadings(
         pageSize: 500,
       });
       if (signal?.aborted) return;
+
+      setLastSeen(getLatestReadingPerDevice(items));
+
       setData(
         items.map((x: Reading) => ({
           id: x.deviceId,
@@ -62,7 +68,7 @@ export function useReadings(
         timerRef.current = null;
       }
     };
-  }, [user, range.from, range.to, intervalMs]); // riippuu vain rangesta ja userista
+  }, [user, range.from, range.to, intervalMs]);
 
-  return { data, loading, error, reload: () => load(undefined) };
+  return { data, loading, error, lastSeen, reload: () => load(undefined) };
 }
