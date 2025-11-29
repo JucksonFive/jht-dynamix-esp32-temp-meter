@@ -12,9 +12,4 @@ public:
                              float temperature,
                              const char *ts,
                              const String &userId);
-    static bool buildStatusPayload(char *out, size_t outSize,
-                                   const String &deviceId,
-                                   const char *status,
-                                   const char *ts,
-                                   const String &userId);
 };

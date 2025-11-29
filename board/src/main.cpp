@@ -18,29 +18,6 @@ int mqtt_port;
 String clientId;
 String deviceId;
 unsigned long lastStatusUpdate = 0;
-const unsigned long STATUS_INTERVAL = 30000; // 30 seconds for near real-time status
-
-// Helper function to send device status
-void sendDeviceStatus(const char *status)
-{
-  if (deviceId.length() == 0)
-  {
-    return; // Device not configured yet
-  }
-
-  char statusPayload[256];
-  const char *ts = TimeHelper::getLocalTimestamp();
-
-  if (StorageHelper::buildStatusPayload(statusPayload, sizeof(statusPayload), deviceId, status, ts, userId))
-  {
-    MQTT::publishStatus(deviceId.c_str(), status, statusPayload);
-    lastStatusUpdate = millis();
-  }
-  else
-  {
-    Serial.println("[Status] Failed to build status payload");
-  }
-}
 
 void setup()
 {
@@ -120,9 +97,6 @@ void setup()
   // Load device and user information
   userId = StorageHelper::getConfigValue("/user.json", "userId");
   deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
-
-  // Send initial online status
-  sendDeviceStatus("online");
 }
 
 void loop()
@@ -140,16 +114,8 @@ void loop()
   if (!MQTT::isConnected())
   {
     MQTT::ensureConnection(clientId.c_str());
-    // Send online status after reconnection
-    sendDeviceStatus("online");
   }
   MQTT::loop();
-
-  // Send heartbeat status update every 30 seconds
-  if (millis() - lastStatusUpdate >= STATUS_INTERVAL)
-  {
-    sendDeviceStatus("online");
-  }
 
   float temp = TempSensor::readCelsius();
   if (temp == DEVICE_DISCONNECTED_C)

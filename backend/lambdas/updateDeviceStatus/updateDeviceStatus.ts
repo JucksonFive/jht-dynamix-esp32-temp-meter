@@ -84,12 +84,10 @@ export const handler = async (event: IoTStatusEvent): Promise<void> => {
         UpdateExpression:
           "SET #status = :status, #lastSeen = :lastSeen, #updatedAt = :updatedAt",
         ExpressionAttributeNames: {
-          "#status": "status",
           "#lastSeen": "lastSeen",
           "#updatedAt": "updatedAt",
         },
         ExpressionAttributeValues: {
-          ":status": status,
           ":lastSeen": lastSeen,
           ":updatedAt": now,
         },

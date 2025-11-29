@@ -41,14 +41,6 @@ void MQTT::publish(const char *topic, const char *payload)
     client.publish(topic, payload);
 }
 
-void MQTT::publishStatus(const char *deviceId, const char *status, const char *payload)
-{
-    char topic[128];
-    snprintf(topic, sizeof(topic), "devices/%s/status", deviceId);
-    client.publish(topic, payload);
-    Serial.printf("[MQTT] Status published to %s: %s\n", topic, status);
-}
-
 void MQTT::loop()
 {
     client.loop();

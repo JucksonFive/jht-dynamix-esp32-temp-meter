@@ -81,19 +81,3 @@ bool StorageHelper::buildPayload(char *out, size_t outSize,
     size_t n = serializeJson(doc, out, outSize);
     return (n > 0 && n < outSize);
 }
-
-bool StorageHelper::buildStatusPayload(char *out, size_t outSize,
-                                       const String &deviceId,
-                                       const char *status,
-                                       const char *ts,
-                                       const String &userId)
-{
-    JsonDocument doc;
-    doc["deviceId"] = deviceId;
-    doc["status"] = status;
-    doc["timestamp"] = ts;
-    doc["userId"] = userId;
-
-    size_t n = serializeJson(doc, out, outSize);
-    return (n > 0 && n < outSize);
-}
