@@ -9,7 +9,6 @@ import { DeviceSelectButton } from "../Buttons/DeviceSelectButton";
 interface DeviceListProps {
   devices: Device[];
   selectedDeviceIds: string[];
-  lastSeen?: Map<string, string>;
   onSelectSingle: (id: string) => void;
   onToggleMulti: (id: string) => void;
   onDeviceDeleted: (deviceId: string) => void;
@@ -19,13 +18,11 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   devices,
   selectedDeviceIds,
   onSelectSingle,
-  lastSeen,
   onToggleMulti,
   onDeviceDeleted,
 }) => {
   const { t } = useTranslation();
 
-  console.log("lastSeen in DeviceList:", lastSeen);
   return (
     <ul className="space-y-2">
       {devices.map((d) => {
@@ -42,7 +39,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
             >
               <DeviceSelectButton
                 id={d.deviceId}
-                lastSeen={lastSeen?.get(d.deviceId)}
+                lastSeen={d.lastSeen}
                 active={isActive}
                 onSelect={onSelectSingle}
                 title={t("tooltipSelectSingle")}
