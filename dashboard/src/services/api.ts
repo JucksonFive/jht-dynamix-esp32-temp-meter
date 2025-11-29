@@ -105,3 +105,16 @@ export async function deleteUserDevice(
     params: { deviceId },
   });
 }
+
+export const getLatestReadingPerDevice = (
+  readings: ReadingsResponse["items"]
+): Map<string, string> => {
+  const latest = new Map<string, string>();
+  readings.forEach((reading) => {
+    const current = latest.get(reading.deviceId);
+    if (!current || reading.timestamp > current) {
+      latest.set(reading.deviceId, reading.timestamp);
+    }
+  });
+  return latest;
+};

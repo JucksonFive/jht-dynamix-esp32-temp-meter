@@ -66,6 +66,7 @@ const backendStack = new BackendStack(app, "BackendStack", {
   getAllDevicesFn: lambdaStack.getAllDevicesFn,
   registerDeviceFn: lambdaStack.registerDeviceFn,
   deleteUserDeviceFn: lambdaStack.deleteUserDeviceFn,
+  updateDeviceStatusFn: lambdaStack.updateDeviceStatusFn,
   userPool: authStack.userPool,
 });
 

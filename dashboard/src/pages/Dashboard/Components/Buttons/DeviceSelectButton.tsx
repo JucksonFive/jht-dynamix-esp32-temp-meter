@@ -17,9 +17,10 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
   onSelect,
   title,
 }) => {
-  // Device is online if last seen within 5 minutes
+  console.log("DeviceSelectButton lastSeen:", lastSeen);
+  // Device is online if last seen within 90 seconds (3x heartbeat interval)
   const isOnline = lastSeen
-    ? Date.now() - new Date(lastSeen).getTime() < 5 * 60 * 1000
+    ? Date.now() - new Date(lastSeen).getTime() < 90 * 1000
     : false;
 
   return (

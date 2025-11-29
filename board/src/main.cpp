@@ -17,6 +17,7 @@ String userId;
 int mqtt_port;
 String clientId;
 String deviceId;
+unsigned long lastStatusUpdate = 0;
 
 void setup()
 {
@@ -92,6 +93,10 @@ void setup()
 
   TimeHelper::setup();
   TempSensor::setup();
+
+  // Load device and user information
+  userId = StorageHelper::getConfigValue("/user.json", "userId");
+  deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
 }
 
 void loop()
