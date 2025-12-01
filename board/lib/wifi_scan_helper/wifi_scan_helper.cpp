@@ -1,57 +1,110 @@
 #include "wifi_scan_helper.h"
-#include <WiFi.h>
 
-namespace
+bool WifiScanHelper::scanInProgress = false;
+JsonDocument WifiScanHelper::scanResult;
+bool WifiScanHelper::resultReady = false;
+unsigned long WifiScanHelper::lastErrorLog = 0;
+int WifiScanHelper::errorCount = 0;
+
+void WifiScanHelper::beginScan()
 {
-    String scanResult;
-    bool resultReady = false;
+    if (scanInProgress)
+    {
+        Serial.println("[WifiScanHelper] Scan already in progress");
+        return;
+    }
+
+    Serial.println("[WifiScanHelper] Starting WiFi scan...");
+    WiFi.scanNetworks(true); // Async scan
+    scanInProgress = true;
+    resultReady = false;
+    errorCount = 0;
 }
 
-namespace WifiScanHelper
+void WifiScanHelper::processScanResult()
 {
-
-    void beginScan()
+    if (!scanInProgress)
     {
-        Serial.println("[WifiScanHelper] Starting WiFi scan...");
-        WiFi.scanDelete();
-        WiFi.scanNetworks(true); // async
-        resultReady = false;
+        return;
     }
 
-    void processScanResult()
+    static const unsigned long ERROR_LOG_INTERVAL = 5000;
+    static const int MAX_RETRIES = 3;
+
+    int16_t status = WiFi.scanComplete();
+
+    if (status == WIFI_SCAN_RUNNING)
     {
-        int scanStatus = WiFi.scanComplete();
-        Serial.printf("[WifiScanHelper] Scan status: %d\n", scanStatus);
-        if (scanStatus >= 0)
+        return; // Skannaus kesken
+    }
+
+    if (status == WIFI_SCAN_FAILED)
+    {
+        errorCount++;
+
+        if (millis() - lastErrorLog > ERROR_LOG_INTERVAL)
         {
-            int n = WiFi.scanComplete();
-            Serial.printf("[WifiScanHelper] Found %d networks\n", n);
-            String json = "{\"networks\":[";
-            for (int i = 0; i < n; ++i)
-            {
-                Serial.printf("[WifiScanHelper] SSID %d: %s\n", i, WiFi.SSID(i).c_str());
-                json += "{\"ssid\":\"" + WiFi.SSID(i) + "\"}";
-                if (i < n - 1)
-                    json += ",";
-            }
-            json += "]}";
-            scanResult = json;
-            resultReady = true;
-            WiFi.scanDelete();
-            Serial.println("[WifiScanHelper] Scan result ready.");
+            Serial.printf("[WifiScanHelper] Scan failed (count: %d)\n", errorCount);
+            lastErrorLog = millis();
         }
+
+        if (errorCount >= MAX_RETRIES)
+        {
+            Serial.println("[WifiScanHelper] Too many failures, giving up");
+            WiFi.scanDelete();
+            scanInProgress = false;
+            errorCount = 0;
+            return;
+        }
+
+        delay(500);
+        WiFi.scanDelete();
+        scanInProgress = false;
+        return;
     }
 
-    bool hasResult()
+    if (status >= 0)
     {
-        Serial.printf("[WifiScanHelper] hasResult: %d\n", resultReady);
-        return resultReady;
+        Serial.printf("[WifiScanHelper] Scan complete, found %d networks\n", status);
+        errorCount = 0;
+
+        scanResult.clear();
+        JsonArray networks = scanResult["networks"].to<JsonArray>();
+
+        for (int i = 0; i < status; i++)
+        {
+            JsonObject net = networks.add<JsonObject>();
+            net["ssid"] = WiFi.SSID(i);
+            net["rssi"] = WiFi.RSSI(i);
+            net["channel"] = WiFi.channel(i);
+            net["encryption"] = (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? "open" : "secured";
+        }
+
+        WiFi.scanDelete();
+        scanInProgress = false;
+        resultReady = true;
+
+        Serial.println("[WifiScanHelper] Results ready");
+    }
+}
+
+bool WifiScanHelper::hasResult()
+{
+    return resultReady;
+}
+
+String WifiScanHelper::getResultAndClear()
+{
+    if (!resultReady)
+    {
+        return "{}";
     }
 
-    String getResultAndClear()
-    {
-        Serial.println("[WifiScanHelper] Returning scan result and clearing flag.");
-        resultReady = false;
-        return scanResult;
-    }
+    String result;
+    serializeJson(scanResult, result);
+
+    scanResult.clear();
+    resultReady = false;
+
+    return result;
 }

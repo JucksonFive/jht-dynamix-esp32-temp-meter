@@ -18,21 +18,20 @@ void MQTT::setup(const char *server, int port)
 
 void MQTT::ensureConnection(const char *clientId)
 {
-    while (!client.connected())
+    if (client.connected())
     {
-        Serial.print("Connecting to MQTT...");
+        return;
+    }
 
-        if (client.connect(clientId))
-        {
-            Serial.println(" ✅ connected");
-        }
-        else
-        {
-            Serial.print(" ❌ failed, rc=");
-            Serial.print(client.state());
-            Serial.println(" try again in 5 seconds");
-            delay(5000);
-        }
+    Serial.print("Connecting to MQTT...");
+
+    if (client.connect(clientId))
+    {
+        Serial.println(" ✅ connected");
+    }
+    else
+    {
+        Serial.printf(" ❌ failed, rc=%d try again in 5 seconds\n", client.state());
     }
 }
 

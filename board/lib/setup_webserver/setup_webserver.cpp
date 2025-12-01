@@ -169,6 +169,10 @@ void startSetupWebServer()
 
 void processCaptivePortalDNS()
 {
+  if (setupComplete)
+  {
+    return; // No need to process DNS if setup is complete
+  }
   dns.processNextRequest();
 }
 
