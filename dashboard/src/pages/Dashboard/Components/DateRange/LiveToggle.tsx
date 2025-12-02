@@ -15,11 +15,7 @@ export const LiveToggle: React.FC = () => {
           ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
           : "bg-green-800 border-green-800 text-neon-green hover:bg-neon-green/20 shadow-[0_0_10px_rgba(74,222,128,0.2)]"
       }`}
-      title={
-        isLive
-          ? t("stopLive") || "Stop Live Updates"
-          : t("startLive") || "Start Live Updates".
-      }
+      title={isLive ? t("stopLive") : t("startLive")}
     >
       {isLive ? <FaStop size={10} /> : <FaPlay size={10} className="ml-0.5" />}
     </button>
