@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAppContext } from "../../../../contexts/AppContext";
 import { DateRangePicker } from "./DateRangePicker";
+import { LiveToggle } from "./LiveToggle";
 
 interface DateRangeFilterProps {
   className?: string;
@@ -15,8 +16,11 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   return (
     <section className={className}>
       <div className="bg-midnight-800/70 backdrop-blur-xl rounded-2xl shadow-inner-soft ring-1 ring-white/10 p-5 w-full sm:w-auto border border-white/5">
-        <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-400 mb-2">
-          {t("dateRange")}
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-400">
+            {t("dateRange")}
+          </div>
+          <LiveToggle />
         </div>
         <DateRangePicker
           value={range}

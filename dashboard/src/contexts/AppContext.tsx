@@ -34,6 +34,9 @@ interface AppContextType {
   // Range
   range: Range;
   setRange: React.Dispatch<React.SetStateAction<Range>>;
+  isLive: boolean;
+  setLive: () => void;
+  setIsLive: React.Dispatch<React.SetStateAction<boolean>>;
 
   // Selection
   selectedDeviceIds: string[];
@@ -62,6 +65,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [bootLoading, setBootLoading] = useState(true);
   const [lastSeen, setLastSeen] = useState<Map<string, string>>(new Map());
+  const [isLive, setIsLive] = useState(true);
+
   // Initialize user
   useEffect(() => {
     (async () => {
@@ -85,6 +90,26 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const from = toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS));
     return { from, to: now };
   });
+
+  useEffect(() => {
+    if (!isLive) return;
+    const id = setInterval(() => {
+      setRange((prev) => ({ ...prev, to: toLocalOffsetIso() }));
+    }, 60000);
+    return () => clearInterval(id);
+  }, [isLive]);
+
+  const setRangeWrapper: React.Dispatch<React.SetStateAction<Range>> = (
+    value
+  ) => {
+    setIsLive(false);
+    setRange(value);
+  };
+
+  const setLive = () => {
+    setIsLive(true);
+    setRange((prev) => ({ ...prev, to: toLocalOffsetIso() }));
+  };
 
   // Readings
   const {
@@ -119,7 +144,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     dataLoading,
     dataError,
     range,
-    setRange,
+    setRange: setRangeWrapper,
+    isLive,
+    setLive,
+    setIsLive,
     selectedDeviceIds,
     setSelectedDeviceIds,
     lastSeen: ls ?? new Map(),
