@@ -1,10 +1,24 @@
-#pragma once
-#include <Arduino.h>
+#ifndef WIFI_SCAN_HELPER_H
+#define WIFI_SCAN_HELPER_H
 
-namespace WifiScanHelper
+#include <Arduino.h>
+#include <WiFi.h>
+#include <ArduinoJson.h>
+
+class WifiScanHelper
 {
-    void beginScan();           // Käynnistää uuden skannauksen
-    void processScanResult();   // Kutsutaan loopissa
-    bool hasResult();           // Onko valmis tulos?
-    String getResultAndClear(); // Palauttaa ja tyhjentää tuloksen
-}
+private:
+    static bool scanInProgress;
+    static JsonDocument scanResult;
+    static bool resultReady;
+    static unsigned long lastErrorLog;
+    static int errorCount;
+
+public:
+    static void beginScan();
+    static void processScanResult();
+    static bool hasResult();
+    static String getResultAndClear();
+};
+
+#endif
