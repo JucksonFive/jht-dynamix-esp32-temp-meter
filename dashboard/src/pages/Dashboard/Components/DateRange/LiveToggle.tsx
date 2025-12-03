@@ -13,7 +13,7 @@ export const LiveToggle: React.FC = () => {
       className={`flex items-center justify-center w-7 h-7 rounded-full border transition-all ${
         isLive
           ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
-          : "bg-green-800 border-green-800 text-neon-green hover:bg-neon-green/20 shadow-[0_0_10px_rgba(74,222,128,0.2)]"
+          : "bg-green-800/80 border-green-800/20 text-neon-green hover:bg-green-800 shadow-[0_0_10px_rgba(74,222,128,0.2)]"
       }`}
       title={isLive ? t("stopLive") : t("startLive")}
     >
