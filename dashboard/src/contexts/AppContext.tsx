@@ -42,9 +42,6 @@ interface AppContextType {
   // Selection
   selectedDeviceIds: string[];
   setSelectedDeviceIds: React.Dispatch<React.SetStateAction<string[]>>;
-
-  lastSeen: Map<string, string>;
-  setLastSeen: React.Dispatch<React.SetStateAction<Map<string, string>>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -116,7 +113,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     data,
     loading: dataLoading,
     error: dataError,
-    lastSeen: ls,
   } = useReadings(user, range, {
     intervalMs: MINUTE,
   });
@@ -150,8 +146,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setIsLive,
     selectedDeviceIds,
     setSelectedDeviceIds,
-    lastSeen: ls ?? new Map(),
-    setLastSeen: () => {}, // Read-only
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
