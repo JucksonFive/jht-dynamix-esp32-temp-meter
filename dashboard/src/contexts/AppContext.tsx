@@ -11,6 +11,7 @@ import { useReadings } from "../hooks/useReadings";
 import { Device } from "../services/types";
 import { toLocalOffsetIso } from "../utils/dateFormatter";
 import { DeviceData, Nullable, Range, User } from "../utils/types";
+
 const ONE_DAY = 864e5;
 const MINUTE = 60 * 1000;
 
