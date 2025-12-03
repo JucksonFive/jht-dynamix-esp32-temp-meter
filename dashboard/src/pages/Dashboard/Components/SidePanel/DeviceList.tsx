@@ -1,6 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAppContext } from "../../../../contexts/AppContext";
+import { useReadings } from "../../../../hooks/useReadings";
 import { Device } from "../../../../services/types";
 import DeleteDeviceButton from "../Buttons/DeleteDeviceButton";
 import DeviceMultiToggle from "../Buttons/DeviceMultiToggle";
@@ -13,7 +15,23 @@ interface DeviceListProps {
   onToggleMulti: (id: string) => void;
   onDeviceDeleted: (deviceId: string) => void;
 }
+const getLastSeen = (
+  deviceId: string,
+  readings: { id: string; timestamp: string }[]
+): string | undefined => {
+  // Suodatetaan laitteen mittaukset
+  const deviceReadings = readings.filter((r) => r.id === deviceId);
+  if (deviceReadings.length === 0) return undefined;
 
+  // Etsitään uusin (oletetaan että data voi olla epäjärjestyksessä, joten sortataan tai etsitään max)
+  // Jos data tulee APIsta aikajärjestyksessä, riittää ottaa viimeinen.
+  // Varmuuden vuoksi etsitään "suurin" päivämäärä:
+  return deviceReadings.reduce((latest, current) => {
+    return new Date(current.timestamp) > new Date(latest)
+      ? current.timestamp
+      : latest;
+  }, deviceReadings[0].timestamp);
+};
 export const DeviceList: React.FC<DeviceListProps> = ({
   devices,
   selectedDeviceIds,
@@ -22,11 +40,14 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   onDeviceDeleted,
 }) => {
   const { t } = useTranslation();
+  const { user, range } = useAppContext();
+  const { data: readings } = useReadings(user, range);
 
   return (
     <ul className="space-y-2">
       {devices.map((d) => {
         const isActive = selectedDeviceIds.includes(d.deviceId);
+        const lastSeen = getLastSeen(d.deviceId, readings);
         return (
           <li key={d.deviceId}>
             <div
@@ -40,6 +61,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
               <DeviceSelectButton
                 id={d.deviceId}
                 active={isActive}
+                lastSeen={lastSeen}
                 onSelect={onSelectSingle}
                 title={t("tooltipSelectSingle")}
               />

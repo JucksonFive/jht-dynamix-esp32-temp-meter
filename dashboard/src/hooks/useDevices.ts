@@ -3,9 +3,9 @@ import { fetchUserDevices } from "../services/api";
 import { Device } from "../services/types";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-import { Nullable } from "../utils/types";
+import { Nullable, User } from "../utils/types";
 
-export function useDevices(user: any) {
+export function useDevices(user: Nullable<User>) {
   const { t } = useTranslation();
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

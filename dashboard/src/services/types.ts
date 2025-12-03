@@ -17,6 +17,4 @@ export interface Device {
   userId: string;
   createdAt: string;
   updatedAt: string;
-  status?: "online" | "offline";
-  lastSeen?: string;
 }
