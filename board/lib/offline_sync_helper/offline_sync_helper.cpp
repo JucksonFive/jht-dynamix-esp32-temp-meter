@@ -160,7 +160,19 @@ bool OfflineSyncHelper::syncPendingEvents(bool (*sendCallback)(const char *, con
 
 bool OfflineSyncHelper::hasPendingEvents()
 {
-    return LittleFS.exists(QUEUE_FILE);
+    if (!LittleFS.exists(QUEUE_FILE))
+    {
+        return false;
+    }
+
+    JsonDocument queueDoc;
+    if (!loadQueue(queueDoc))
+    {
+        return false;
+    }
+
+    JsonArray events = queueDoc["events"].as<JsonArray>();
+    return !events.isNull() && events.size() > 0;
 }
 
 size_t OfflineSyncHelper::getPendingCount()

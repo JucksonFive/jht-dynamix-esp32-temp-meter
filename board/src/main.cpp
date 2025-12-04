@@ -146,6 +146,7 @@ void publishTemperature(float temperature)
   if (MQTT::isConnected())
   {
     // Online - lähetä suoraan
+    Serial.printf("[MQTT] About to publish on topic=%s\n", mqtt_topic_str.c_str());
     MQTT::publish(mqtt_topic_str.c_str(), payload);
     Serial.printf("[MQTT] publish topic=%s len=%d | %s\n",
                   mqtt_topic_str.c_str(), strlen(payload), payload);
@@ -186,14 +187,19 @@ void loop()
     MQTT::loop();
   }
 
-   // Lue ja lähetä 10s välein (riippumatta MQTT-yhteydestä)
+  // Lue ja lähetä 10s välein (riippumatta MQTT-yhteydestä)
   static unsigned long lastPublish = 0;
   if (millis() - lastPublish > 10000)
   {
     float temp = TempSensor::readCelsius();
+    Serial.printf("[Sensor] Read temp=%.2f C\n", temp);
     if (temp != DEVICE_DISCONNECTED_C)
     {
       publishTemperature(temp);
+    }
+    else
+    {
+      Serial.println("[Sensor] Temperature sensor disconnected or read failed");
     }
     lastPublish = millis();
   }
