@@ -230,6 +230,8 @@ void loop()
     MQTT::loop();
   }
 
+  delay(100);
+
   if (MQTT::isConnected() && now - lastStatusPublish > STATUS_INTERVAL_MS)
   {
     publishStatus(/*retained=*/false);
