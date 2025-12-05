@@ -35,9 +35,9 @@ void MQTT::ensureConnection(const char *clientId)
     }
 }
 
-void MQTT::publish(const char *topic, const char *payload)
+void MQTT::publish(const char *topic, const char *payload, bool retained)
 {
-    client.publish(topic, payload);
+    client.publish(topic, payload, retained);
 }
 
 void MQTT::loop()

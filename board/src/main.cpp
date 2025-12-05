@@ -11,11 +11,17 @@
 #include <wifi_scan_helper.h>
 #include "reset_helper.h"
 #include "offline_sync_helper.h"
+#include <ArduinoJson.h>
 
-// Globaalit muuttujat
+// Global variables
 OfflineSyncHelper offlineSync;
+
 unsigned long lastSyncAttempt = 0;
-const unsigned long SYNC_INTERVAL = 60000; // Yritä synciä minuutin välein
+const unsigned long SYNC_INTERVAL = 60000;
+
+unsigned long lastStatusPublish = 0;
+const unsigned long MEASUREMENT_INTERVAL_MS = 10000;
+const unsigned long STATUS_INTERVAL_MS = 30000;
 
 String mqtt_server_str;
 String mqtt_topic_str;
@@ -23,15 +29,16 @@ String userId;
 int mqtt_port;
 String clientId;
 String deviceId;
+String statusTopic;
 
 void setup()
 {
   Serial.begin(115200);
   delay(1000);
 
-  // Alusta LittleFS, formatoi jos korruptoitunut
+  // Initialize LittleFS, format if corrupted
   if (!LittleFS.begin(true))
-  { // true = formatoi automaattisesti
+  { // true = format if failed
     Serial.println("LittleFS mount/format failed!");
     while (true)
       ;
@@ -94,7 +101,12 @@ void setup()
     while (true)
       ;
   }
+
+  userId = StorageHelper::getConfigValue("/user.json", "userId");
+  deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+  statusTopic = "devices/" + deviceId + "/status";
   clientId = "esp32-" + String(WiFi.macAddress());
+
   MQTT::setup(mqtt_server_str.c_str(), mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
 
@@ -114,6 +126,7 @@ void setup()
   {
     Serial.printf("Offline sync ready, %d pending events\n", offlineSync.getPendingCount());
   }
+  publishStatus(/*retained=*/true);
 }
 
 // Callback-funktio MQTT-lähetykselle
@@ -125,6 +138,35 @@ bool sendMqttMessage(const char *topic, const char *payload)
   }
   MQTT::publish(topic, payload);
   return true;
+}
+
+void publishStatus(bool retained)
+{
+  if (!MQTT::isConnected())
+  {
+    return;
+  }
+
+  StaticJsonDocument<192> doc;
+  doc["userId"] = userId;
+  doc["deviceId"] = deviceId;
+  doc["status"] = "ONLINE"; // LWT handles OFFLINE later if you want
+  doc["ts"] = TimeHelper::getLocalTimestamp();
+
+  char payload[192];
+  size_t n = serializeJson(doc, payload, sizeof(payload));
+  if (n == 0)
+  {
+    Serial.println("[Status] Failed to serialize status JSON");
+    return;
+  }
+
+  Serial.printf("[Status] Publishing %s to %s (retained=%s)\n",
+                doc["status"].as<const char *>(),
+                statusTopic.c_str(),
+                retained ? "true" : "false");
+
+  MQTT::publish(statusTopic.c_str(), payload, retained);
 }
 
 void publishTemperature(float temperature)
@@ -145,7 +187,7 @@ void publishTemperature(float temperature)
 
   if (MQTT::isConnected())
   {
-    // Online - lähetä suoraan
+    // Online - send directly
     Serial.printf("[MQTT] About to publish on topic=%s\n", mqtt_topic_str.c_str());
     MQTT::publish(mqtt_topic_str.c_str(), payload);
     Serial.printf("[MQTT] publish topic=%s len=%d | %s\n",
@@ -153,7 +195,7 @@ void publishTemperature(float temperature)
   }
   else
   {
-    // Offline - tallenna jonoon
+    // Offline - save to queue
     offlineSync.queueEvent(mqtt_topic_str.c_str(), payload, millis());
     Serial.printf("[Offline] Queued: %s\n", payload);
   }
@@ -170,15 +212,16 @@ void loop()
     delay(10);
     return;
   }
+  const unsigned long now = millis();
 
-  // Yritä yhdistää jos ei yhteyttä, mutta älä jää odottamaan
+  // try to maintain MQTT connection
   if (!MQTT::isConnected())
   {
     static unsigned long lastConnectAttempt = 0;
-    if (millis() - lastConnectAttempt > 5000) // Yritä 5s välein
+    if (now - lastConnectAttempt > 5000) // Try every 5 seconds
     {
       MQTT::ensureConnection(clientId.c_str());
-      lastConnectAttempt = millis();
+      lastConnectAttempt = now;
     }
   }
 
@@ -187,9 +230,15 @@ void loop()
     MQTT::loop();
   }
 
-  // Lue ja lähetä 10s välein (riippumatta MQTT-yhteydestä)
+  if (MQTT::isConnected() && now - lastStatusPublish > STATUS_INTERVAL_MS)
+  {
+    publishStatus(/*retained=*/false);
+    lastStatusPublish = now;
+  }
+
+  // Read and publish every 10s (regardless of MQTT connection)
   static unsigned long lastPublish = 0;
-  if (millis() - lastPublish > 10000)
+  if (now - lastPublish > MEASUREMENT_INTERVAL_MS)
   {
     float temp = TempSensor::readCelsius();
     Serial.printf("[Sensor] Read temp=%.2f C\n", temp);
@@ -201,17 +250,17 @@ void loop()
     {
       Serial.println("[Sensor] Temperature sensor disconnected or read failed");
     }
-    lastPublish = millis();
+    lastPublish = now;
   }
 
-  // Yritä synciä offline-tapahtumat
+  // Sync offline events periodically
   if (MQTT::isConnected() && offlineSync.hasPendingEvents() &&
-      millis() - lastSyncAttempt > SYNC_INTERVAL)
+      now - lastSyncAttempt > SYNC_INTERVAL)
   {
     Serial.println("Attempting to sync offline events...");
     offlineSync.syncPendingEvents(sendMqttMessage);
-    lastSyncAttempt = millis();
+    lastSyncAttempt = now;
   }
 
-  delay(100); // Lyhyt delay estämään watchdog resetin
+  delay(100); // Short delay to prevent watchdog reset
 }
