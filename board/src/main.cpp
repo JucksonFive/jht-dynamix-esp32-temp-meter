@@ -31,6 +31,35 @@ String clientId;
 String deviceId;
 String statusTopic;
 
+void publishStatus(bool retained)
+{
+  if (!MQTT::isConnected())
+  {
+    return;
+  }
+
+  JsonDocument doc;
+  doc["userId"] = userId;
+  doc["deviceId"] = deviceId;
+  doc["status"] = "ONLINE";
+  doc["ts"] = TimeHelper::getLocalTimestamp();
+
+  char payload[192];
+  size_t n = serializeJson(doc, payload, sizeof(payload));
+  if (n == 0)
+  {
+    Serial.println("[Status] Failed to serialize status JSON");
+    return;
+  }
+
+  Serial.printf("[Status] Publishing %s to %s (retained=%s)\n",
+                doc["status"].as<const char *>(),
+                statusTopic.c_str(),
+                retained ? "true" : "false");
+
+  MQTT::publish(statusTopic.c_str(), payload, retained);
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -126,7 +155,7 @@ void setup()
   {
     Serial.printf("Offline sync ready, %d pending events\n", offlineSync.getPendingCount());
   }
-  publishStatus(/*retained=*/true);
+  publishStatus(true);
 }
 
 // Callback-funktio MQTT-lähetykselle
@@ -138,35 +167,6 @@ bool sendMqttMessage(const char *topic, const char *payload)
   }
   MQTT::publish(topic, payload);
   return true;
-}
-
-void publishStatus(bool retained)
-{
-  if (!MQTT::isConnected())
-  {
-    return;
-  }
-
-  StaticJsonDocument<192> doc;
-  doc["userId"] = userId;
-  doc["deviceId"] = deviceId;
-  doc["status"] = "ONLINE"; // LWT handles OFFLINE later if you want
-  doc["ts"] = TimeHelper::getLocalTimestamp();
-
-  char payload[192];
-  size_t n = serializeJson(doc, payload, sizeof(payload));
-  if (n == 0)
-  {
-    Serial.println("[Status] Failed to serialize status JSON");
-    return;
-  }
-
-  Serial.printf("[Status] Publishing %s to %s (retained=%s)\n",
-                doc["status"].as<const char *>(),
-                statusTopic.c_str(),
-                retained ? "true" : "false");
-
-  MQTT::publish(statusTopic.c_str(), payload, retained);
 }
 
 void publishTemperature(float temperature)
