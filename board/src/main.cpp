@@ -29,9 +29,8 @@ void setup()
   Serial.begin(115200);
   delay(1000);
 
-  // Alusta LittleFS, formatoi jos korruptoitunut
   if (!LittleFS.begin(true))
-  { // true = formatoi automaattisesti
+  {
     Serial.println("LittleFS mount/format failed!");
     while (true)
       ;
@@ -44,7 +43,6 @@ void setup()
   if (!isSetupComplete())
   {
     Serial.println("[Setup] Setup not complete, starting wizard");
-
     startSetupWebServer();
     return;
   }
@@ -105,8 +103,7 @@ void setup()
   userId = StorageHelper::getConfigValue("/user.json", "userId");
   deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
 
-  // Alusta offline sync
-  if (!offlineSync.begin())
+    if (!offlineSync.begin())
   {
     Serial.println("Failed to initialize offline sync");
   }
