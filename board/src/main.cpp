@@ -103,7 +103,7 @@ void setup()
   userId = StorageHelper::getConfigValue("/user.json", "userId");
   deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
 
-    if (!offlineSync.begin())
+  if (!offlineSync.begin())
   {
     Serial.println("Failed to initialize offline sync");
   }
@@ -125,7 +125,7 @@ void loop()
     return;
   }
 
-  // Yritä yhdistää jos ei yhteyttä, mutta älä jää odottamaan
+  // Connect to MQTT if not connected
   if (!MQTT::isConnected())
   {
     static unsigned long lastConnectAttempt = 0;
@@ -141,7 +141,7 @@ void loop()
     MQTT::loop();
   }
 
-  // Lue ja lähetä 10s välein (riippumatta MQTT-yhteydestä)
+  // Report temperature every 10 seconds
   static unsigned long lastPublish = 0;
   if (millis() - lastPublish > 10000)
   {
@@ -158,7 +158,7 @@ void loop()
     lastPublish = millis();
   }
 
-  // Yritä synciä offline-tapahtumat
+  // Attempt to sync offline events
   if (MQTT::isConnected() && offlineSync.hasPendingEvents() &&
       millis() - lastSyncAttempt > SYNC_INTERVAL)
   {
@@ -167,5 +167,5 @@ void loop()
     lastSyncAttempt = millis();
   }
 
-  delay(100); // Lyhyt delay estämään watchdog resetin
+  delay(100); // Short delay to prevent watchdog reset
 }
