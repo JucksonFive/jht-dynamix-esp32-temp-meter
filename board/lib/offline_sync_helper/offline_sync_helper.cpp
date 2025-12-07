@@ -229,9 +229,9 @@ bool OfflineSyncHelper::clearQueue()
     return createQueueFile();
 }
 
-void OfflineSyncHelper::attemptOfflineSync(bool mqttConnected, OfflineSyncHelper &offlineSync, unsigned long &lastSyncAttempt, const unsigned long SYNC_INTERVAL)
+void OfflineSyncHelper::attemptOfflineSync(OfflineSyncHelper &offlineSync, unsigned long &lastSyncAttempt, const unsigned long SYNC_INTERVAL)
 {
-    if (mqttConnected && offlineSync.hasPendingEvents() &&
+    if (MQTT::isConnected() && offlineSync.hasPendingEvents() &&
         millis() - lastSyncAttempt > SYNC_INTERVAL)
     {
         Serial.println("Attempting to sync offline events...");

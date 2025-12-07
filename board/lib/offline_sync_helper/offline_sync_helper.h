@@ -23,7 +23,7 @@ public:
     bool queueEvent(const char *topic, const char *payload, unsigned long timestamp);
     bool syncPendingEvents(bool (*sendCallback)(const char *, const char *));
     bool hasPendingEvents();
-    static void attemptOfflineSync(bool mqttConnected, OfflineSyncHelper &offlineSync, unsigned long &lastSyncAttempt, const unsigned long SYNC_INTERVAL);
+    static void attemptOfflineSync(OfflineSyncHelper &offlineSync, unsigned long &lastSyncAttempt, const unsigned long SYNC_INTERVAL);
     size_t getPendingCount();
 };
 

@@ -158,7 +158,7 @@ void loop()
     lastPublish = millis();
   }
 
-  OfflineSyncHelper::attemptOfflineSync(MQTT::isConnected(), offlineSync, lastSyncAttempt, SYNC_INTERVAL);
+  OfflineSyncHelper::attemptOfflineSync(offlineSync, lastSyncAttempt, SYNC_INTERVAL);
 
   delay(100); // Short delay to prevent watchdog reset
 }
