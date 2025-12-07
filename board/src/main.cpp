@@ -116,17 +116,6 @@ void setup()
   }
 }
 
-// Callback-funktio MQTT-lähetykselle
-bool sendMqttMessage(const char *topic, const char *payload)
-{
-  if (!MQTT::isConnected())
-  {
-    return false;
-  }
-  MQTT::publish(topic, payload);
-  return true;
-}
-
 void publishTemperature(float temperature)
 {
   Serial.printf("[publishTemperature] MQTT connected: %s\n",

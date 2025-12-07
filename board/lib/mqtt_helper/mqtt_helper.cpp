@@ -49,3 +49,14 @@ bool MQTT::isConnected()
 {
     return client.connected();
 }
+
+// Callback-funktio MQTT-lähetykselle
+bool sendMqttMessage(const char *topic, const char *payload)
+{
+    if (!MQTT::isConnected())
+    {
+        return false;
+    }
+    MQTT::publish(topic, payload);
+    return true;
+}
