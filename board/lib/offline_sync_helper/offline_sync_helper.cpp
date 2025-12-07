@@ -1,5 +1,6 @@
 #include "offline_sync_helper.h"
 #include <LittleFS.h>
+#include <mqtt_helper.h>
 
 const char *OfflineSyncHelper::QUEUE_FILE = "/offline_queue.json";
 
@@ -20,9 +21,6 @@ bool OfflineSyncHelper::createQueueFile()
 
 bool OfflineSyncHelper::begin()
 {
-    // LittleFS on jo mountattu main.cpp:ssä, ei tarvitse mountata uudelleen
-
-    // Tarkista tiedostokoko ja tyhjennä tarvittaessa
     if (LittleFS.exists(QUEUE_FILE))
     {
         File file = LittleFS.open(QUEUE_FILE, "r");
@@ -49,8 +47,6 @@ bool OfflineSyncHelper::begin()
 bool OfflineSyncHelper::queueEvent(const char *topic, const char *payload, unsigned long timestamp)
 {
     JsonDocument queueDoc;
-
-    // Lataa olemassa oleva jono
     if (LittleFS.exists(QUEUE_FILE))
     {
         if (!loadQueue(queueDoc))
@@ -59,8 +55,6 @@ bool OfflineSyncHelper::queueEvent(const char *topic, const char *payload, unsig
             queueDoc.clear();
         }
     }
-
-    // Tarkista jonon koko
     JsonArray events = queueDoc["events"].as<JsonArray>();
     if (events.isNull())
     {
@@ -73,7 +67,6 @@ bool OfflineSyncHelper::queueEvent(const char *topic, const char *payload, unsig
         events.remove(0);
     }
 
-    // Lisää uusi tapahtuma
     JsonObject newEvent = events.add<JsonObject>();
     newEvent["topic"] = topic;
     newEvent["payload"] = payload;
@@ -137,15 +130,14 @@ bool OfflineSyncHelper::syncPendingEvents(bool (*sendCallback)(const char *, con
         {
             failCount++;
             Serial.printf("[Sync] ❌ Failed to sync: %s\n", topic);
-            remaining.add(event); // Pidä epäonnistuneet jonossa
+            remaining.add(event);
         }
 
-        yield(); // Anna aikaa muille tehtäville
+        yield();
     }
 
     Serial.printf("[Sync] Sync complete: %d success, %d failed\n", successCount, failCount);
 
-    // Päivitä jono
     if (remaining.size() > 0)
     {
         Serial.printf("[Sync] Keeping %d failed events in queue\n", remaining.size());
@@ -235,4 +227,15 @@ bool OfflineSyncHelper::clearQueue()
     }
 
     return createQueueFile();
+}
+
+void OfflineSyncHelper::attemptOfflineSync(bool mqttConnected, OfflineSyncHelper &offlineSync, unsigned long &lastSyncAttempt, const unsigned long SYNC_INTERVAL)
+{
+    if (mqttConnected && offlineSync.hasPendingEvents() &&
+        millis() - lastSyncAttempt > SYNC_INTERVAL)
+    {
+        Serial.println("Attempting to sync offline events...");
+        offlineSync.syncPendingEvents(MQTT::sendMqttMessage);
+        lastSyncAttempt = millis();
+    }
 }

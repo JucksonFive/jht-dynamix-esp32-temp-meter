@@ -158,14 +158,7 @@ void loop()
     lastPublish = millis();
   }
 
-  // Attempt to sync offline events
-  if (MQTT::isConnected() && offlineSync.hasPendingEvents() &&
-      millis() - lastSyncAttempt > SYNC_INTERVAL)
-  {
-    Serial.println("Attempting to sync offline events...");
-    offlineSync.syncPendingEvents(MQTT::sendMqttMessage);
-    lastSyncAttempt = millis();
-  }
+  OfflineSyncHelper::attemptOfflineSync(MQTT::isConnected(), offlineSync, lastSyncAttempt, SYNC_INTERVAL);
 
   delay(100); // Short delay to prevent watchdog reset
 }
