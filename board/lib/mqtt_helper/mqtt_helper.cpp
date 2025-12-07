@@ -51,7 +51,7 @@ bool MQTT::isConnected()
 }
 
 // Callback-funktio MQTT-lähetykselle
-bool sendMqttMessage(const char *topic, const char *payload)
+bool MQTT::sendMqttMessage(const char *topic, const char *payload)
 {
     if (!MQTT::isConnected())
     {

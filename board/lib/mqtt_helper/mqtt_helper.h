@@ -6,6 +6,6 @@ namespace MQTT
     void ensureConnection(const char *clientId);
     void publish(const char *topic, const char *payload);
     void loop();
-    void sendMqttMessage(const char *topic, const char *payload);
+    bool sendMqttMessage(const char *topic, const char *payload);
     bool isConnected();
 }

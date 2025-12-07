@@ -116,38 +116,6 @@ void setup()
   }
 }
 
-void publishTemperature(float temperature)
-{
-  Serial.printf("[publishTemperature] MQTT connected: %s\n",
-                MQTT::isConnected() ? "YES" : "NO");
-  char payload[256];
-  const char *ts = TimeHelper::getLocalTimestamp();
-  userId = StorageHelper::getConfigValue("/user.json", "userId");
-  deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
-
-  if (!StorageHelper::buildPayload(payload, sizeof(payload), deviceId, temperature, ts, userId))
-  {
-    Serial.println("[ERR] JSON serialize failed (buffer too small?)");
-    delay(2000);
-    return;
-  }
-
-  if (MQTT::isConnected())
-  {
-    // Online - lähetä suoraan
-    Serial.printf("[MQTT] About to publish on topic=%s\n", mqtt_topic_str.c_str());
-    MQTT::publish(mqtt_topic_str.c_str(), payload);
-    Serial.printf("[MQTT] publish topic=%s len=%d | %s\n",
-                  mqtt_topic_str.c_str(), strlen(payload), payload);
-  }
-  else
-  {
-    // Offline - tallenna jonoon
-    offlineSync.queueEvent(mqtt_topic_str.c_str(), payload, millis());
-    Serial.printf("[Offline] Queued: %s\n", payload);
-  }
-}
-
 void loop()
 {
   WifiScanHelper::processScanResult();
@@ -184,7 +152,7 @@ void loop()
     Serial.printf("[Sensor] Read temp=%.2f C\n", temp);
     if (temp != DEVICE_DISCONNECTED_C)
     {
-      publishTemperature(temp);
+      TempSensor::publishTemperature(temp, offlineSync, mqtt_topic_str, userId, deviceId);
     }
     else
     {
@@ -198,7 +166,7 @@ void loop()
       millis() - lastSyncAttempt > SYNC_INTERVAL)
   {
     Serial.println("Attempting to sync offline events...");
-    offlineSync.syncPendingEvents(sendMqttMessage);
+    offlineSync.syncPendingEvents(MQTT::sendMqttMessage);
     lastSyncAttempt = millis();
   }
 
