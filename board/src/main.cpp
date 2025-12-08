@@ -11,6 +11,7 @@
 #include <wifi_scan_helper.h>
 #include "reset_helper.h"
 #include "offline_sync_helper.h"
+#include "../lib/common_helper/common_helper.h"
 
 // Globaalit muuttujat
 OfflineSyncHelper offlineSync;
@@ -24,64 +25,50 @@ int mqtt_port;
 String clientId;
 String deviceId;
 
-void setup()
+static inline bool handleSetupStart()
 {
-  Serial.begin(115200);
-  delay(1000);
-
-  if (!LittleFS.begin(true))
-  {
-    Serial.println("LittleFS mount/format failed!");
-    while (true)
-      ;
-  }
-  Serial.println("LittleFS mounted");
-
-  // Reset button helper initialization (long press 3s on GPIO0 -> factory reset)
-  ResetHelper::setup(/*pin=*/0, /*longPressMs=*/3000, /*shortPressRestart=*/false);
-
   if (!isSetupComplete())
   {
     Serial.println("[Setup] Setup not complete, starting wizard");
     startSetupWebServer();
-    return;
+    return false; // lopeta setup tähän, loop hoitaa captive-portalin
   }
-
-  // Setup complete: ensure we're in STA mode only
   WiFi.mode(WIFI_STA);
   Serial.println("[Setup] Setup complete, switched to STA mode");
+  return true;
+}
 
-  if (wifiCredentialsExist())
+static inline bool connectWifiFromStorage()
+{
+  if (!wifiCredentialsExist())
+    return true; // ei tunnuksia -> ei virhettä, wizard jo hoidettu
+  WifiCredentials creds;
+  if (!wifi_config_manager::readCredentials(creds))
   {
-    WifiCredentials creds;
-    if (!wifi_config_manager::readCredentials(creds))
-    {
-      Serial.println("[WiFi] Failed to read wifi.json, starting setup wizard");
-      startSetupWebServer();
-      return;
-    }
-
-    WiFi.begin(creds.ssid.c_str(),
-               creds.password.c_str());
-
-    unsigned long start = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - start < 10000)
-    {
-      delay(100);
-    }
-
-    if (WiFi.status() != WL_CONNECTED)
-    {
-      Serial.println("[WiFi] Connection failed, starting wizard fallback");
-      startSetupWebServer();
-      return;
-    }
-
-    Serial.println("[WiFi] Connected");
+    Serial.println("[WiFi] Failed to read wifi.json, starting setup wizard");
+    startSetupWebServer();
+    return false;
   }
 
-  Serial.println("MQTT::SETUP");
+  WiFi.begin(creds.ssid.c_str(), creds.password.c_str());
+  unsigned long start = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start < 10000)
+  {
+    delay(100);
+  }
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("[WiFi] Connection failed, starting wizard fallback");
+    startSetupWebServer();
+    return false;
+  }
+  Serial.println("[WiFi] Connected");
+  return true;
+}
 
+static inline bool initMqtt()
+{
+  Serial.println("MQTT::SETUP");
   mqtt_server_str = StorageHelper::getConfigValue("/config/config.json", "mqtt_server");
   mqtt_topic_str = StorageHelper::getConfigValue("/config/config.json", "mqtt_topic");
   mqtt_port = StorageHelper::getConfigValue("/config/config.json", "mqtt_port").toInt();
@@ -89,15 +76,47 @@ void setup()
   if (mqtt_server_str.length() == 0)
   {
     Serial.println("[ERROR] mqtt_server missing or invalid");
-    while (true)
-      ;
+    return false;
   }
   clientId = "esp32-" + String(WiFi.macAddress());
   MQTT::setup(mqtt_server_str.c_str(), mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
+  return true;
+}
 
+static inline void initTimeAndSensors()
+{
   TimeHelper::setup();
   TempSensor::setup();
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  delay(1000);
+
+  if (!CommonHelper::initLittleFS())
+  {
+    while (true)
+      ;
+  }
+
+  // Reset button helper initialization (long press 3s on GPIO0 -> factory reset)
+  ResetHelper::setup(/*pin=*/0, /*longPressMs=*/3000, /*shortPressRestart=*/false);
+
+  if (!handleSetupStart())
+    return;
+
+  if (!connectWifiFromStorage())
+    return;
+
+  if (!initMqtt())
+  {
+    while (true)
+      ;
+  }
+
+  initTimeAndSensors();
 
   // Load device and user information
   userId = StorageHelper::getConfigValue("/user.json", "userId");
