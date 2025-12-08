@@ -60,3 +60,20 @@ bool MQTT::sendMqttMessage(const char *topic, const char *payload)
     MQTT::publish(topic, payload);
     return true;
 }
+
+void MQTT::maintainMqttConnection(const String &clientId)
+{
+    if (!MQTT::isConnected())
+    {
+        static unsigned long lastConnectAttempt = 0;
+        if (millis() - lastConnectAttempt > 5000)
+        {
+            MQTT::ensureConnection(clientId.c_str());
+            lastConnectAttempt = millis();
+        }
+    }
+    if (MQTT::isConnected())
+    {
+        MQTT::loop();
+    }
+}

@@ -113,37 +113,28 @@ void setup()
   }
 }
 
+static inline bool handleSetupFlow()
+{
+  if (!isSetupComplete())
+  {
+    processCaptivePortalDNS();
+    delay(10);
+    return false;
+  }
+  return true;
+}
+
 void loop()
 {
   WifiScanHelper::processScanResult();
   ResetHelper::loop();
 
-  if (!isSetupComplete())
+  if (!handleSetupFlow())
   {
-    processCaptivePortalDNS();
-    delay(10);
     return;
   }
-
-  // Connect to MQTT if not connected
-  if (!MQTT::isConnected())
-  {
-    static unsigned long lastConnectAttempt = 0;
-    if (millis() - lastConnectAttempt > 5000) // Yritä 5s välein
-    {
-      MQTT::ensureConnection(clientId.c_str());
-      lastConnectAttempt = millis();
-    }
-  }
-
-  if (MQTT::isConnected())
-  {
-    MQTT::loop();
-  }
-
-  // Report temperature every 10 seconds
+  MQTT::maintainMqttConnection(clientId);
   TempSensor::publishTemperatureIfDue(offlineSync, mqtt_topic_str, userId, deviceId);
-
   OfflineSyncHelper::attemptOfflineSync(offlineSync, lastSyncAttempt, SYNC_INTERVAL);
 
   delay(100); // Short delay to prevent watchdog reset
