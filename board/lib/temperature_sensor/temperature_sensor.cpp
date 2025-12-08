@@ -52,3 +52,23 @@ void TempSensor::publishTemperature(float temperature, OfflineSyncHelper offline
         Serial.printf("[Offline] Queued: %s\n", payload);
     }
 }
+
+// Report temperature every 10 seconds
+void TempSensor::publishTemperatureIfDue(OfflineSyncHelper offlineSync, String mqtt_topic_str, String userId, String deviceId)
+{
+    static unsigned long lastPublish = 0;
+    if (millis() - lastPublish > 10000)
+    {
+        float temp = TempSensor::readCelsius();
+        Serial.printf("[Sensor] Read temp=%.2f C\n", temp);
+        if (temp != DEVICE_DISCONNECTED_C)
+        {
+            TempSensor::publishTemperature(temp, offlineSync, mqtt_topic_str, userId, deviceId);
+        }
+        else
+        {
+            Serial.println("[Sensor] Temperature sensor disconnected or read failed");
+        }
+        lastPublish = millis();
+    }
+}

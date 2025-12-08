@@ -142,21 +142,7 @@ void loop()
   }
 
   // Report temperature every 10 seconds
-  static unsigned long lastPublish = 0;
-  if (millis() - lastPublish > 10000)
-  {
-    float temp = TempSensor::readCelsius();
-    Serial.printf("[Sensor] Read temp=%.2f C\n", temp);
-    if (temp != DEVICE_DISCONNECTED_C)
-    {
-      TempSensor::publishTemperature(temp, offlineSync, mqtt_topic_str, userId, deviceId);
-    }
-    else
-    {
-      Serial.println("[Sensor] Temperature sensor disconnected or read failed");
-    }
-    lastPublish = millis();
-  }
+  TempSensor::publishTemperatureIfDue(offlineSync, mqtt_topic_str, userId, deviceId);
 
   OfflineSyncHelper::attemptOfflineSync(offlineSync, lastSyncAttempt, SYNC_INTERVAL);
 
