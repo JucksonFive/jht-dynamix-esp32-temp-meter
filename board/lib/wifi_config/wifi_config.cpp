@@ -3,6 +3,7 @@
 #include "wifi_config.h"
 #include "../wifi_config_manager/wifi_config_manager.h"
 #include <wifi_state.h>
+#include <setup_webserver.h>
 
 bool connectToWifi(uint32_t timeoutMs)
 {
@@ -98,4 +99,32 @@ bool saveWifiCredentials(const String &ssid, const String &password)
 bool wifiCredentialsExist()
 {
   return wifi_config_manager::credentialsExist();
+}
+
+bool connectWifiFromStorage()
+{
+  if (!wifiCredentialsExist())
+    return true;
+  WifiCredentials creds;
+  if (!wifi_config_manager::readCredentials(creds))
+  {
+    Serial.println("[WiFi] Failed to read wifi.json, starting setup wizard");
+    startSetupWebServer();
+    return false;
+  }
+
+  WiFi.begin(creds.ssid.c_str(), creds.password.c_str());
+  unsigned long start = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start < 10000)
+  {
+    delay(100);
+  }
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("[WiFi] Connection failed, starting wizard fallback");
+    startSetupWebServer();
+    return false;
+  }
+  Serial.println("[WiFi] Connected");
+  return true;
 }

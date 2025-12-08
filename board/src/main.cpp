@@ -38,34 +38,6 @@ static inline bool handleSetupStart()
   return true;
 }
 
-static inline bool connectWifiFromStorage()
-{
-  if (!wifiCredentialsExist())
-    return true; // ei tunnuksia -> ei virhettä, wizard jo hoidettu
-  WifiCredentials creds;
-  if (!wifi_config_manager::readCredentials(creds))
-  {
-    Serial.println("[WiFi] Failed to read wifi.json, starting setup wizard");
-    startSetupWebServer();
-    return false;
-  }
-
-  WiFi.begin(creds.ssid.c_str(), creds.password.c_str());
-  unsigned long start = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - start < 10000)
-  {
-    delay(100);
-  }
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("[WiFi] Connection failed, starting wizard fallback");
-    startSetupWebServer();
-    return false;
-  }
-  Serial.println("[WiFi] Connected");
-  return true;
-}
-
 static inline bool initMqtt()
 {
   Serial.println("MQTT::SETUP");
