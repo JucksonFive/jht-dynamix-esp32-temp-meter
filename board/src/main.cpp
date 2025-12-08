@@ -90,6 +90,24 @@ static inline void initTimeAndSensors()
   TempSensor::setup();
 }
 
+static inline void loadUserAndDeviceIds()
+{
+  userId = StorageHelper::getConfigValue("/user.json", "userId");
+  deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+}
+
+static inline void initOfflineSync()
+{
+  if (!offlineSync.begin())
+  {
+    Serial.println("Failed to initialize offline sync");
+  }
+  else
+  {
+    Serial.printf("Offline sync ready, %d pending events\n", offlineSync.getPendingCount());
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -118,18 +136,9 @@ void setup()
 
   initTimeAndSensors();
 
-  // Load device and user information
-  userId = StorageHelper::getConfigValue("/user.json", "userId");
-  deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+  loadUserAndDeviceIds();
 
-  if (!offlineSync.begin())
-  {
-    Serial.println("Failed to initialize offline sync");
-  }
-  else
-  {
-    Serial.printf("Offline sync ready, %d pending events\n", offlineSync.getPendingCount());
-  }
+  initOfflineSync();
 }
 
 static inline bool handleSetupFlow()
