@@ -24,8 +24,6 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   onDeviceDeleted,
 }) => {
   const { t } = useTranslation();
-
-  console.log("lastSeen in DeviceList:", lastSeen);
   return (
     <ul className="space-y-2">
       {devices.map((d) => {

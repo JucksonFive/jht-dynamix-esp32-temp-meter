@@ -1,14 +1,17 @@
 import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamoDb from "aws-cdk-lib/aws-dynamodb";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import * as path from "path";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+
 export interface LambdaStackProps extends cdk.StackProps {
   temperaturesTable: dynamoDb.Table;
   deviceUserTable: dynamoDb.Table;
+  dashboardEnvSecret: secretsmanager.ISecret;
 }
 
 export class LambdaStack extends cdk.Stack {
@@ -22,11 +25,12 @@ export class LambdaStack extends cdk.Stack {
   public readonly getAllDevicesFn: NodejsFunction;
   public readonly purgeDeviceReadingsFn: NodejsFunction;
   public readonly updateDeviceStatusFn: NodejsFunction;
+  public readonly getDashboardConfigFn: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaStackProps) {
     super(scope, id, props);
 
-    const { temperaturesTable, deviceUserTable } = props;
+    const { temperaturesTable, deviceUserTable, dashboardEnvSecret } = props;
 
     const purgeDlq = new sqs.Queue(this, "DeleteReadingsDLQ", {
       retentionPeriod: cdk.Duration.days(14),
@@ -235,5 +239,22 @@ export class LambdaStack extends cdk.Stack {
         ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
       },
     });
+
+    // Lambda to fetch dashboard config from Secrets Manager
+    this.getDashboardConfigFn = new NodejsFunction(
+      this,
+      "GetDashboardConfigFunction",
+      {
+        functionName: "GetDashboardConfigFunction",
+        entry: path.join(__dirname, "../../lambdas/getConfig/getConfig.ts"),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        environment: {
+          SECRET_ARN: dashboardEnvSecret.secretArn,
+          ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
+        },
+      }
+    );
+    dashboardEnvSecret.grantRead(this.getDashboardConfigFn);
   }
 }

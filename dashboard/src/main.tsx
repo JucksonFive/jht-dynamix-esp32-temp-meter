@@ -4,15 +4,26 @@ import App from "./App";
 import "./index.css";
 
 import { Amplify } from "aws-amplify";
-import amplifyConfig from "./amplify-config";
+import { buildAmplifyConfig } from "./amplify-config";
 import { AppProvider } from "./contexts/AppContext";
+import { fetchDashboardConfig } from "./services/api";
+import { setRuntimeConfig } from "./utils/runtimeConfig";
 
-Amplify.configure(amplifyConfig);
+const bootstrap = async () => {
+  try {
+    const cfg = await fetchDashboardConfig();
+    setRuntimeConfig(cfg);
+  } catch (e) {}
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <AppProvider>
-      <App />
-    </AppProvider>
-  </React.StrictMode>
-);
+  Amplify.configure(buildAmplifyConfig());
+
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <AppProvider>
+        <App />
+      </AppProvider>
+    </React.StrictMode>
+  );
+};
+
+bootstrap();

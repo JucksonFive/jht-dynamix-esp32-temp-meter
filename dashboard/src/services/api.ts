@@ -2,9 +2,11 @@ import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
 import { Device, ReadingsResponse } from "./types";
 import { Nullable, QueryParams } from "../utils/types";
-
-const BASE_URL = import.meta.env.VITE_BASE_API_URL;
-if (!BASE_URL) throw new Error("VITE_BASE_API_URL is not defined");
+import {
+  resolveBaseApiUrl,
+  getRuntimeConfig,
+  setRuntimeConfig,
+} from "../utils/runtimeConfig";
 
 async function apiRequest<T>(opts: {
   method?: "GET" | "POST" | "DELETE" | "PUT";
@@ -13,6 +15,8 @@ async function apiRequest<T>(opts: {
   data?: unknown;
   signal?: AbortSignal;
 }): Promise<T> {
+  const BASE_URL = resolveBaseApiUrl();
+  if (!BASE_URL) throw new Error("BASE API URL is not defined");
   const session = await fetchAuthSession();
   const token =
     session.tokens?.idToken?.toString() ??
@@ -104,6 +108,16 @@ export async function deleteUserDevice(
     path: "/delete-user-device",
     params: { deviceId },
   });
+}
+
+export async function fetchDashboardConfig(): Promise<Record<string, string>> {
+  const url = resolveBaseApiUrl();
+  if (!url) throw new Error("BASE API URL is not defined");
+  const res = await fetch(`${url}/config`);
+  if (!res.ok) throw new Error("Failed to fetch config");
+  const json = await res.json();
+  setRuntimeConfig(json);
+  return json;
 }
 
 export const getLatestReadingPerDevice = (
