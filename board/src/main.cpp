@@ -13,10 +13,9 @@
 #include "offline_sync_helper.h"
 #include "../lib/common_helper/common_helper.h"
 
-// Globaalit muuttujat
 OfflineSyncHelper offlineSync;
 unsigned long lastSyncAttempt = 0;
-const unsigned long SYNC_INTERVAL = 60000; // Yritä synciä minuutin välein
+const unsigned long SYNC_INTERVAL = 60000; // sync every 60 seconds
 
 String mqtt_server_str;
 String mqtt_topic_str;
@@ -31,7 +30,7 @@ static inline bool handleSetupStart()
   {
     Serial.println("[Setup] Setup not complete, starting wizard");
     startSetupWebServer();
-    return false; // lopeta setup tähän, loop hoitaa captive-portalin
+    return false;
   }
   WiFi.mode(WIFI_STA);
   Serial.println("[Setup] Setup complete, switched to STA mode");

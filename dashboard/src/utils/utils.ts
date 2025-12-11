@@ -32,7 +32,6 @@ export function bucketizeMulti(points: MultiPoint[], r: Range) {
     Number.NEGATIVE_INFINITY
   );
 
-  // käytetään pienempää: valittu range tai datan span
   const ms = Math.max(0, Math.min(spanMs(r), maxTs - minTs) || 1);
   const bucket = pickBucketMs(ms);
 
@@ -44,7 +43,6 @@ export function bucketizeMulti(points: MultiPoint[], r: Range) {
 
   for (const p of points) {
     const t = getTime(p);
-    // bucketin alku suhteessa minTs:ään, ettei kaikki mene samaan, jos range on iso
     const key = Math.floor((t - minTs) / bucket) * bucket + minTs;
 
     const row = (acc[key] ||= { ts: key, per: {} });
