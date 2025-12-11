@@ -1,7 +1,15 @@
 #pragma once
 #include <DallasTemperature.h>
-namespace TempSensor
+#include "offline_sync_helper.h"
+#include <Arduino.h>
+
+class TempSensor
 {
-    void setup();
-    float readCelsius();
-}
+private:
+    static void publishTemperature(float temperature, OfflineSyncHelper offlineSync, String mqtt_topic_str, String userId, String deviceId);
+    static float readCelsius();
+
+public:
+    static void setup();
+    static void publishTemperatureIfDue(OfflineSyncHelper offlineSync, String mqtt_topic_str, String userId, String deviceId);
+};

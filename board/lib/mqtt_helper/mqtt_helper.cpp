@@ -49,3 +49,31 @@ bool MQTT::isConnected()
 {
     return client.connected();
 }
+
+// Callback-funktio MQTT-lähetykselle
+bool MQTT::sendMqttMessage(const char *topic, const char *payload)
+{
+    if (!MQTT::isConnected())
+    {
+        return false;
+    }
+    MQTT::publish(topic, payload);
+    return true;
+}
+
+void MQTT::maintainMqttConnection(const String &clientId)
+{
+    if (!MQTT::isConnected())
+    {
+        static unsigned long lastConnectAttempt = 0;
+        if (millis() - lastConnectAttempt > 5000)
+        {
+            MQTT::ensureConnection(clientId.c_str());
+            lastConnectAttempt = millis();
+        }
+    }
+    if (MQTT::isConnected())
+    {
+        MQTT::loop();
+    }
+}

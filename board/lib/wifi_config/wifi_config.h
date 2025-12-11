@@ -13,3 +13,4 @@ bool wifiCredentialsExist();
 void startWifiConnectTask(String ssid, String pass);
 bool connectToWifi(uint32_t timeoutMs = 10000);
 bool isWifiConnected();
+bool connectWifiFromStorage();

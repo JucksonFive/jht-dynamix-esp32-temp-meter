@@ -11,6 +11,7 @@
 #include <wifi_scan_helper.h>
 #include "reset_helper.h"
 #include "offline_sync_helper.h"
+#include "../lib/common_helper/common_helper.h"
 
 // Globaalit muuttujat
 OfflineSyncHelper offlineSync;
@@ -24,66 +25,22 @@ int mqtt_port;
 String clientId;
 String deviceId;
 
-void setup()
+static inline bool handleSetupStart()
 {
-  Serial.begin(115200);
-  delay(1000);
-
-  // Alusta LittleFS, formatoi jos korruptoitunut
-  if (!LittleFS.begin(true))
-  { // true = formatoi automaattisesti
-    Serial.println("LittleFS mount/format failed!");
-    while (true)
-      ;
-  }
-  Serial.println("LittleFS mounted");
-
-  // Reset button helper initialization (long press 3s on GPIO0 -> factory reset)
-  ResetHelper::setup(/*pin=*/0, /*longPressMs=*/3000, /*shortPressRestart=*/false);
-
   if (!isSetupComplete())
   {
     Serial.println("[Setup] Setup not complete, starting wizard");
-
     startSetupWebServer();
-    return;
+    return false; // lopeta setup tähän, loop hoitaa captive-portalin
   }
-
-  // Setup complete: ensure we're in STA mode only
   WiFi.mode(WIFI_STA);
   Serial.println("[Setup] Setup complete, switched to STA mode");
+  return true;
+}
 
-  if (wifiCredentialsExist())
-  {
-    WifiCredentials creds;
-    if (!wifi_config_manager::readCredentials(creds))
-    {
-      Serial.println("[WiFi] Failed to read wifi.json, starting setup wizard");
-      startSetupWebServer();
-      return;
-    }
-
-    WiFi.begin(creds.ssid.c_str(),
-               creds.password.c_str());
-
-    unsigned long start = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - start < 10000)
-    {
-      delay(100);
-    }
-
-    if (WiFi.status() != WL_CONNECTED)
-    {
-      Serial.println("[WiFi] Connection failed, starting wizard fallback");
-      startSetupWebServer();
-      return;
-    }
-
-    Serial.println("[WiFi] Connected");
-  }
-
+static inline bool initMqtt()
+{
   Serial.println("MQTT::SETUP");
-
   mqtt_server_str = StorageHelper::getConfigValue("/config/config.json", "mqtt_server");
   mqtt_topic_str = StorageHelper::getConfigValue("/config/config.json", "mqtt_topic");
   mqtt_port = StorageHelper::getConfigValue("/config/config.json", "mqtt_port").toInt();
@@ -91,21 +48,28 @@ void setup()
   if (mqtt_server_str.length() == 0)
   {
     Serial.println("[ERROR] mqtt_server missing or invalid");
-    while (true)
-      ;
+    return false;
   }
   clientId = "esp32-" + String(WiFi.macAddress());
   MQTT::setup(mqtt_server_str.c_str(), mqtt_port);
   MQTT::ensureConnection(clientId.c_str());
+  return true;
+}
 
+static inline void initTimeAndSensors()
+{
   TimeHelper::setup();
   TempSensor::setup();
+}
 
-  // Load device and user information
+static inline void loadUserAndDeviceIds()
+{
   userId = StorageHelper::getConfigValue("/user.json", "userId");
   deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+}
 
-  // Alusta offline sync
+static inline void initOfflineSync()
+{
   if (!offlineSync.begin())
   {
     Serial.println("Failed to initialize offline sync");
@@ -116,47 +80,48 @@ void setup()
   }
 }
 
-// Callback-funktio MQTT-lähetykselle
-bool sendMqttMessage(const char *topic, const char *payload)
+void setup()
 {
-  if (!MQTT::isConnected())
+  Serial.begin(115200);
+  delay(1000);
+
+  if (!CommonHelper::initLittleFS())
   {
-    return false;
+    while (true)
+      ;
   }
-  MQTT::publish(topic, payload);
-  return true;
+
+  // Reset button helper initialization (long press 3s on GPIO0 -> factory reset)
+  ResetHelper::setup(/*pin=*/0, /*longPressMs=*/3000, /*shortPressRestart=*/false);
+
+  if (!handleSetupStart())
+    return;
+
+  if (!connectWifiFromStorage())
+    return;
+
+  if (!initMqtt())
+  {
+    while (true)
+      ;
+  }
+
+  initTimeAndSensors();
+
+  loadUserAndDeviceIds();
+
+  initOfflineSync();
 }
 
-void publishTemperature(float temperature)
+static inline bool handleSetupFlow()
 {
-  Serial.printf("[publishTemperature] MQTT connected: %s\n",
-                MQTT::isConnected() ? "YES" : "NO");
-  char payload[256];
-  const char *ts = TimeHelper::getLocalTimestamp();
-  userId = StorageHelper::getConfigValue("/user.json", "userId");
-  deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
-
-  if (!StorageHelper::buildPayload(payload, sizeof(payload), deviceId, temperature, ts, userId))
+  if (!isSetupComplete())
   {
-    Serial.println("[ERR] JSON serialize failed (buffer too small?)");
-    delay(2000);
-    return;
+    processCaptivePortalDNS();
+    delay(10);
+    return false;
   }
-
-  if (MQTT::isConnected())
-  {
-    // Online - lähetä suoraan
-    Serial.printf("[MQTT] About to publish on topic=%s\n", mqtt_topic_str.c_str());
-    MQTT::publish(mqtt_topic_str.c_str(), payload);
-    Serial.printf("[MQTT] publish topic=%s len=%d | %s\n",
-                  mqtt_topic_str.c_str(), strlen(payload), payload);
-  }
-  else
-  {
-    // Offline - tallenna jonoon
-    offlineSync.queueEvent(mqtt_topic_str.c_str(), payload, millis());
-    Serial.printf("[Offline] Queued: %s\n", payload);
-  }
+  return true;
 }
 
 void loop()
@@ -164,54 +129,13 @@ void loop()
   WifiScanHelper::processScanResult();
   ResetHelper::loop();
 
-  if (!isSetupComplete())
+  if (!handleSetupFlow())
   {
-    processCaptivePortalDNS();
-    delay(10);
     return;
   }
+  MQTT::maintainMqttConnection(clientId);
+  TempSensor::publishTemperatureIfDue(offlineSync, mqtt_topic_str, userId, deviceId);
+  OfflineSyncHelper::attemptOfflineSync(offlineSync, lastSyncAttempt, SYNC_INTERVAL);
 
-  // Yritä yhdistää jos ei yhteyttä, mutta älä jää odottamaan
-  if (!MQTT::isConnected())
-  {
-    static unsigned long lastConnectAttempt = 0;
-    if (millis() - lastConnectAttempt > 5000) // Yritä 5s välein
-    {
-      MQTT::ensureConnection(clientId.c_str());
-      lastConnectAttempt = millis();
-    }
-  }
-
-  if (MQTT::isConnected())
-  {
-    MQTT::loop();
-  }
-
-  // Lue ja lähetä 10s välein (riippumatta MQTT-yhteydestä)
-  static unsigned long lastPublish = 0;
-  if (millis() - lastPublish > 10000)
-  {
-    float temp = TempSensor::readCelsius();
-    Serial.printf("[Sensor] Read temp=%.2f C\n", temp);
-    if (temp != DEVICE_DISCONNECTED_C)
-    {
-      publishTemperature(temp);
-    }
-    else
-    {
-      Serial.println("[Sensor] Temperature sensor disconnected or read failed");
-    }
-    lastPublish = millis();
-  }
-
-  // Yritä synciä offline-tapahtumat
-  if (MQTT::isConnected() && offlineSync.hasPendingEvents() &&
-      millis() - lastSyncAttempt > SYNC_INTERVAL)
-  {
-    Serial.println("Attempting to sync offline events...");
-    offlineSync.syncPendingEvents(sendMqttMessage);
-    lastSyncAttempt = millis();
-  }
-
-  delay(100); // Lyhyt delay estämään watchdog resetin
+  delay(100); // Short delay to prevent watchdog reset
 }

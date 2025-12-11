@@ -10,7 +10,7 @@ class OfflineSyncHelper
 private:
     static const char *QUEUE_FILE;
     static const size_t MAX_QUEUE_SIZE = 1000;
-    static const size_t MAX_FILE_SIZE = 512000; // 500KB
+    static const size_t MAX_FILE_SIZE = 512000;
 
     bool createQueueFile();
     bool appendToQueue(const JsonDocument &doc);
@@ -20,15 +20,10 @@ private:
 
 public:
     bool begin();
-
-    // Lisää tapahtuma jonoon
     bool queueEvent(const char *topic, const char *payload, unsigned long timestamp);
-
-    // Lähetä kaikki jonossa olevat tapahtumat
     bool syncPendingEvents(bool (*sendCallback)(const char *, const char *));
-
-    // Tarkista jonon tila
     bool hasPendingEvents();
+    static void attemptOfflineSync(OfflineSyncHelper &offlineSync, unsigned long &lastSyncAttempt, const unsigned long SYNC_INTERVAL);
     size_t getPendingCount();
 };
 
