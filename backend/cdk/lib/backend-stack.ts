@@ -16,6 +16,7 @@ export interface BackendStackProps extends cdk.StackProps {
   fetchUserTemperatureBoundsFn: NodejsFunction;
   deleteUserDeviceFn: NodejsFunction;
   updateDeviceStatusFn: NodejsFunction;
+  getDashboardConfigFn: NodejsFunction;
   userPool: cognito.IUserPool;
 }
 
@@ -31,6 +32,7 @@ export class BackendStack extends cdk.Stack {
       registerDeviceFn,
       deleteUserDeviceFn,
       updateDeviceStatusFn,
+      getDashboardConfigFn,
       userPool,
     } = props;
 
@@ -152,6 +154,17 @@ export class BackendStack extends cdk.Stack {
         apiKeyRequired: false,
       }
     );
+
+    // Public endpoint to provide dashboard configuration
+    api.root
+      .addResource("config")
+      .addMethod(
+        "GET",
+        new apigateway.LambdaIntegration(getDashboardConfigFn),
+        {
+          apiKeyRequired: false,
+        }
+      );
 
     api.root
       .addResource("delete-user-device")

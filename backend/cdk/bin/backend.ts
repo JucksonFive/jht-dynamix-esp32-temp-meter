@@ -50,6 +50,7 @@ const lambdaStack = new LambdaStack(app, "LambdaStack", {
   env: { account, region },
   temperaturesTable: infraStack.temperaturesTable,
   deviceUserTable: infraStack.deviceUserTable,
+  dashboardEnvSecret: infraStack.dashboardEnvSecret,
 });
 // Create auth stack with Lambda dependencies
 const authStack = new AuthStack(app, "AuthStack", {
@@ -67,6 +68,7 @@ const backendStack = new BackendStack(app, "BackendStack", {
   registerDeviceFn: lambdaStack.registerDeviceFn,
   deleteUserDeviceFn: lambdaStack.deleteUserDeviceFn,
   updateDeviceStatusFn: lambdaStack.updateDeviceStatusFn,
+  getDashboardConfigFn: lambdaStack.getDashboardConfigFn,
   userPool: authStack.userPool,
 });
 

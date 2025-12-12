@@ -1,6 +1,7 @@
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { getRuntimeConfig } from "../../utils/runtimeConfig";
 import { Nullable } from "../../utils/types";
 import AuthActions from "./Components/AuthActions";
 import { Logo } from "./Components/Logo";
@@ -18,6 +19,15 @@ export const Login = () => {
     setError(null);
 
     try {
+      const cfg = getRuntimeConfig();
+      if (
+        !cfg.VITE_COGNITO_USER_POOL_ID ||
+        !cfg.VITE_COGNITO_USER_POOL_CLIENT_ID
+      ) {
+        throw new Error(
+          "Authentication is not configured. Please ensure runtime config is loaded."
+        );
+      }
       setLoading(true);
       if (mode === "signin") {
         await signIn({ username: email, password });
@@ -35,7 +45,11 @@ export const Login = () => {
       }
     } catch (err: any) {
       console.error("Auth failed", err);
-      setError(err.message || "Authentication failed");
+      const msg: string = err?.message || "Authentication failed";
+      const friendly = /UserPool not configured/i.test(msg)
+        ? "Authentication is not configured. Please check /config and Cognito settings."
+        : msg;
+      setError(friendly);
     } finally {
       setLoading(false);
     }
