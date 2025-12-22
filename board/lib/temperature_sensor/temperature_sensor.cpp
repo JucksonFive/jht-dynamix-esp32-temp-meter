@@ -1,36 +1,73 @@
 #include "temperature_sensor.h"
-#include <OneWire.h>
-#include <DallasTemperature.h>
+
+#include <Wire.h>
+
 #include <time_helper.h>
 #include <storage_helper.h>
 #include "offline_sync_helper.h"
 #include <mqtt_helper.h>
+#include <Adafruit_AHTX0.h>
 
-constexpr uint8_t DATA_PIN = 4;
-OneWire oneWire(DATA_PIN);
-DallasTemperature sensor(&oneWire);
+namespace
+{
+    Adafruit_AHTX0 aht;
+    constexpr uint8_t I2C_SDA = 8;
+    constexpr uint8_t I2C_SCL = 9;
+    constexpr unsigned long PUBLISH_INTERVAL_MS = 60UL * 60UL * 1000UL; // 1 hour
+}
 
 void TempSensor::setup()
 {
-    sensor.begin();
+    Wire.begin(I2C_SDA, I2C_SCL);
+
+    if (!aht.begin())
+    {
+        Serial.println("[ERR] AHT10 not found. Check wiring / I2C pins.");
+        return;
+    }
+
+    Serial.println("[OK] AHT10 initialized");
 }
 
 float TempSensor::readCelsius()
 {
-    sensor.requestTemperatures();
-    return sensor.getTempCByIndex(0);
+    sensors_event_t humidityEvent;
+    sensors_event_t tempEvent;
+
+    // aht.getEvent(&humidity, &temp) -> in this order
+    const bool ok = aht.getEvent(&humidityEvent, &tempEvent);
+    if (!ok)
+    {
+        return NAN;
+    }
+
+    return tempEvent.temperature;
 }
 
-void TempSensor::publishTemperature(float temperature, OfflineSyncHelper offlineSync, String mqtt_topic_str, String userId, String deviceId)
+void TempSensor::publishTemperature(
+    float temperature,
+    float humidity,
+    OfflineSyncHelper &offlineSync,
+    const String &mqttTopic,
+    const String &userId,
+    const String &deviceId)
 {
-    Serial.printf("[publishTemperature] MQTT connected: %s\n",
-                  MQTT::isConnected() ? "YES" : "NO");
+    Serial.printf("[publishTemperature] MQTT connected: %s\n", MQTT::isConnected() ? "YES" : "NO");
+
     char payload[256];
     const char *ts = TimeHelper::getLocalTimestamp();
-    userId = StorageHelper::getConfigValue("/user.json", "userId");
-    deviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
 
-    if (!StorageHelper::buildPayload(payload, sizeof(payload), deviceId, temperature, ts, userId))
+    const String resolvedUserId = StorageHelper::getConfigValue("/user.json", "userId");
+    const String resolvedDeviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+
+    if (!StorageHelper::buildPayload(
+            payload,
+            sizeof(payload),
+            resolvedDeviceId,
+            temperature,
+            humidity,
+            ts,
+            resolvedUserId))
     {
         Serial.println("[ERR] JSON serialize failed (buffer too small?)");
         delay(2000);
@@ -39,36 +76,46 @@ void TempSensor::publishTemperature(float temperature, OfflineSyncHelper offline
 
     if (MQTT::isConnected())
     {
-        // Online - lähetä suoraan
-        Serial.printf("[MQTT] About to publish on topic=%s\n", mqtt_topic_str.c_str());
-        MQTT::publish(mqtt_topic_str.c_str(), payload);
-        Serial.printf("[MQTT] publish topic=%s len=%d | %s\n",
-                      mqtt_topic_str.c_str(), strlen(payload), payload);
+        Serial.printf("[MQTT] About to publish on topic=%s\n", mqttTopic.c_str());
+        MQTT::publish(mqttTopic.c_str(), payload);
+        Serial.printf("[MQTT] publish topic=%s len=%d | %s\n", mqttTopic.c_str(), strlen(payload), payload);
     }
     else
     {
-        // Offline - tallenna jonoon
-        offlineSync.queueEvent(mqtt_topic_str.c_str(), payload, millis());
+        offlineSync.queueEvent(mqttTopic.c_str(), payload, millis());
         Serial.printf("[Offline] Queued: %s\n", payload);
     }
 }
 
-// Report temperature every 10 seconds
-void TempSensor::publishTemperatureIfDue(OfflineSyncHelper offlineSync, String mqtt_topic_str, String userId, String deviceId)
+void TempSensor::publishTemperatureIfDue(
+    OfflineSyncHelper &offlineSync,
+    const String &mqttTopic,
+    const String &userId,
+    const String &deviceId)
 {
+
     static unsigned long lastPublish = 0;
-    if (millis() - lastPublish > 10000)
+
+    if (lastPublish && (millis() - lastPublish <= PUBLISH_INTERVAL_MS))
     {
-        float temp = TempSensor::readCelsius();
-        Serial.printf("[Sensor] Read temp=%.2f C\n", temp);
-        if (temp != DEVICE_DISCONNECTED_C)
-        {
-            TempSensor::publishTemperature(temp, offlineSync, mqtt_topic_str, userId, deviceId);
-        }
-        else
-        {
-            Serial.println("[Sensor] Temperature sensor disconnected or read failed");
-        }
-        lastPublish = millis();
+        return;
     }
+
+    sensors_event_t humidityEvent;
+    sensors_event_t tempEvent;
+    const bool ok = aht.getEvent(&humidityEvent, &tempEvent);
+    if (!ok)
+    {
+        Serial.println("[Sensor] AHT10 read failed");
+        lastPublish = millis();
+        return;
+    }
+
+    const float temp = tempEvent.temperature;
+    const float humidity = humidityEvent.relative_humidity;
+
+    Serial.printf("[Sensor] Read temp=%.2f C, humidity=%.2f %%\n", temp, humidity);
+    TempSensor::publishTemperature(temp, humidity, offlineSync, mqttTopic, userId, deviceId);
+
+    lastPublish = millis();
 }

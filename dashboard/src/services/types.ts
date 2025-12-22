@@ -4,6 +4,7 @@ export type Reading = {
   deviceId: string;
   timestamp: string;
   temperature: number;
+  humidity: number;
   userId: string;
 };
 

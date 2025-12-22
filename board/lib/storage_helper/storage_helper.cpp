@@ -68,13 +68,14 @@ bool StorageHelper::saveUserResponse(const char *path, const String &response)
 bool StorageHelper::buildPayload(char *out, size_t outSize,
                                  const String &deviceId,
                                  float temperature,
+                                 float humidity,
                                  const char *ts,
                                  const String &userId)
 {
-
     JsonDocument doc;
     doc["deviceId"] = deviceId;
     doc["temperature"] = temperature;
+    doc["humidity"] = humidity;
     doc["timestamp"] = ts;
     doc["userId"] = userId;
 

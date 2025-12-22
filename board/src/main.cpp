@@ -90,8 +90,9 @@ void setup()
       ;
   }
 
+  constexpr int RESET_PIN = 0;
   // Reset button helper initialization (long press 3s on GPIO0 -> factory reset)
-  ResetHelper::setup(/*pin=*/0, /*longPressMs=*/3000, /*shortPressRestart=*/false);
+  ResetHelper::setup(/*pin=*/RESET_PIN, /*longPressMs=*/3000, /*shortPressRestart=*/false);
 
   if (!handleSetupStart())
     return;

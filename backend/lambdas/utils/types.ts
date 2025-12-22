@@ -3,8 +3,9 @@ import { BatchWriteCommandInput } from "@aws-sdk/lib-dynamodb";
 export type HandlerEvent = {
   deviceId: string;
   temperature: number;
+  humidity: number;
   timestamp: string;
-  userId?: string;
+  userId: string;
 };
 // --- Types ---
 export type DeviceDeleteMsg = { userId: string; deviceId: string };

@@ -14,8 +14,13 @@ const DEVICES_TABLE = process.env.DEVICES_TABLE!;
 export const handler = async (event: HandlerEvent) => {
   console.log("Received event:", JSON.stringify(event));
 
-  const { deviceId, temperature, timestamp } = event;
-  if (!deviceId || typeof temperature !== "number" || !timestamp) {
+  const { deviceId, temperature, humidity, timestamp } = event;
+  if (
+    !deviceId ||
+    typeof temperature !== "number" ||
+    typeof humidity !== "number" ||
+    !timestamp
+  ) {
     console.error("Invalid payload");
     return { statusCode: 400, body: "Invalid payload" };
   }
@@ -33,7 +38,7 @@ export const handler = async (event: HandlerEvent) => {
   }
 
   // Temperatures PK/SK = deviceId + timestamp
-  const item = { deviceId, timestamp, userId, temperature };
+  const item = { deviceId, timestamp, userId, temperature, humidity };
 
   try {
     await ddb.send(new PutCommand({ TableName: TEMPS_TABLE, Item: item }));
