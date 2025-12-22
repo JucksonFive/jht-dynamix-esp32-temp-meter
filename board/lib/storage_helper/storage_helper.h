@@ -10,6 +10,7 @@ public:
     static bool buildPayload(char *out, size_t outSize,
                              const String &deviceId,
                              float temperature,
+                             float humidity,
                              const char *ts,
                              const String &userId);
 };
