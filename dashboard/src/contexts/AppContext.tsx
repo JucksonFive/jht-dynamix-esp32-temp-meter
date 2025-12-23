@@ -11,7 +11,7 @@ import { useReadings } from "../hooks/useReadings";
 import { Device } from "../services/types";
 import { toLocalOffsetIso } from "../utils/dateFormatter";
 import { DeviceData, Nullable, Range, User } from "../utils/types";
-const THREE_WEEKS = 7 * 864e5;
+const ONE_DAY = 864e5;
 const MINUTE = 60 * 1000;
 
 interface AppContextType {
@@ -61,7 +61,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Nullable<User>>(null);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [bootLoading, setBootLoading] = useState(true);
-  const [lastSeen, setLastSeen] = useState<Map<string, string>>(new Map());
+  console.log("AppProvider render", ONE_DAY);
   // Initialize user
   useEffect(() => {
     (async () => {
@@ -82,7 +82,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Range
   const [range, setRange] = useState<Range>(() => {
     const now = toLocalOffsetIso();
-    const from = toLocalOffsetIso(new Date(Date.now() - THREE_WEEKS));
+    const from = toLocalOffsetIso(new Date(Date.now() - ONE_DAY));
     return { from, to: now };
   });
 
