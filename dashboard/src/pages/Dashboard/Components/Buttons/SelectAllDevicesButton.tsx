@@ -1,6 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
+import checkAllIcon from "../../../../ui/icons/check-all.svg";
+import indeterminateIcon from "../../../../ui/icons/indeterminate.svg";
+
 interface SelectAllDevicesButtonProps {
   total: number;
   selected: number;
@@ -41,14 +44,14 @@ export const SelectAllDevicesButton: React.FC<SelectAllDevicesButtonProps> = ({
         >
           {allSelected && (
             <img
-              src="/src/ui/icons/check-all.svg"
+              src={checkAllIcon}
               alt="all"
               className="w-4 h-4 text-green-400"
             />
           )}
           {isIndeterminate && !allSelected && (
             <img
-              src="/src/ui/icons/indeterminate.svg"
+              src={indeterminateIcon}
               alt="partial"
               className="w-4 h-4 text-current"
             />
