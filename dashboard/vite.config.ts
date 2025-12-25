@@ -3,6 +3,11 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: "./src/setupTests.ts",
+  },
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {

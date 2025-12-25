@@ -1,0 +1,186 @@
+name: Write Tests to PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'agents/**'
+      - 'dashboard/**'
+      - 'homepage/**'
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'agents/**'
+      - 'dashboard/**'
+      - 'homepage/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  internal:
+    name: Commit tests to PR branch (internal)
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'ai-tests')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          # Check out the actual PR head branch so we can push
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.repository }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test-writer deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r agents/requirements.txt
+
+      - name: Generate tests
+        run: python agents/tasks/generate_tests.py
+        env:
+          # Modes: stub | auto | llm
+          TEST_WRITER_MODE: ${{ vars.TEST_WRITER_MODE }}
+
+          # Gemini (Google AI Studio)
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+
+      - name: Commit changes if any
+        id: commit
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore(tests): auto-generate missing test stubs"
+            # Ensure we push to the PR head branch explicitly
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment files created
+        if: steps.commit.outputs.changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('node:child_process');
+            const out = execSync('git diff --name-only HEAD~1..HEAD', { encoding: 'utf8' });
+            const files = out.split('\n').filter(Boolean).map(f => `- ${f}`).join('\n');
+            const body = [
+              '🧪 Test writer added files:',
+              '',
+              files || '(no files?)'
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+  fork:
+    name: Suggest tests as patch (fork-safe)
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && contains(github.event.pull_request.labels.*.name, 'ai-tests')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout fork PR head (no credentials)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test-writer deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r agents/requirements.txt
+
+      - name: Generate tests (no pushing)
+        run: python agents/tasks/generate_tests.py || true
+
+      - name: Build patch of new tests
+        id: patch
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add -N . >/dev/null 2>&1 || true
+            git diff --diff-filter=A > tests.patch || true
+            if [[ -s tests.patch ]]; then
+              echo "changes=true" >> $GITHUB_OUTPUT
+            else
+              echo "changes=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload patch artifact
+        if: steps.patch.outputs.changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-tests-patch
+          path: tests.patch
+          if-no-files-found: ignore
+
+      - name: Comment with instructions
+        if: steps.patch.outputs.changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require('node:child_process');
+            const created = execSync('git diff --name-only --diff-filter=A', { encoding: 'utf8' })
+              .split('\n').filter(Boolean).map(f => `- ${f}`).join('\n');
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              '🧪 Test writer generated a patch with new test stubs.',
+              '',
+              'Files:',
+              created || '(no files?)',
+              '',
+              '**Apply locally:**',
+              '```bash',
+              'curl -L -o tests.patch "' + artifactUrl + '"  # Download artifact first from the run page',
+              'git apply tests.patch',
+              'git add -A && git commit -m "chore(tests): add auto-generated test stubs"',
+              'git push',
+              '```',
+              '',
+              'Find the patch in the workflow run artifacts named "auto-tests-patch".'
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });

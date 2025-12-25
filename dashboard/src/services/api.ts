@@ -1,12 +1,8 @@
-import axios from "axios";
 import { fetchAuthSession } from "@aws-amplify/auth";
-import { Device, ReadingsResponse } from "./types";
+import axios from "axios";
+import { resolveBaseApiUrl, setRuntimeConfig } from "../utils/runtimeConfig";
 import { Nullable, QueryParams } from "../utils/types";
-import {
-  resolveBaseApiUrl,
-  getRuntimeConfig,
-  setRuntimeConfig,
-} from "../utils/runtimeConfig";
+import { Device, ReadingsResponse } from "./types";
 
 async function apiRequest<T>(opts: {
   method?: "GET" | "POST" | "DELETE" | "PUT";
