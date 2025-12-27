@@ -61,7 +61,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Nullable<User>>(null);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [bootLoading, setBootLoading] = useState(true);
-  console.log("AppProvider render", ONE_DAY);
   // Initialize user
   useEffect(() => {
     (async () => {

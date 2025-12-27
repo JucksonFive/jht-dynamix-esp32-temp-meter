@@ -23,6 +23,22 @@ This folder hosts autonomous / semi-autonomous agents that iterate on project im
 | `AUTO_IMPLEMENT_GIT_REMOTE` | origin | Remote used for push. |
 | `RATE_LIMIT_DELAY_SECONDS` | 30 | Base delay for Gemini rate-limit retries. |
 
+### Test Writer (LLM) variables
+
+The GitHub workflow `.github/workflows/write-tests.yml` can optionally generate tests using an LLM.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `TEST_WRITER_MODE` | `stub` | `stub` creates smoke tests, `auto` tries LLM and falls back, `llm` requires LLM and fails otherwise. |
+| `GEMINI_API_KEY` | (none) | Gemini API key from Google AI Studio (secret). Required for `auto`/`llm`. |
+| `GEMINI_MODEL` | `gemini-pro-latest` | Gemini model name (repo variable). |
+
+Local run:
+
+```bash
+TEST_WRITER_MODE=auto GEMINI_API_KEY=... python agents/tasks/generate_tests.py
+```
+
 ## Auto-Implementation Safety
 
 Diffs are first validated (`patch --dry-run`). Only if validation passes do they apply. Git automation creates branch `ticket-<NNN>-<slug>` and commit message `ticket-<NNN>: auto-implement <slug>` truncated to 72 chars.

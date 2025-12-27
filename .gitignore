@@ -72,3 +72,4 @@ homepage/dist/rain.footer.h264.mp4
 homepage/dist/*
 board/webui-react/node_modules/*
 dashboard/env/.env
+dashboard/coverage/*

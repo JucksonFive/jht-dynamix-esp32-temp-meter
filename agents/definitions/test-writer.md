@@ -17,3 +17,8 @@ Outputs
 Notes
 - Backends use Node 22, ts-jest.
 - Frontend uses Vite + Vitest.
+
+How to run
+- Script: `python agents/tasks/generate_tests.py`
+- Modes: `TEST_WRITER_MODE=stub|auto|llm`
+- Gemini: set `GEMINI_API_KEY` (and optionally `GEMINI_MODEL`)
