@@ -92,12 +92,32 @@ def apply_coder_plan(
 
     repo_root = Path(__file__).resolve().parents[2]
     try:
-        proc = subprocess.run(cmd, cwd=repo_root, stdin=open(patch_file, "r"), text=True)
+        with open(patch_file, "r", encoding="utf-8") as patch_in:
+            proc = subprocess.run(cmd, cwd=repo_root, stdin=patch_in, text=True)
         success = proc.returncode == 0
         msg = _status_message(success, apply)
-    result = ExecutionResult(apply, success, proc.returncode, msg, len(blocks), len(combined), conflicts=potential_conflicts or None)
+        result = ExecutionResult(
+            apply,
+            success,
+            proc.returncode,
+            msg,
+            len(blocks),
+            len(combined),
+            conflicts=potential_conflicts or None,
+        )
         if success and apply:
-            _post_patch_actions(result, repo_root, plan_path, git_branch, base, pre_commit_commands, git_commit_message, git_push, remote, generate_pr_description)
+            _post_patch_actions(
+                result,
+                repo_root,
+                plan_path,
+                git_branch,
+                base,
+                pre_commit_commands,
+                git_commit_message,
+                git_push,
+                remote,
+                generate_pr_description,
+            )
         return result
     finally:
         try:

@@ -73,3 +73,5 @@ homepage/dist/*
 board/webui-react/node_modules/*
 dashboard/env/.env
 dashboard/coverage/*
+agents/tasks/coder_output/
+agents/.env

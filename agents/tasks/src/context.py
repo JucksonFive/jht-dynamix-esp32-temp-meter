@@ -80,15 +80,20 @@ def _collect_root_metadata(root: Path, max_bytes: int, current_total: int) -> tu
 
 def _iter_candidate_files(folder: Path) -> Iterable[Path]:
     for path in sorted(folder.rglob("*")):
-        if path.is_dir():
-            if any(part in EXCLUDED_DIR_PARTS for part in path.parts):
+        # On Windows some entries (notably in node_modules/.bin) can raise OSError
+        # during stat() calls triggered by is_dir()/is_file(). Avoid probing them.
+        if any(part in EXCLUDED_DIR_PARTS for part in path.parts):
+            continue
+
+        try:
+            if path.is_dir():
                 continue
+        except OSError:
+            # Skip unreadable/broken entries
             continue
         if path.suffix.lower() not in INCLUDED_SUFFIXES:
             continue
         if path.name in EXCLUDED_FILE_NAMES:
-            continue
-        if any(part in EXCLUDED_DIR_PARTS for part in path.parts):
             continue
         yield path
 

@@ -1,215 +1,95 @@
 ### Summary
 
-This change introduces automated visual regression testing for the dashboard using Playwright. It adds the necessary dependencies and configuration, an initial test case for the login page, a CI workflow, and documentation for developers.
+This change introduces Progressive Web App (PWA) capabilities to the dashboard. It adds a web app manifest and a minimal service worker, making the dashboard installable on users' desktops or mobile home screens for an app-like experience.
 
 ### Implementation Plan
 
-1.  Add the `@playwright/test` package to the `devDependencies` in `dashboard/package.json`.
-2.  Add a `test:visual` script to `dashboard/package.json` to execute the Playwright tests.
-3.  Create a new configuration file, `dashboard/playwright.config.ts`, to define the test environment and instruct Playwright to start the Vite dev server.
-4.  Create a new test file, `dashboard/tests/visual.spec.ts`, containing an initial test that captures a screenshot of the application's login page.
-5.  Update the root `.gitignore` file to exclude Playwright's generated test reports and temporary files.
-6.  Add a new GitHub Actions workflow at `.github/workflows/dashboard-visual-tests.yml` to automatically run these tests on pull requests modifying the `dashboard`.
-7.  Update `dashboard/README.md` to document the new visual testing workflow, including how to run tests locally and update baseline images.
+**Assumption:** The `dashboard` directory contains a standard Vite+React project structure, including an `index.html` at the root and a `src/main.tsx` as the main application entry point. The following changes are based on this assumption.
+
+1.  **Update Manifest:** Modify `dashboard/public/manifest.json` to replace the placeholder content with details specific to the JHT-Dynamix Temperature Dashboard.
+2.  **Create Service Worker:** Create a new, minimal service worker file at `dashboard/public/sw.js`. This file will be empty of logic for now, fulfilling the PWA requirement for an install prompt.
+3.  **Link Manifest:** Update `dashboard/index.html` to add a `<link>` tag for the manifest and a `<meta>` tag for the theme color in the document `<head>`.
+4.  **Register Service Worker:** Add JavaScript to `dashboard/src/main.tsx` to register the new service worker when the application loads.
 
 ### Code Changes
 
 ```diff
-diff --git a/.gitignore b/.gitignore
-index 952a23..0f438a 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -29,3 +29,9 @@
- *.js.map
- *.css.map
- *.d.ts.map
-+
-+# Playwright
-+/playwright-report/
-+/test-results/
-+
-+/dashboard/test-results/
+diff --git a/dashboard/index.html b/dashboard/index.html
+--- a/dashboard/index.html
++++ b/dashboard/index.html
+@@ -3,7 +3,9 @@
+   <head>
+     <meta charset="UTF-8" />
+     <link rel="icon" href="/favicon.ico" />
++    <link rel="manifest" href="/manifest.json" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <meta name="theme-color" content="#1f2937" />
+     <title>JHT-Dynamix Dashboard</title>
+   </head>
+   <body>
 
 ```
-
 ```diff
-diff --git a/.github/workflows/dashboard-visual-tests.yml b/.github/workflows/dashboard-visual-tests.yml
+diff --git a/dashboard/public/manifest.json b/dashboard/public/manifest.json
+index 752225f..6d37651 100644
+--- a/dashboard/public/manifest.json
++++ b/dashboard/public/manifest.json
+@@ -1,7 +1,7 @@
+ {
+-  "short_name": "React App",
+-  "name": "Create React App Sample",
++  "short_name": "Temp Meter",
++  "name": "JHT-Dynamix Temperature Dashboard",
+   "icons": [
+     {
+       "src": "favicon.ico",
+@@ -17,7 +17,7 @@
+   ],
+   "start_url": ".",
+   "display": "standalone",
+-  "theme_color": "#000000",
++  "theme_color": "#1f2937",
+   "background_color": "#ffffff"
+ }
+
+```
+```diff
+diff --git a/dashboard/public/sw.js b/dashboard/public/sw.js
 new file mode 100644
-index 000000..d6e4b8
+index 0000000..f69a194
 --- /dev/null
-+++ b/.github/workflows/dashboard-visual-tests.yml
-@@ -0,0 +1,38 @@
-+name: Dashboard - Visual Regression Tests
++++ b/dashboard/public/sw.js
+@@ -0,0 +1,3 @@
++// This is a minimal service worker to enable PWA installation.
++// Caching and offline support will be added in a future ticket.
 +
-+on:
-+  pull_request:
-+    paths:
-+      - "dashboard/**"
-+  merge_group:
-+
-+jobs:
-+  test:
-+    name: Run Visual Tests
-+    runs-on: ubuntu-latest
-+    defaults:
-+      run:
-+        working-directory: dashboard
-+
-+    steps:
-+      - name: Checkout repository
-+        uses: actions/checkout@v4
-+
-+      - name: Setup Node.js
-+        uses: actions/setup-node@v4
-+        with:
-+          node-version: "20"
-+          cache: "npm"
-+          cache-dependency-path: dashboard/package-lock.json
-+
-+      - name: Install dependencies
-+        run: npm ci
-+
-+      - name: Install Playwright Browsers
-+        run: npx playwright install --with-deps
-+
-+      - name: Run Playwright tests
-+        run: npm run test:visual
-+
-+      - name: Upload report on failure
-+        if: failure()
-+        uses: actions/upload-artifact@v4
-+        with:
-+          name: playwright-report
-+          path: dashboard/playwright-report/
-+          retention-days: 30
 
 ```
-
 ```diff
-diff --git a/dashboard/README.md b/dashboard/README.md
-index a616c6..d442a8 100644
---- a/dashboard/README.md
-+++ b/dashboard/README.md
-@@ -42,6 +42,21 @@
- -   `npm run build`: Builds the app for production.
- -   `npm run preview`: Serves the production build locally.
- -   `npm run test`: Runs the test suite.
-+-   `npm run test:visual`: Runs visual regression tests using Playwright.
-+
-+## Visual Regression Testing
-+
-+This project uses Playwright to catch unintended UI changes. It works by comparing screenshots of components against baseline images committed to the repository.
-+
-+### Running Tests Locally
-+
-+To run the visual tests, use the following command:
-+```bash
-+npm run test:visual
-+```
-+If there are visual differences, the test will fail, and a report will be generated in `playwright-report/`.
-+
-+### Updating Baseline Screenshots
-+
-+If you've made an intentional UI change, you need to update the baseline screenshots. Run the following command, review the changes, and commit the new screenshot files:
-+```bash
-+npm run test:visual -- --update-snapshots
-+```
+diff --git a/dashboard/src/main.tsx b/dashboard/src/main.tsx
+--- a/dashboard/src/main.tsx
++++ b/dashboard/src/main.tsx
+@@ -3,6 +3,19 @@
+ import App from "./App";
+ import "./index.css";
  
- ## Technologies Used
- 
-
-```
-
-```diff
-diff --git a/dashboard/package.json b/dashboard/package.json
-index 3855ff..655e94 100644
---- a/dashboard/package.json
-+++ b/dashboard/package.json
-@@ -28,7 +28,8 @@
-     "build": "vite build",
-     "preview": "vite preview",
-     "lint": "eslint --ext .ts,.tsx src",
--    "test": "vitest run --coverage",
-+    "test": "vitest run",
-+    "test:visual": "playwright test",
-     "test:watch": "vitest"
-   },
-   "eslintConfig": {
-@@ -49,6 +50,7 @@
-   "devDependencies": {
-     "@tailwindcss/forms": "^0.5.10",
-     "@types/babel__core": "^7.20.5",
-+    "@playwright/test": "^1.45.3",
-     "@types/node": "^24.0.15",
-     "@vitejs/plugin-react": "^5.0.2",
-     "@vitest/ui": "^3.2.4",
-
-```
-
-```diff
-diff --git a/dashboard/playwright.config.ts b/dashboard/playwright.config.ts
-new file mode 100644
-index 000000..f6b614
---- /dev/null
-+++ b/dashboard/playwright.config.ts
-@@ -0,0 +1,38 @@
-+import { defineConfig, devices } from "@playwright/test";
-+
-+/**
-+ * See https://playwright.dev/docs/test-configuration.
-+ */
-+export default defineConfig({
-+  testDir: "./tests",
-+  /* Run tests in files in parallel */
-+  fullyParallel: true,
-+  /* Fail the build on CI if you accidentally left test.only in the source code. */
-+  forbidOnly: !!process.env.CI,
-+  /* Retry on CI only */
-+  retries: process.env.CI ? 2 : 0,
-+  /* Opt out of parallel tests on CI. */
-+  workers: process.env.CI ? 1 : undefined,
-+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-+  reporter: "html",
-+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-+  use: {
-+    /* Base URL to use in actions like `await page.goto('/')`. */
-+    baseURL: "http://localhost:5173",
-+
-+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-+    trace: "on-first-retry",
-+  },
-+
-+  projects: [
-+    {
-+      name: "chromium",
-+      use: { ...devices["Desktop Chrome"] },
-+    },
-+  ],
-+
-+  webServer: {
-+    command: "npm run dev",
-+    url: "http://localhost:5173",
-+    reuseExistingServer: !process.env.CI,
-+  },
-+});
-
-```
-
-```diff
-diff --git a/dashboard/tests/visual.spec.ts b/dashboard/tests/visual.spec.ts
-new file mode 100644
-index 000000..4ba2c8
---- /dev/null
-+++ b/dashboard/tests/visual.spec.ts
-@@ -0,0 +1,8 @@
-+import { test, expect } from "@playwright/test";
-+
-+test.describe("Visual Regression: Pages", () => {
-+  test("Login page matches baseline", async ({ page }) => {
-+    await page.goto("/");
-+    await expect(page).toHaveScreenshot("login-page.png");
++// Register the service worker for PWA functionality.
++if ("serviceWorker" in navigator) {
++  window.addEventListener("load", () => {
++    navigator.serviceWorker
++      .register("/sw.js")
++      .then((registration) => {
++        console.log("Service Worker registered: ", registration);
++      })
++      .catch((registrationError) => {
++        console.log("Service Worker registration failed: ", registrationError);
++      });
 +  });
-+});
++}
++
+ ReactDOM.createRoot(document.getElementById("root")!).render(
+   <React.StrictMode>
+     <App />
 
 ```
 
@@ -217,23 +97,25 @@ index 000000..4ba2c8
 
 #### Automated Tests
 
--   The new GitHub Actions workflow in `.github/workflows/dashboard-visual-tests.yml` will run on every pull request that modifies files under the `dashboard/` directory.
--   It executes `npm run test:visual` and will fail if any pixel differences are detected between the new screenshots and the committed baseline images.
--   On failure, the workflow will upload the `playwright-report` directory as an artifact, allowing developers to view the diff images.
+No automated tests are added in this change. Existing tests should continue to pass.
 
-#### Manual Verification Steps
+#### Manual Tests
 
-1.  After pulling the changes, navigate to the `dashboard` directory and run `npm install` to install Playwright.
-2.  Generate the initial baseline screenshot by running:
-    ```bash
-    npm run test:visual -- --update-snapshots
-    ```
-3.  Verify that a new snapshot file is created at `dashboard/tests/visual.spec.ts-snapshots/login-page-chromium.png`. Commit this new file.
-4.  Run the tests again to confirm they pass:
-    ```bash
-    npm run test:visual
-    ```
-5.  Introduce a small, temporary visual change to a component visible on the login page (e.g., change a button's background color).
-6.  Run `npm run test:visual` again. The test should fail, and a report will be available in `dashboard/playwright-report/index.html`. Open this file in a browser to see the visual diff.
-7.  To accept the intentional change, run `npm run test:visual -- --update-snapshots` again. This will update the baseline image.
-8.  Commit the updated snapshot and revert the temporary code change to complete the validation.
+1.  **Build and serve the dashboard:** Run `npm run build` and then `npm run preview` inside the `dashboard` directory.
+2.  **Verify PWA readiness:**
+    *   Open the dashboard in a compatible browser (e.g., Chrome).
+    *   Open Developer Tools and navigate to the **Lighthouse** tab.
+    *   Run a PWA audit and confirm that the "Installable" check passes.
+3.  **Verify Manifest and Service Worker:**
+    *   In Developer Tools, navigate to the **Application** tab.
+    *   Under **Manifest**, check that the details from `manifest.json` are loaded correctly (e.g., name, colors, icons).
+    *   Under **Service Workers**, confirm that `sw.js` is registered and activated.
+4.  **Test Installation:**
+    *   An "Install" icon should appear in the browser's address bar. Click it and complete the installation prompt.
+    *   Verify a new application icon appears on your desktop or mobile home screen.
+5.  **Test Standalone Launch:**
+    *   Close the browser tab.
+    *   Launch the dashboard using the newly created home screen icon.
+    *   Confirm that the application opens in its own standalone window, without browser UI elements like the address bar.
+6.  **Regression Check:**
+    *   Briefly navigate through the installed application (e.g., log in, view charts) to ensure all existing functionality remains intact.
