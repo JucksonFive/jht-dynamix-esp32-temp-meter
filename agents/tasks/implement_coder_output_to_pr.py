@@ -275,6 +275,50 @@ def _resolve_plan_paths(args: argparse.Namespace) -> list[Path]:
     return []
 
 
+def _apply_plan_with_git(args: argparse.Namespace, *, plan_path: Path, branch: str, commit_msg: str):
+    try:
+        return apply_coder_plan(
+            plan_path,
+            apply=True,
+            git_branch=branch,
+            git_commit_message=commit_msg,
+            git_push=True,
+            remote=args.remote,
+            base=args.base,
+            pre_commit_commands=None,
+            generate_pr_description=True,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"[APPLY][ERROR] {exc}")
+        return None
+
+
+def _dry_run_plan(plan_path: Path):
+    dry = apply_coder_plan(plan_path, apply=False)
+    print(f"[DRY] success={dry.success} msg='{dry.message}' blocks={dry.diff_blocks}")
+    return dry
+
+
+def _maybe_create_pr(
+    gh_cfg: GitHubConfig | None,
+    *,
+    plan_path: Path,
+    branch: str,
+    pr_description_path: Path | None,
+) -> tuple[bool, str | None]:
+    if gh_cfg is None:
+        return True, None
+    title = _derive_pr_title(plan_path)
+    body = _load_pr_body_from_executor_result(pr_description_path, plan_path)
+    try:
+        pr_url = _create_pr(gh_cfg, branch, title, body)
+        print(f"[PR] {pr_url}")
+        return True, pr_url
+    except Exception as exc:  # noqa: BLE001
+        print(f"[PR][ERROR] {exc}")
+        return False, None
+
+
 def main() -> int:
     args = _parse_args()
 
@@ -302,24 +346,16 @@ def main() -> int:
         print(f"[GIT] branch={branch}")
 
         # 1) Dry-run validation
-        dry = apply_coder_plan(plan_path, apply=False)
-        print(f"[DRY] success={dry.success} msg='{dry.message}' blocks={dry.diff_blocks}")
+        dry = _dry_run_plan(plan_path)
         if not dry.success:
             overall_ok = False
             continue
 
         # 2) Apply + branch + commit + push
-        applied = apply_coder_plan(
-            plan_path,
-            apply=True,
-            git_branch=branch,
-            git_commit_message=commit_msg,
-            git_push=True,
-            remote=args.remote,
-            base=args.base,
-            pre_commit_commands=None,
-            generate_pr_description=True,
-        )
+        applied = _apply_plan_with_git(args, plan_path=plan_path, branch=branch, commit_msg=commit_msg)
+        if applied is None:
+            overall_ok = False
+            continue
         print(
             f"[APPLY] success={applied.success} committed={applied.committed} pushed={applied.pushed} pr_desc={applied.pr_description_path}"
         )
@@ -328,15 +364,14 @@ def main() -> int:
             continue
 
         # 3) PR creation
-        if gh_cfg is not None:
-            title = _derive_pr_title(plan_path)
-            body = _load_pr_body_from_executor_result(applied.pr_description_path, plan_path)
-            try:
-                pr_url = _create_pr(gh_cfg, branch, title, body)
-                print(f"[PR] {pr_url}")
-            except Exception as exc:  # noqa: BLE001
-                overall_ok = False
-                print(f"[PR][ERROR] {exc}")
+        ok, _ = _maybe_create_pr(
+            gh_cfg,
+            plan_path=plan_path,
+            branch=branch,
+            pr_description_path=applied.pr_description_path,
+        )
+        if not ok:
+            overall_ok = False
 
     return 0 if overall_ok else 1
 

@@ -294,11 +294,24 @@ def _git_is_dirty(repo: Path) -> bool:
     return bool(res.stdout.strip())
 
 
+def _git_dirty_summary(repo: Path) -> str:
+    res = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return res.stdout.strip()
+
+
 def _git_prepare_branch(repo: Path, branch: str, base: str) -> None:
     if _git_is_dirty(repo):
+        summary = _git_dirty_summary(repo)
         raise RuntimeError(
             "Working tree is not clean; refusing to switch branches. "
-            "Commit/stash your changes and re-run the automation."
+            "Commit/stash your changes and re-run the automation. "
+            + (f"Dirty files:\n{summary}" if summary else "")
         )
     subprocess.run(["git", "fetch"], cwd=repo, text=True)
     existing = subprocess.run(["git", "rev-parse", "--verify", branch], cwd=repo, text=True)
