@@ -67,6 +67,12 @@ agents/tasks/.env
 agents/tasks/tickets/*
 agents/tasks/coder_output/*
 agents/tasks/src/__pycache__/*
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 agents/tasks/coder_output/
 homepage/dist/rain.footer.h264.mp4
 homepage/dist/*
