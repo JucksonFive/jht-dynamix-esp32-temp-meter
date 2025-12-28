@@ -16,6 +16,7 @@ DEFAULT_RATE_LIMIT_DELAY = int(os.getenv("RATE_LIMIT_DELAY_SECONDS", "30"))
 ENABLE_CODER_AGENT = os.getenv("ENABLE_CODER_AGENT", "1").lower() not in {"0", "false"}
 ENABLE_AUTO_IMPLEMENT = os.getenv("ENABLE_AUTO_IMPLEMENT", "0").lower() not in {"0", "false"}
 ENABLE_AUTO_IMPLEMENT_GIT = os.getenv("ENABLE_AUTO_IMPLEMENT_GIT", "0").lower() not in {"0", "false"}
+ENABLE_AUTO_STASH = os.getenv("ENABLE_AUTO_STASH", "0").lower() not in {"0", "false"}
 AUTO_IMPLEMENT_GIT_REMOTE = os.getenv("AUTO_IMPLEMENT_GIT_REMOTE", "origin")
 AUTO_IMPLEMENT_GIT_BASE = os.getenv("AUTO_IMPLEMENT_GIT_BASE", "main")
 ENABLE_PRE_COMMIT_CHECKS = os.getenv("ENABLE_PRE_COMMIT_CHECKS", "0").lower() not in {"0", "false"}
@@ -88,7 +89,7 @@ coder_model = genai.GenerativeModel(
 )
 
 log(
-    f"[INIT] AUTO_IMPLEMENT={'ON' if ENABLE_AUTO_IMPLEMENT else 'OFF'} | GIT_AUTO={'ON' if ENABLE_AUTO_IMPLEMENT_GIT else 'OFF'} | PRE_COMMIT={'ON' if ENABLE_PRE_COMMIT_CHECKS else 'OFF'} | PR_DESC={'ON' if ENABLE_PR_DESCRIPTION_GENERATION else 'OFF'}"
+    f"[INIT] AUTO_IMPLEMENT={'ON' if ENABLE_AUTO_IMPLEMENT else 'OFF'} | GIT_AUTO={'ON' if ENABLE_AUTO_IMPLEMENT_GIT else 'OFF'} | AUTO_STASH={'ON' if ENABLE_AUTO_STASH else 'OFF'} | PRE_COMMIT={'ON' if ENABLE_PRE_COMMIT_CHECKS else 'OFF'} | PR_DESC={'ON' if ENABLE_PR_DESCRIPTION_GENERATION else 'OFF'}"
 )
 
 log("[INIT] Configuration and models ready.")

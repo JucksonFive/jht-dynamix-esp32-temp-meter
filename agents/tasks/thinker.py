@@ -20,6 +20,7 @@ from src.config import (
     ENABLE_CODER_AGENT,
     ENABLE_AUTO_IMPLEMENT,
     ENABLE_AUTO_IMPLEMENT_GIT,
+    ENABLE_AUTO_STASH,
     AUTO_IMPLEMENT_GIT_REMOTE,
     AUTO_IMPLEMENT_GIT_BASE,
     ENABLE_PRE_COMMIT_CHECKS,
@@ -163,7 +164,7 @@ def _accept_ticket(
 
 def _auto_implement_ticket(new_index: int, ticket_path: Path, coder_path: Path) -> None:
     log(f"[EXEC] Dry-run validation for ticket #{new_index}…")
-    result = apply_coder_plan(coder_path, apply=False)
+    result = apply_coder_plan(coder_path, apply=False, auto_stash=ENABLE_AUTO_STASH)
     log(
         f"[EXEC] Dry-run: success={result.success} blocks={result.diff_blocks} patch_len={result.patch_length} msg='{result.message}'"
     )
@@ -188,6 +189,7 @@ def _auto_implement_ticket(new_index: int, ticket_path: Path, coder_path: Path) 
         base=AUTO_IMPLEMENT_GIT_BASE,
         pre_commit_commands=PRE_COMMIT_COMMANDS if ENABLE_PRE_COMMIT_CHECKS else None,
         generate_pr_description=ENABLE_PR_DESCRIPTION_GENERATION,
+        auto_stash=ENABLE_AUTO_STASH,
     )
     log(
         f"[EXEC] Apply: success={apply_result.success} exit={apply_result.exit_code} msg='{apply_result.message}' branch={apply_result.branch} committed={apply_result.committed} pushed={apply_result.pushed} pre_commit_passed={apply_result.pre_commit_passed} pr_desc={apply_result.pr_description_path}"
