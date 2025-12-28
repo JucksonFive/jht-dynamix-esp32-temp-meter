@@ -56,7 +56,8 @@ def ensure_patch_available() -> None:
 def run_patch(patch_text: str, apply: bool) -> int:
     """Run patch in dry-run or apply mode. Returns patch command exit code."""
     ensure_patch_available()
-    mode_args = ["patch", "-p1"]
+    # --batch prevents interactive prompts like "File to patch:" which would hang automation.
+    mode_args = ["patch", "-p1", "--batch"]
     if not apply:
         mode_args.append("--dry-run")
     # Use a temp file for robust stdin handling (some patch versions behave differently on piped input)

@@ -149,6 +149,10 @@ def _apply_edit_operations(
                 break
             occurrences = content.count(op.search)
             if occurrences == 0:
+                # Idempotency: if the replacement content is already present, treat as already applied.
+                # This allows safe re-runs when a plan was partially or fully applied previously.
+                if op.replace and op.replace in content:
+                    continue
                 errors.append(f"{rel_path}: SEARCH block not found")
                 break
             if occurrences > 1:
@@ -229,7 +233,8 @@ def apply_coder_plan(
         tf.write(combined)
         patch_file = tf.name
 
-    cmd = ["patch", "-p1"]
+    # --batch prevents interactive prompts like "File to patch:" which would hang automation.
+    cmd = ["patch", "-p1", "--batch"]
     if not apply:
         cmd.append("--dry-run")
 
@@ -397,7 +402,7 @@ def _detect_conflicts(diff_blocks: list[str]) -> list[str]:
         if not header:
             continue
         try:
-            _, _, a_path, b_path = header.split()
+            _, _, _, b_path = header.split()
         except ValueError:
             continue
         # Use b_path as target path
