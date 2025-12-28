@@ -72,6 +72,50 @@ def _require_env(name: str) -> str:
     return value
 
 
+def _derive_repo_from_origin() -> str | None:
+    try:
+        url = _git_capture("remote", "get-url", "origin", check=False)
+    except Exception:  # noqa: BLE001
+        return None
+    if not url:
+        return None
+
+    # Support common URL shapes:
+    # - https://github.com/owner/name.git
+    # - git@github.com:owner/name.git
+    url = url.strip()
+    if url.endswith(".git"):
+        url = url[: -len(".git")]
+
+    if url.startswith("https://github.com/"):
+        return url.removeprefix("https://github.com/")
+    if url.startswith("git@github.com:"):
+        return url.removeprefix("git@github.com:")
+    return None
+
+
+def _require_github_token() -> str:
+    # Common aliases (GitHub Actions / gh CLI conventions)
+    token = _env("GITHUB_TOKEN") or _env("GH_TOKEN")
+    if not token:
+        print("Missing env: GITHUB_TOKEN (or GH_TOKEN)", file=sys.stderr)
+        sys.exit(2)
+    return token
+
+
+def _load_github_config(args: argparse.Namespace) -> GitHubConfig | None:
+    if args.no_pr:
+        return None
+
+    token = _require_github_token()
+    repo = _env("REPO") or _derive_repo_from_origin()
+    if not repo:
+        print("Missing env: REPO (owner/name). Could not derive it from git origin.", file=sys.stderr)
+        sys.exit(2)
+
+    return GitHubConfig(token=token, repo=repo, base=args.pr_base)
+
+
 def _git(*args: str, check: bool = True) -> subprocess.CompletedProcess:
     return subprocess.run(["git", *args], cwd=REPO_ROOT, text=True, check=check, capture_output=False)
 
@@ -239,11 +283,7 @@ def main() -> int:
         print("No plan files found.")
         return 1
 
-    gh_cfg: GitHubConfig | None = None
-    if not args.no_pr:
-        token = _require_env("GITHUB_TOKEN")
-        repo = _require_env("REPO")
-        gh_cfg = GitHubConfig(token=token, repo=repo, base=args.pr_base)
+    gh_cfg = _load_github_config(args)
 
     _ensure_git_identity()
 

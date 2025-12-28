@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import List
 
+import os
 import subprocess
 import sys
 
@@ -35,6 +36,40 @@ from src.context import collect_project_context
 from src.file_utils import save_coder_output, save_ticket_to_file
 from src.executor import apply_coder_plan
 from src.history import load_previous_ideas
+
+
+def _log_auto_implement_guidance(coder_outputs: List[Path]) -> None:
+    if not coder_outputs:
+        return
+
+    if not ENABLE_AUTO_IMPLEMENT:
+        log(
+            "[NEXT] Auto-implementation is OFF, so no code is applied and no PR will be created. "
+            "To auto-implement + open a PR, set: ENABLE_AUTO_IMPLEMENT=1, ENABLE_AUTO_IMPLEMENT_GIT=1, ENABLE_AUTO_PR=1."
+        )
+        log("[NEXT] PR creation also requires env: REPO=<owner/name> and GITHUB_TOKEN=<token with repo scope>.")
+        sample_plan = coder_outputs[0]
+        log(
+            "[NEXT] Or run manually: python agents/tasks/implement_coder_output_to_pr.py "
+            f"--plan {sample_plan}"
+        )
+        return
+
+    if ENABLE_AUTO_IMPLEMENT and not ENABLE_AUTO_IMPLEMENT_GIT:
+        log(
+            "[NEXT] Auto-implementation is ON but git automation is OFF; changes may be applied locally without a branch/push/PR. "
+            "Enable git automation with ENABLE_AUTO_IMPLEMENT_GIT=1."
+        )
+        return
+
+    if ENABLE_AUTO_PR:
+        missing = [name for name in ("REPO", "GITHUB_TOKEN") if not os.environ.get(name)]
+        if missing:
+            log(
+                "[NEXT] ENABLE_AUTO_PR=1 but required env is missing: "
+                + ", ".join(missing)
+                + ". PR creation will fail until these are set."
+            )
 
 
 def _run_implement_coder_output_to_pr(plan_paths: List[Path] | None = None) -> int:
@@ -137,6 +172,7 @@ def run_round() -> int:
         log("[CODER] Generated implementation plans:")
         for path in coder_outputs:
             log(f"  - {path}")
+        _log_auto_implement_guidance(coder_outputs)
     elif ENABLE_CODER_AGENT:
         log("[CODER] No coder outputs produced in this round.")
 
