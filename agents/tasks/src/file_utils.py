@@ -25,10 +25,10 @@ def _extract_title(content: str) -> str:
 def _slugify(value: str) -> str:
     sanitized = "".join(char for char in value if char.isalnum() or char in {" ", "-", "_"})
     return sanitized.strip().replace(" ", "-").lower()[:50] or "ticket"
-
-
-def save_coder_output(ticket_number: int, content: str) -> Path:
-    filename = f"{ticket_number:03d}-coder-plan.md"
+def save_coder_output(ticket_number: int, content: str, ticket_content: str = "") -> Path:
+    title_line = _extract_title(ticket_content) if ticket_content else ""
+    safe_title = _slugify(title_line) if title_line else "coder-plan"
+    filename = f"{ticket_number:03d}-{safe_title}-coder-plan.md"
     output_path = CODER_OUTPUT_DIR / filename
     output_path.write_text(content, encoding="utf-8")
     return output_path

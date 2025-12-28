@@ -150,7 +150,7 @@ def _accept_ticket(
 
     if ENABLE_CODER_AGENT:
         coder_markdown = propose_code_changes(ticket_markdown, project_context)
-        coder_path = save_coder_output(new_index, coder_markdown)
+        coder_path = save_coder_output(new_index, coder_markdown, ticket_markdown)
         coder_outputs.append(coder_path)
         log(f"[CODER] Implementation plan saved to {coder_path.name}")
 
