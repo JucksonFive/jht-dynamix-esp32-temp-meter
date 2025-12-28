@@ -253,18 +253,24 @@ def apply_coder_plan(
             conflicts=potential_conflicts or None,
         )
         if success and apply:
-            _post_patch_actions(
-                result,
-                repo_root,
-                plan_path,
-                git_branch,
-                base,
-                pre_commit_commands,
-                git_commit_message,
-                git_push,
-                remote,
-                generate_pr_description,
-            )
+            try:
+                _post_patch_actions(
+                    result,
+                    repo_root,
+                    plan_path,
+                    git_branch,
+                    base,
+                    pre_commit_commands,
+                    git_commit_message,
+                    git_push,
+                    remote,
+                    generate_pr_description,
+                )
+            except Exception as exc:  # noqa: BLE001
+                # Fail-soft: do not crash the whole run, surface the reason to the caller.
+                result.success = False
+                result.exit_code = 1
+                result.message = f"{result.message} | git automation failed: {exc}"
         return result
     finally:
         try:
@@ -277,7 +283,23 @@ def _git_run(repo: Path, *args: str, check: bool = True) -> subprocess.Completed
     return subprocess.run(["git", *args], cwd=repo, text=True, check=check)
 
 
+def _git_is_dirty(repo: Path) -> bool:
+    res = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return bool(res.stdout.strip())
+
+
 def _git_prepare_branch(repo: Path, branch: str, base: str) -> None:
+    if _git_is_dirty(repo):
+        raise RuntimeError(
+            "Working tree is not clean; refusing to switch branches. "
+            "Commit/stash your changes and re-run the automation."
+        )
     subprocess.run(["git", "fetch"], cwd=repo, text=True)
     existing = subprocess.run(["git", "rev-parse", "--verify", branch], cwd=repo, text=True)
     if existing.returncode == 0:
