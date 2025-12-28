@@ -65,13 +65,13 @@ dashboard/src/.App.tsx.swp
 agents/tasks/venv/*
 agents/tasks/.env
 agents/tasks/tickets/*
-agents/tasks/coder_output/*
-agents/tasks/src/__pycache__/*
 agents/tasks/coder_output/
+agents/tasks/src/__pycache__/*
+agents/tasks/tests/__pycache__/*
 homepage/dist/rain.footer.h264.mp4
 homepage/dist/*
 board/webui-react/node_modules/*
 dashboard/env/.env
 dashboard/coverage/*
-agents/tasks/coder_output/
 agents/.env
+agents/tasks/__pycache__/*

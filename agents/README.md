@@ -9,6 +9,7 @@ This folder hosts autonomous / semi-autonomous agents that iterate on project im
 3. Ticket is created and saved under `agents/tasks/tickets/`.
 4. Coder produces an implementation plan + diffs (stored under `agents/tasks/coder_output/`).
 5. (Optional) Auto-implementation applies diffs and (optionally) creates a git branch & commit.
+6. (Optional) Implementer can open a PR from existing `coder_output` plan(s).
 
 ## Environment Variables
 
@@ -21,6 +22,10 @@ This folder hosts autonomous / semi-autonomous agents that iterate on project im
 | `ENABLE_AUTO_IMPLEMENT_GIT` | 0 | Also create branch, commit, push. |
 | `AUTO_IMPLEMENT_GIT_BASE` | main | Base branch for new feature branches. |
 | `AUTO_IMPLEMENT_GIT_REMOTE` | origin | Remote used for push. |
+| `ENABLE_AUTO_PR` | 0 | After push, open (or reuse) a PR for the new branch. |
+| `GITHUB_TOKEN` | (none) | Token for PR creation (used by implementer task). |
+| `REPO` | (none) | Repo in `owner/name` format (used by implementer task). |
+| `PR_BASE` | main | Base branch for PRs (used by implementer task). |
 | `RATE_LIMIT_DELAY_SECONDS` | 30 | Base delay for Gemini rate-limit retries. |
 
 ### Test Writer (LLM) variables
@@ -57,6 +62,21 @@ Planned future enhancements:
 export ENABLE_AUTO_IMPLEMENT=1
 export ENABLE_AUTO_IMPLEMENT_GIT=1
 python agents/tasks/thinker.py
+```
+
+## Implement coder_output → branch → PR
+
+This task consumes existing coder plans under `agents/tasks/coder_output/` and does:
+dry-run → apply → branch+commit+push → open PR.
+
+```bash
+# Single plan
+GITHUB_TOKEN=... REPO=Hizaguru/jht-dynamix-esp32-temp-meter \
+python agents/tasks/implement_coder_output_to_pr.py --plan agents/tasks/coder_output/001-...-coder-plan.md
+
+# All plans
+GITHUB_TOKEN=... REPO=Hizaguru/jht-dynamix-esp32-temp-meter \
+python agents/tasks/implement_coder_output_to_pr.py --all
 ```
 
 ## Manual Patch Application

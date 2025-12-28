@@ -20,8 +20,10 @@ from src.config import (
     ENABLE_CODER_AGENT,
     ENABLE_AUTO_IMPLEMENT,
     ENABLE_AUTO_IMPLEMENT_GIT,
+    ENABLE_AUTO_PR,
     AUTO_IMPLEMENT_GIT_REMOTE,
     AUTO_IMPLEMENT_GIT_BASE,
+    PR_BASE,
     ENABLE_PRE_COMMIT_CHECKS,
     ENABLE_PR_DESCRIPTION_GENERATION,
     PRE_COMMIT_COMMANDS,
@@ -30,6 +32,7 @@ from src.config import (
     PROJECT_ROOT,
     log,
 )
+from src.github_pr import GitHubClient, create_or_get_pr
 from src.context import collect_project_context
 from src.file_utils import save_coder_output, save_ticket_to_file
 from src.executor import apply_coder_plan
@@ -192,6 +195,39 @@ def _auto_implement_ticket(new_index: int, ticket_path: Path, coder_path: Path) 
     log(
         f"[EXEC] Apply: success={apply_result.success} exit={apply_result.exit_code} msg='{apply_result.message}' branch={apply_result.branch} committed={apply_result.committed} pushed={apply_result.pushed} pre_commit_passed={apply_result.pre_commit_passed} pr_desc={apply_result.pr_description_path}"
     )
+
+    if (
+        ENABLE_AUTO_PR
+        and ENABLE_AUTO_IMPLEMENT_GIT
+        and apply_result.success
+        and apply_result.pushed
+        and apply_result.branch
+    ):
+        import os
+
+        token = os.getenv("GITHUB_TOKEN")
+        repo = os.getenv("REPO")
+        if not token or not repo:
+            log("[EXEC][PR] Skipping PR creation (missing GITHUB_TOKEN or REPO env)")
+            return
+
+        pr_title = commit_msg or f"ticket-{new_index:03d}: auto-implement"
+        pr_body = "Automated implementation applied from coder plan."
+        if apply_result.pr_description_path and apply_result.pr_description_path.is_file():
+            pr_body = apply_result.pr_description_path.read_text(encoding="utf-8")
+
+        try:
+            client = GitHubClient(token=token, repo=repo)
+            pr_url = create_or_get_pr(
+                client,
+                head_branch=apply_result.branch,
+                base=PR_BASE,
+                title=pr_title,
+                body=pr_body,
+            )
+            log(f"[EXEC][PR] {pr_url}")
+        except Exception as exc:  # noqa: BLE001
+            log(f"[EXEC][PR][ERROR] {exc}")
 
 
 if __name__ == "__main__":
