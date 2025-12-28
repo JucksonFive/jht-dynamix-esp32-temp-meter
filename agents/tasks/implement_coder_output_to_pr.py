@@ -259,6 +259,11 @@ def _parse_args() -> argparse.Namespace:
     g.add_argument("--all", action="store_true", help="Process all plans under agents/tasks/coder_output")
 
     p.add_argument("--no-pr", action="store_true", help="Do not create a PR (still branches/commits/pushes).")
+    p.add_argument(
+        "--auto-stash",
+        action="store_true",
+        help="Auto-stash local changes before switching branches, then try to restore them afterwards.",
+    )
     p.add_argument("--remote", default=_env("AUTO_IMPLEMENT_GIT_REMOTE", "origin"), help="Git remote name")
     p.add_argument("--base", default=_env("AUTO_IMPLEMENT_GIT_BASE", "main"), help="Git base branch")
     p.add_argument("--pr-base", default=_env("PR_BASE", "main"), help="PR base branch")
@@ -277,6 +282,9 @@ def _resolve_plan_paths(args: argparse.Namespace) -> list[Path]:
 
 def _apply_plan_with_git(args: argparse.Namespace, *, plan_path: Path, branch: str, commit_msg: str):
     try:
+        extra: dict[str, object] = {}
+        if getattr(args, "auto_stash", False):
+            extra["auto_stash"] = True
         return apply_coder_plan(
             plan_path,
             apply=True,
@@ -287,6 +295,7 @@ def _apply_plan_with_git(args: argparse.Namespace, *, plan_path: Path, branch: s
             base=args.base,
             pre_commit_commands=None,
             generate_pr_description=True,
+            **extra,
         )
     except Exception as exc:  # noqa: BLE001
         print(f"[APPLY][ERROR] {exc}")

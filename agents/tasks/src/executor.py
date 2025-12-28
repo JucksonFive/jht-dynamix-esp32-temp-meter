@@ -46,6 +46,8 @@ class ExecutionResult:
     conflicts: list[str] | None = None
     pre_commit_passed: bool | None = None
     pr_description_path: Path | None = None
+    stashed: bool = False
+    stash_restored: bool | None = None
 
 
 def extract_diff_blocks(markdown: str) -> list[str]:
@@ -176,6 +178,7 @@ def apply_coder_plan(
     base: str = "main",
     pre_commit_commands: list[list[str]] | None = None,
     generate_pr_description: bool = False,
+    auto_stash: bool = False,
 ) -> ExecutionResult:
     if not plan_path.is_file():
         return ExecutionResult(apply, False, 1, f"Plan file not found: {plan_path}", 0, 0)
@@ -220,6 +223,7 @@ def apply_coder_plan(
                 git_push,
                 remote,
                 generate_pr_description,
+                auto_stash,
             )
         return result
 
@@ -265,6 +269,7 @@ def apply_coder_plan(
                     git_push,
                     remote,
                     generate_pr_description,
+                    auto_stash,
                 )
             except Exception as exc:  # noqa: BLE001
                 # Fail-soft: do not crash the whole run, surface the reason to the caller.
@@ -305,14 +310,57 @@ def _git_dirty_summary(repo: Path) -> str:
     return res.stdout.strip()
 
 
-def _git_prepare_branch(repo: Path, branch: str, base: str) -> None:
+def _git_stash_push(repo: Path, *, message: str) -> bool:
+    res = subprocess.run(
+        ["git", "stash", "push", "-u", "-m", message],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return res.returncode == 0
+
+
+def _git_stash_pop(repo: Path) -> bool:
+    res = subprocess.run(
+        ["git", "stash", "pop"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return res.returncode == 0
+
+
+def _git_prepare_branch(repo: Path, branch: str, base: str, *, auto_stash: bool) -> bool:
+    """Prepare (checkout/create) branch.
+
+    Returns True if changes were auto-stashed.
+    """
+    stashed = False
     if _git_is_dirty(repo):
-        summary = _git_dirty_summary(repo)
-        raise RuntimeError(
-            "Working tree is not clean; refusing to switch branches. "
-            "Commit/stash your changes and re-run the automation. "
-            + (f"Dirty files:\n{summary}" if summary else "")
-        )
+        if not auto_stash:
+            summary = _git_dirty_summary(repo)
+            raise RuntimeError(
+                "Working tree is not clean; refusing to switch branches. "
+                "Commit/stash your changes and re-run the automation. "
+                + (f"Dirty files:\n{summary}" if summary else "")
+            )
+
+        ok = _git_stash_push(repo, message=f"agents-auto-stash before {branch}")
+        if not ok:
+            summary = _git_dirty_summary(repo)
+            raise RuntimeError(
+                "Auto-stash failed; refusing to switch branches. " + (f"Dirty files:\n{summary}" if summary else "")
+            )
+        if _git_is_dirty(repo):
+            summary = _git_dirty_summary(repo)
+            raise RuntimeError(
+                "Auto-stash completed but working tree is still dirty; refusing to switch branches. "
+                + (f"Dirty files:\n{summary}" if summary else "")
+            )
+        stashed = True
+
     subprocess.run(["git", "fetch"], cwd=repo, text=True)
     existing = subprocess.run(["git", "rev-parse", "--verify", branch], cwd=repo, text=True)
     if existing.returncode == 0:
@@ -320,6 +368,8 @@ def _git_prepare_branch(repo: Path, branch: str, base: str) -> None:
     else:
         _git_run(repo, "checkout", base)
         _git_run(repo, "checkout", "-b", branch)
+
+    return stashed
 
 
 def _git_commit_all(repo: Path, message: str) -> bool:
@@ -403,10 +453,13 @@ def _post_patch_actions(
     git_push: bool,
     remote: str,
     generate_pr_description: bool,
+    auto_stash: bool,
 ) -> None:
+    stashed = False
     if git_branch:
-        _git_prepare_branch(repo_root, git_branch, base)
+        stashed = _git_prepare_branch(repo_root, git_branch, base, auto_stash=auto_stash)
         result.branch = git_branch
+        result.stashed = stashed
     if pre_commit_commands:
         checks_pass = _run_pre_commit_checks(repo_root, pre_commit_commands)
         result.pre_commit_passed = checks_pass
@@ -421,6 +474,11 @@ def _post_patch_actions(
     if generate_pr_description and git_branch and git_commit_message:
         pr_path = _generate_pr_description(repo_root, plan_path, git_branch, git_commit_message, pre_commit_commands)
         result.pr_description_path = pr_path
+
+    if stashed:
+        result.stash_restored = _git_stash_pop(repo_root)
+        if result.stash_restored is False:
+            result.message += " | auto-stash restore had conflicts (manual resolve may be needed)"
 
 
 def _detect_conflicts(diff_blocks: list[str]) -> list[str]:

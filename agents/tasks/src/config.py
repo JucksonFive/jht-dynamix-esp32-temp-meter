@@ -16,6 +16,7 @@ DEFAULT_RATE_LIMIT_DELAY = int(os.getenv("RATE_LIMIT_DELAY_SECONDS", "30"))
 ENABLE_CODER_AGENT = os.getenv("ENABLE_CODER_AGENT", "1").lower() not in {"0", "false"}
 ENABLE_AUTO_IMPLEMENT = os.getenv("ENABLE_AUTO_IMPLEMENT", "0").lower() not in {"0", "false"}
 ENABLE_AUTO_IMPLEMENT_GIT = os.getenv("ENABLE_AUTO_IMPLEMENT_GIT", "0").lower() not in {"0", "false"}
+ENABLE_AUTO_STASH = os.getenv("ENABLE_AUTO_STASH", "0").lower() not in {"0", "false"}
 AUTO_IMPLEMENT_GIT_REMOTE = os.getenv("AUTO_IMPLEMENT_GIT_REMOTE", "origin")
 AUTO_IMPLEMENT_GIT_BASE = os.getenv("AUTO_IMPLEMENT_GIT_BASE", "main")
 ENABLE_AUTO_PR = os.getenv("ENABLE_AUTO_PR", "0").lower() not in {"0", "false"}

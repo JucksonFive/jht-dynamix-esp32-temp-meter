@@ -22,6 +22,7 @@ from src.config import (
     ENABLE_CODER_AGENT,
     ENABLE_AUTO_IMPLEMENT,
     ENABLE_AUTO_IMPLEMENT_GIT,
+    ENABLE_AUTO_STASH,
     ENABLE_AUTO_PR,
     AUTO_IMPLEMENT_GIT_REMOTE,
     AUTO_IMPLEMENT_GIT_BASE,
@@ -87,6 +88,9 @@ def _run_implement_coder_output_to_pr(plan_paths: List[Path] | None = None) -> i
 
     if not ENABLE_AUTO_PR:
         cmd.append("--no-pr")
+
+    if ENABLE_AUTO_STASH:
+        cmd.append("--auto-stash")
 
     cmd.extend(["--remote", AUTO_IMPLEMENT_GIT_REMOTE, "--base", AUTO_IMPLEMENT_GIT_BASE, "--pr-base", PR_BASE])
 

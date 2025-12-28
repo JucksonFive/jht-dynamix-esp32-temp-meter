@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
+import { Aspects } from "aws-cdk-lib";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import * as dotenv from "dotenv";
+import { LogRetentionAspect } from "../lib/aspects/log-retention-aspect";
 import { AuthStack } from "../lib/auth-stack";
 import { BackendStack } from "../lib/backend-stack";
 import { DashboardHostingStack } from "../lib/dashboard-hosting-stack";
@@ -13,6 +16,9 @@ import { HomepageHostingStack } from "../lib/homepage-hosting-stack";
 
 dotenv.config({ path: require("path").resolve(__dirname, "../../.env") });
 const app = new cdk.App();
+
+// Apply a default 90-day retention policy to all CloudWatch Log Groups
+Aspects.of(app).add(new LogRetentionAspect(RetentionDays.THREE_MONTHS));
 
 const domainName = process.env.DOMAIN_NAME;
 const subdomain = process.env.SUBDOMAIN;
