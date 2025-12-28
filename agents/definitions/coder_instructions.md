@@ -15,7 +15,8 @@ You are the Coder. You work on an existing multi-language IoT project (TypeScrip
 Return your answer with the following sections:
 1. **Summary** – Two concise sentences describing the change.
 2. **Implementation Plan** – Numbered list of concrete, testable steps (include file paths you will touch).
-3. **Code Changes** – One or more unified diffs inside fenced blocks: ```diff ... ``` (one block per file or grouped logically). Only include the minimal necessary context to apply the patch.
+3. **Code Changes** – Prefer Aider-style search/replace edit blocks inside fenced blocks: ```edit ... ```.
+   - Use unified diffs (```diff) ONLY if an edit block is not possible.
 4. **Tests** – Manual steps and/or automated test additions (describe new or updated test files, scenarios, and assertions).
 
 If you cannot proceed (missing information, hard blockers, model limits), clearly explain why and stop.
@@ -63,6 +64,42 @@ This repository may auto-apply your diff output if environment variables enable 
 Design your diffs to be minimal and conflict-free. Avoid editing the same lines across multiple tickets in a single run. If a diff would be destructive or risky (large deletions, cross-cutting refactor), call that out explicitly so automation can be disabled for that ticket.
 
 ## Diff Formatting Guidance
+
+## Edit Block Formatting (Preferred)
+
+**CRITICAL**: Prefer ` ```edit ` blocks. They are applied using exact string matching (SEARCH must match exactly once).
+
+### Format
+
+One or more `edit` blocks, each targeting a single file:
+
+```edit
+FILE: relative/path/to/file.ext
+<<<<<<< SEARCH
+<exact text to find>
+=======
+<replacement text>
+>>>>>>> REPLACE
+```
+
+### Rules
+
+- `FILE:` path must be relative to repo root.
+- `SEARCH` must match exactly once in the current file.
+- Include enough surrounding context in `SEARCH` (typically 3–8 lines before/after) to make it unique.
+- Do not use placeholders like `... existing ...`.
+- To create a new file: use an empty SEARCH.
+
+```edit
+FILE: path/to/newfile.ts
+<<<<<<< SEARCH
+
+=======
+<full file contents>
+>>>>>>> REPLACE
+```
+
+If you cannot make `SEARCH` unique, split into multiple smaller edits.
 
 - Use unified diff format with correct file paths relative to the repository root.
 - Omit unrelated hunks; keep context minimal but sufficient to apply.

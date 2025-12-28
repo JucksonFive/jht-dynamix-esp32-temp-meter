@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import List
 
+import subprocess
 import sys
 
 # Ensure local src/ package is importable when running the script directly
@@ -24,22 +25,82 @@ from src.config import (
     AUTO_IMPLEMENT_GIT_REMOTE,
     AUTO_IMPLEMENT_GIT_BASE,
     PR_BASE,
-    ENABLE_PRE_COMMIT_CHECKS,
-    ENABLE_PR_DESCRIPTION_GENERATION,
-    PRE_COMMIT_COMMANDS,
     MAX_IDEAS,
     MAX_TICKETS,
+    CODER_OUTPUT_DIR,
     PROJECT_ROOT,
     log,
 )
-from src.github_pr import GitHubClient, create_or_get_pr
 from src.context import collect_project_context
 from src.file_utils import save_coder_output, save_ticket_to_file
 from src.executor import apply_coder_plan
 from src.history import load_previous_ideas
 
 
-def run_round() -> None:
+def _run_implement_coder_output_to_pr(plan_paths: List[Path] | None = None) -> int:
+    script_path = CURRENT_DIR / "implement_coder_output_to_pr.py"
+    if not script_path.exists():
+        log(f"[EXEC][ERROR] Missing implement script: {script_path}")
+        return 2
+
+    cmd: list[str] = [sys.executable, str(script_path)]
+    if plan_paths:
+        for plan_path in plan_paths:
+            cmd.extend(["--plan", str(plan_path)])
+    else:
+        cmd.append("--all")
+
+    if not ENABLE_AUTO_PR:
+        cmd.append("--no-pr")
+
+    cmd.extend(["--remote", AUTO_IMPLEMENT_GIT_REMOTE, "--base", AUTO_IMPLEMENT_GIT_BASE, "--pr-base", PR_BASE])
+
+    log(f"[EXEC] Running implement_coder_output_to_pr: {' '.join(cmd)}")
+    completed = subprocess.run(cmd, check=False)
+    return int(completed.returncode)
+
+
+def _apply_existing_plans_locally(plan_paths: List[Path]) -> int:
+    overall_ok = True
+    for plan_path in plan_paths:
+        log(f"[EXEC] Local apply for plan: {plan_path}")
+        dry = apply_coder_plan(plan_path, apply=False)
+        log(f"[EXEC] Dry-run: success={dry.success} blocks={dry.diff_blocks} msg='{dry.message}'")
+        if not dry.success:
+            overall_ok = False
+            continue
+        applied = apply_coder_plan(plan_path, apply=True)
+        log(f"[EXEC] Apply: success={applied.success} msg='{applied.message}'")
+        if not applied.success:
+            overall_ok = False
+    return 0 if overall_ok else 1
+
+
+def _maybe_process_existing_plans() -> int | None:
+    """If coder_output contains queued plans and auto-implement is enabled, process them and return an exit code."""
+    existing_plans = sorted(CODER_OUTPUT_DIR.glob("*.md"))
+    if not existing_plans or not ENABLE_AUTO_IMPLEMENT:
+        return None
+    log(f"[FLOW] Found {len(existing_plans)} existing coder plan(s) in {CODER_OUTPUT_DIR}")
+    if ENABLE_AUTO_IMPLEMENT_GIT:
+        return _run_implement_coder_output_to_pr(None)
+    return _apply_existing_plans_locally(existing_plans)
+
+
+def _maybe_process_generated_plans(coder_outputs: List[Path]) -> int | None:
+    """If this round produced plans and auto-implement is enabled, process them and return an exit code."""
+    if not coder_outputs or not ENABLE_AUTO_IMPLEMENT:
+        return None
+    if ENABLE_AUTO_IMPLEMENT_GIT:
+        return _run_implement_coder_output_to_pr(coder_outputs)
+    return _apply_existing_plans_locally(coder_outputs)
+
+
+def run_round() -> int:
+    existing_exit = _maybe_process_existing_plans()
+    if existing_exit is not None:
+        return existing_exit
+
     log("[CTX] Collecting project context…")
     context = collect_project_context(PROJECT_ROOT)
     log(f"[CTX] Context collected ({len(context)} chars)")
@@ -78,6 +139,14 @@ def run_round() -> None:
             log(f"  - {path}")
     elif ENABLE_CODER_AGENT:
         log("[CODER] No coder outputs produced in this round.")
+
+    generated_exit = _maybe_process_generated_plans(coder_outputs)
+    if generated_exit is not None:
+        return generated_exit
+
+    return 0
+
+
 def _handle_idea(
     index: int,
     original_idea: str,
@@ -156,79 +225,11 @@ def _accept_ticket(
         coder_path = save_coder_output(new_index, coder_markdown, ticket_markdown)
         coder_outputs.append(coder_path)
         log(f"[CODER] Implementation plan saved to {coder_path.name}")
-
-        if ENABLE_AUTO_IMPLEMENT:
-            _auto_implement_ticket(new_index, ticket_path, coder_path)
+        # Auto-implementation is handled after the round so we can process existing plans first.
     else:
         log("[CODER] Skipping coder agent (disabled)")
     return new_index
 
 
-def _auto_implement_ticket(new_index: int, ticket_path: Path, coder_path: Path) -> None:
-    log(f"[EXEC] Dry-run validation for ticket #{new_index}…")
-    result = apply_coder_plan(coder_path, apply=False)
-    log(
-        f"[EXEC] Dry-run: success={result.success} blocks={result.diff_blocks} patch_len={result.patch_length} msg='{result.message}'"
-    )
-    if not result.success:
-        log("[EXEC][WARN] Dry-run failed; skipping apply.")
-        return
-    branch_name = None
-    commit_msg = None
-    if ENABLE_AUTO_IMPLEMENT_GIT:
-        branch_slug = ticket_path.stem.split("-", 1)[1] if "-" in ticket_path.stem else ticket_path.stem
-        branch_name = f"ticket-{new_index:03d}-{branch_slug}"
-        commit_msg = f"ticket-{new_index:03d}: auto-implement {branch_slug}"[:72]
-        log(f"[EXEC][GIT] Will use branch '{branch_name}'")
-    log("[EXEC] Applying patch…")
-    apply_result = apply_coder_plan(
-        coder_path,
-        apply=True,
-        git_branch=branch_name,
-        git_commit_message=commit_msg,
-        git_push=ENABLE_AUTO_IMPLEMENT_GIT,
-        remote=AUTO_IMPLEMENT_GIT_REMOTE,
-        base=AUTO_IMPLEMENT_GIT_BASE,
-        pre_commit_commands=PRE_COMMIT_COMMANDS if ENABLE_PRE_COMMIT_CHECKS else None,
-        generate_pr_description=ENABLE_PR_DESCRIPTION_GENERATION,
-    )
-    log(
-        f"[EXEC] Apply: success={apply_result.success} exit={apply_result.exit_code} msg='{apply_result.message}' branch={apply_result.branch} committed={apply_result.committed} pushed={apply_result.pushed} pre_commit_passed={apply_result.pre_commit_passed} pr_desc={apply_result.pr_description_path}"
-    )
-
-    if (
-        ENABLE_AUTO_PR
-        and ENABLE_AUTO_IMPLEMENT_GIT
-        and apply_result.success
-        and apply_result.pushed
-        and apply_result.branch
-    ):
-        import os
-
-        token = os.getenv("GITHUB_TOKEN")
-        repo = os.getenv("REPO")
-        if not token or not repo:
-            log("[EXEC][PR] Skipping PR creation (missing GITHUB_TOKEN or REPO env)")
-            return
-
-        pr_title = commit_msg or f"ticket-{new_index:03d}: auto-implement"
-        pr_body = "Automated implementation applied from coder plan."
-        if apply_result.pr_description_path and apply_result.pr_description_path.is_file():
-            pr_body = apply_result.pr_description_path.read_text(encoding="utf-8")
-
-        try:
-            client = GitHubClient(token=token, repo=repo)
-            pr_url = create_or_get_pr(
-                client,
-                head_branch=apply_result.branch,
-                base=PR_BASE,
-                title=pr_title,
-                body=pr_body,
-            )
-            log(f"[EXEC][PR] {pr_url}")
-        except Exception as exc:  # noqa: BLE001
-            log(f"[EXEC][PR][ERROR] {exc}")
-
-
 if __name__ == "__main__":
-    run_round()
+    raise SystemExit(run_round())

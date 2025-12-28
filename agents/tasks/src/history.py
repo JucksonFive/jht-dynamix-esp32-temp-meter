@@ -40,3 +40,4 @@ def _extract_title(ticket_file: Path) -> str:
     except (UnicodeDecodeError, OSError):
         return ""
     return ""
+    

@@ -153,7 +153,19 @@ Project context snippets:
 Produce a Markdown response with the following sections:
 1. Summary – 2 sentences describing the change.
 2. Implementation Plan – numbered list of small, safe steps.
-3. Code Changes – provide unified diffs for any files that need edits. Use ```diff fenced blocks.
+3. Code Changes – provide Aider-style search/replace edit blocks for any files that need edits.
+    Use fenced blocks with ```edit and this exact format:
+    FILE: relative/path
+    <<<<<<< SEARCH
+    <exact text>
+    =======
+    <replacement text>
+    >>>>>>> REPLACE
+   
+    Rules:
+    - SEARCH must match exactly once in the current file.
+    - Include 3–8 lines of context in SEARCH to make it unique.
+    - Do NOT output unified diffs unless you cannot express the change as edits.
 4. Tests – list manual or automated checks to run.
 
 Only propose changes that are realistically implementable without breaking the build. If the ticket lacks information, note the missing details and stop.
@@ -171,7 +183,7 @@ def _call_gemini(model, prompt: str, label: str, fallback: str, attempts: int = 
     for attempt in range(1, attempts + 1):
         try:
             log(f"[{model.model_name.upper()}] Calling API for {label} (attempt {attempt}/{attempts})…")
-            response = model.generate_content(prompt)
+            response = model.generate_content(prompt, request_options={"timeout": 300})
             log(f"[{model.model_name.upper()}] API call succeeded")
             return response.text
         except ResourceExhausted as exc:
@@ -197,12 +209,21 @@ def _extract_ideas(raw_response: str, limit: int) -> List[str]:
         candidate = line.strip()
         if not candidate:
             continue
-        if candidate.lower().startswith("idea"):
+
+        lowered = candidate.lower()
+        if lowered.startswith("idea"):
             parts = candidate.split(":", 1)
             idea = parts[1].strip() if len(parts) > 1 else candidate
-            ideas.append(idea)
-        elif len(ideas) < limit:
-            ideas.append(candidate)
+            if idea:
+                ideas.append(idea)
+        else:
+            # Normalize common list formats: "1. Foo", "- Foo", "* Foo"
+            normalized = re.sub(r"^\d+\.\s+", "", candidate)
+            normalized = re.sub(r"^[-*]\s+", "", normalized)
+            normalized = normalized.strip()
+            if normalized and len(ideas) < limit:
+                ideas.append(normalized)
+
         if len(ideas) >= limit:
             break
     return ideas or [raw_response]

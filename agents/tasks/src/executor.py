@@ -1,9 +1,9 @@
 """Executor for applying coder plan implementation diffs automatically.
 
 Responsibilities:
-  * Extract ```diff fenced blocks from coder plan markdown.
-  * Combine them into a unified patch string.
-  * Dry-run or apply using system 'patch' command.
+    * Extract ```edit (Aider-style SEARCH/REPLACE) or ```diff fenced blocks from coder plan markdown.
+    * Prefer applying ```edit blocks directly (string replacement) for robustness.
+    * Fall back to unified diff application via system 'patch' when needed.
   * Provide structured result object for logging.
 
 We intentionally reuse system 'patch' for reliability; deeper semantic validation
@@ -22,6 +22,14 @@ import shutil
 import difflib
 
 DIFF_FENCE_RE = re.compile(r"```diff\n(.*?)```", re.DOTALL)
+EDIT_FENCE_RE = re.compile(r"```edit\n(.*?)```", re.DOTALL)
+
+
+@dataclass(frozen=True)
+class EditOperation:
+    file_path: str
+    search: str
+    replace: str
 
 
 @dataclass
@@ -45,9 +53,113 @@ def extract_diff_blocks(markdown: str) -> list[str]:
     return [b.strip() + ("\n" if not b.endswith("\n") else "") for b in blocks]
 
 
+def extract_edit_operations(markdown: str) -> list[EditOperation]:
+    """Extract Aider-style SEARCH/REPLACE operations from ```edit fenced blocks.
+
+    Expected block format:
+    FILE: relative/path.ext
+    <<<<<<< SEARCH
+    ...
+    =======
+    ...
+    >>>>>>> REPLACE
+    """
+    operations: list[EditOperation] = []
+    for block in EDIT_FENCE_RE.findall(markdown):
+        raw = block.strip("\n")
+        lines = raw.splitlines()
+        if not lines:
+            continue
+        file_line = next((l for l in lines if l.strip().lower().startswith("file:")), None)
+        if not file_line:
+            continue
+        file_path = file_line.split(":", 1)[1].strip()
+
+        # Parse one or more SEARCH/REPLACE segments
+        pattern = re.compile(
+            r"<<<<<<< SEARCH\n(.*?)\n=======\n(.*?)\n>>>>>>> REPLACE",
+            re.DOTALL,
+        )
+        for match in pattern.finditer(raw):
+            search, replace = match.group(1), match.group(2)
+            operations.append(EditOperation(file_path=file_path, search=search, replace=replace))
+    return operations
+
+
 def _ensure_patch_available() -> None:
     if shutil.which("patch") is None:
         raise RuntimeError("'patch' command not found (install via package manager, e.g. apt install patch).")
+
+
+def _resolve_repo_root(plan_path: Path) -> Path:
+    """Resolve repository root reliably.
+
+    Strategy:
+    1) Walk upward from plan_path looking for common repo markers.
+    2) Fall back to walking upward from this file looking for 'agents' directory.
+    """
+    markers = {"pnpm-workspace.yaml", "sonar-project.properties", ".git"}
+    current = plan_path.resolve()
+    for parent in [current] + list(current.parents):
+        for marker in markers:
+            if (parent / marker).exists():
+                return parent
+
+    current = Path(__file__).resolve()
+    while current.name != "agents" and current.parent != current:
+        current = current.parent
+    if current.name == "agents":
+        return current.parent
+
+    # Worst-case fallback
+    return Path.cwd()
+
+
+def _apply_edit_operations(
+    repo_root: Path,
+    ops: list[EditOperation],
+    apply: bool,
+) -> tuple[bool, list[str]]:
+    """Apply edit operations; returns (success, error_messages)."""
+    errors: list[str] = []
+
+    # Group by file and apply sequentially to avoid stale reads
+    ops_by_file: dict[str, list[EditOperation]] = {}
+    for op in ops:
+        ops_by_file.setdefault(op.file_path, []).append(op)
+
+    for rel_path, file_ops in ops_by_file.items():
+        target = repo_root / rel_path
+        exists = target.exists()
+
+        if not exists:
+            # Allow create only when there is exactly one op with empty SEARCH
+            if len(file_ops) == 1 and file_ops[0].search == "":
+                if apply:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text(file_ops[0].replace, encoding="utf-8")
+                continue
+            errors.append(f"{rel_path}: target file does not exist")
+            continue
+
+        content = target.read_text(encoding="utf-8")
+        for op in file_ops:
+            if op.search == "":
+                errors.append(f"{rel_path}: empty SEARCH not allowed for existing file")
+                break
+            occurrences = content.count(op.search)
+            if occurrences == 0:
+                errors.append(f"{rel_path}: SEARCH block not found")
+                break
+            if occurrences > 1:
+                errors.append(f"{rel_path}: SEARCH block is ambiguous ({occurrences} matches)")
+                break
+            content = content.replace(op.search, op.replace, 1)
+        else:
+            if apply:
+                target.write_text(content, encoding="utf-8")
+
+    return (len(errors) == 0, errors)
 
 
 def apply_coder_plan(
@@ -65,16 +177,47 @@ def apply_coder_plan(
         return ExecutionResult(apply, False, 1, f"Plan file not found: {plan_path}", 0, 0)
 
     content = plan_path.read_text(encoding="utf-8")
+    edit_ops = extract_edit_operations(content)
     blocks = extract_diff_blocks(content)
-    if not blocks:
-        return ExecutionResult(apply, False, 2, "No diff blocks found in plan file.", 0, 0)
+    if not edit_ops and not blocks:
+        return ExecutionResult(apply, False, 2, "No edit or diff blocks found in plan file.", 0, 0)
 
     combined = "\n".join(blocks)
 
-    # Basic conflict detection before applying (only when applying)
+    # Basic conflict detection before applying (only when applying) - only for diffs
     potential_conflicts: list[str] = []
-    if apply:
+    if apply and blocks:
         potential_conflicts = _detect_conflicts(blocks)
+
+    repo_root = _resolve_repo_root(plan_path)
+
+    # Prefer edit operations if present
+    if edit_ops:
+        ok, errors = _apply_edit_operations(repo_root, edit_ops, apply=apply)
+        msg = _status_message(ok, apply) if ok else f"Edit apply failed: {'; '.join(errors[:3])}"
+        result = ExecutionResult(
+            apply,
+            ok,
+            0 if ok else 1,
+            msg,
+            diff_blocks=len(edit_ops),
+            patch_length=sum(len(o.search) + len(o.replace) for o in edit_ops),
+            conflicts=None,
+        )
+        if ok and apply:
+            _post_patch_actions(
+                result,
+                repo_root,
+                plan_path,
+                git_branch,
+                base,
+                pre_commit_commands,
+                git_commit_message,
+                git_push,
+                remote,
+                generate_pr_description,
+            )
+        return result
 
     try:
         _ensure_patch_available()
@@ -90,7 +233,6 @@ def apply_coder_plan(
     if not apply:
         cmd.append("--dry-run")
 
-    repo_root = Path(__file__).resolve().parents[2]
     try:
         with open(patch_file, "r", encoding="utf-8") as patch_in:
             proc = subprocess.run(cmd, cwd=repo_root, stdin=patch_in, text=True)

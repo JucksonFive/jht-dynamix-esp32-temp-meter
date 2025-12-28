@@ -14,7 +14,7 @@ CRITIC_JSON_TEXT = "RANDOM PREFIX {\n  \"verdict\": \"accept\",\n  \"rationale\"
 
 
 def test_extract_ideas_basic():
-    ideas = _extract_ideas(IDEA_TEXT)
+    ideas = _extract_ideas(IDEA_TEXT, limit=10)
     assert len(ideas) == 3
     assert ideas[0].startswith("Implement structured logging")
 
@@ -42,6 +42,14 @@ def test_save_ticket_and_history(tmp_path: Path, monkeypatch):
     # Create faux tickets directory
     local_tickets = tmp_path / "agents" / "tasks" / "tickets"
     local_tickets.mkdir(parents=True)
+
+    # Ensure helpers use the temp tickets dir (they import TICKETS_DIR at module import time).
+    import agents.tasks.src.file_utils as file_utils  # type: ignore
+    import agents.tasks.src.history as history  # type: ignore
+
+    monkeypatch.setattr(file_utils, "TICKETS_DIR", local_tickets, raising=True)
+    monkeypatch.setattr(history, "TICKETS_DIR", local_tickets, raising=True)
+
     # Create two tickets
     t1 = save_ticket_to_file("## Ticket: First Feature\nDetails", 1)
     t2 = save_ticket_to_file("## Ticket: Second Feature\nDetails", 2)
