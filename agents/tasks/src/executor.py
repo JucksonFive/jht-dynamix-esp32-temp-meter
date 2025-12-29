@@ -90,7 +90,9 @@ def apply_coder_plan(
     if not apply:
         cmd.append("--dry-run")
 
-    repo_root = Path(__file__).resolve().parents[2]
+    # executor.py lives at agents/tasks/src/executor.py
+    # parents[0]=src, [1]=tasks, [2]=agents, [3]=<repo-root>
+    repo_root = Path(__file__).resolve().parents[3]
     try:
         with open(patch_file, "r", encoding="utf-8") as patch_in:
             proc = subprocess.run(cmd, cwd=repo_root, stdin=patch_in, text=True)
@@ -141,7 +143,16 @@ def _git_prepare_branch(repo: Path, branch: str, base: str) -> None:
 
 
 def _git_commit_all(repo: Path, message: str) -> bool:
-    _git_run(repo, "add", ".")
+    # Stage everything except common generated artifacts.
+    # This prevents accidental commits of Python bytecode / caches produced during test runs.
+    excluded_pathspecs = [
+        ":(glob,exclude)**/__pycache__/**",
+        ":(glob,exclude)**/*.py[cod]",
+        ":(glob,exclude)**/.pytest_cache/**",
+        ":(glob,exclude)agents/tasks/venv/**",
+        ":(glob,exclude)agents/tasks/generated_pr_descriptions/**",
+    ]
+    _git_run(repo, "add", "-A", "--", ".", *excluded_pathspecs)
     diff = subprocess.run(["git", "diff", "--cached", "--name-only"], cwd=repo, text=True, capture_output=True)
     if not diff.stdout.strip():
         return False

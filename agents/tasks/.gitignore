@@ -1,0 +1,10 @@
+# Task runner local artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtualenv (kept inside repo for convenience)
+venv/
+
+# Generated outputs
+generated_pr_descriptions/
