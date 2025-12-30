@@ -9,6 +9,7 @@ import { EspAuthStack } from "../lib/esp-auth-stack";
 import { InfrastructureStack } from "../lib/infrastructure-stack";
 import { LambdaStack } from "../lib/lambda-stack";
 import { CertStack } from "../lib/cert-stack";
+import { WafStack } from "../lib/waf-stack";
 import { HomepageHostingStack } from "../lib/homepage-hosting-stack";
 
 dotenv.config({ path: require("path").resolve(__dirname, "../../.env") });
@@ -40,6 +41,21 @@ if (!skipCertCreation && domainName && siteDomain) {
   });
 }
 
+// Create a global WAF for CloudFront in us-east-1
+const globalWafStack = new WafStack(app, "GlobalWafStack", {
+  env: { account, region: "us-east-1" },
+  scope: "CLOUDFRONT",
+  metricName: "GlobalWaf",
+  crossRegionReferences: true,
+});
+
+// Create a regional WAF for API Gateway
+const regionalWafStack = new WafStack(app, "RegionalWafStack", {
+  env: { account, region },
+  scope: "REGIONAL",
+  metricName: "RegionalWaf",
+});
+
 // Create infrastructure stack with DynamoDB tables first
 const infraStack = new InfrastructureStack(app, "InfrastructureStack", {
   env: { account, region },
@@ -70,6 +86,7 @@ const backendStack = new BackendStack(app, "BackendStack", {
   updateDeviceStatusFn: lambdaStack.updateDeviceStatusFn,
   getDashboardConfigFn: lambdaStack.getDashboardConfigFn,
   userPool: authStack.userPool,
+  regionalWafArn: regionalWafStack.webAclArn,
 });
 
 const espAuthStack = new EspAuthStack(app, "EspAuthStack", {
@@ -88,6 +105,7 @@ if (domainName && siteDomain && certStack?.certificateArn) {
       domainName,
       siteDomain,
       certificateArn: certStack.certificateArn,
+      globalWafArn: globalWafStack.webAclArn,
       crossRegionReferences: true,
     }
   );
@@ -101,6 +119,7 @@ if (domainName && certStack?.certificateArn) {
     domainName,
     siteDomain: domainName, // apex domain
     certificateArn: certStack.certificateArn,
+    globalWafArn: globalWafStack.webAclArn,
     crossRegionReferences: true,
   });
 }

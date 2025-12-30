@@ -12,6 +12,7 @@ interface Props extends cdk.StackProps {
   domainName: string;
   siteDomain: string;
   certificateArn: string;
+  globalWafArn?: string;
 }
 
 export class DashboardHostingStack extends cdk.Stack {
@@ -85,6 +86,7 @@ export class DashboardHostingStack extends cdk.Stack {
       enableLogging: true,
       logBucket: logBucket,
       logFilePrefix: "distribution-access-logs/",
+      webAclId: props.globalWafArn,
       defaultBehavior: {
         origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
           originAccessControl,
