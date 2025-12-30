@@ -73,3 +73,4 @@ homepage/dist/*
 board/webui-react/node_modules/*
 dashboard/env/.env
 dashboard/coverage/*
+agents/tasks/tests/__pycache__/
