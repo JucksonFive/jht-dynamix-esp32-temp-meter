@@ -28,7 +28,15 @@ def _slugify(value: str) -> str:
 
 
 def save_coder_output(ticket_number: int, content: str) -> Path:
-    filename = f"{ticket_number:03d}-coder-plan.md"
+    # Try to find the existing ticket file to preserve the name
+    ticket_files = list(TICKETS_DIR.glob(f"{ticket_number:03d}-*.md"))
+    if ticket_files:
+        # e.g. "001-my-feature" from "001-my-feature.md"
+        base_name = ticket_files[0].stem
+        filename = f"{base_name}-coder-plan.md"
+    else:
+        filename = f"{ticket_number:03d}-coder-plan.md"
+
     output_path = CODER_OUTPUT_DIR / filename
     output_path.write_text(content, encoding="utf-8")
     return output_path
