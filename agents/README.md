@@ -21,6 +21,9 @@ This folder hosts autonomous / semi-autonomous agents that iterate on project im
 | `ENABLE_AUTO_IMPLEMENT_GIT` | 0 | Also create branch, commit, push. |
 | `AUTO_IMPLEMENT_GIT_BASE` | main | Base branch for new feature branches. |
 | `AUTO_IMPLEMENT_GIT_REMOTE` | origin | Remote used for push. |
+| `AUTO_IMPLEMENT_REQUIRE_BRANCH` | 1 | Require feature branch for git automation. |
+| `AUTO_IMPLEMENT_BLOCK_MAIN` | 1 | Block protected branches (`main`, `master`, or base). |
+| `ENABLE_AUTO_PR_CREATION` | 0 | Create PR after push (requires `gh` CLI). |
 | `RATE_LIMIT_DELAY_SECONDS` | 30 | Base delay for Gemini rate-limit retries. |
 
 ### Test Writer (LLM) variables
@@ -41,7 +44,7 @@ TEST_WRITER_MODE=auto GEMINI_API_KEY=... python agents/tasks/generate_tests.py
 
 ## Auto-Implementation Safety
 
-Diffs are first validated (`patch --dry-run`). Only if validation passes do they apply. Git automation creates branch `ticket-<NNN>-<slug>` and commit message `ticket-<NNN>: auto-implement <slug>` truncated to 72 chars.
+Diffs are first validated (`patch --dry-run`). Only if validation passes do they apply. Git automation creates branch `ticket-<NNN>-<slug>` and commit message `ticket-<NNN>: auto-implement <slug>` truncated to 72 chars. When branch guards are enabled, auto-implementation refuses to target protected branches and can optionally open a PR via `gh`.
 
 ## Extensibility
 

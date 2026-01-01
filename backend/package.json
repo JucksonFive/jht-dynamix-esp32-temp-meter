@@ -23,11 +23,14 @@
     "typescript": "~5.6.3"
   },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.1.0",
+    "@aws-lambda-powertools/metrics": "^2.1.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.848.0",
     "@aws-sdk/client-dynamodb": "^3.808.0",
     "@aws-sdk/client-secrets-manager": "^3.948.0",
     "@aws-sdk/client-sqs": "^3.882.0",
     "@aws-sdk/lib-dynamodb": "^3.808.0",
+    "@middy/core": "^5.4.3",
     "aws-cdk-lib": "2.194.0",
     "constructs": "^10.0.0",
     "dotenv": "^17.2.1"
