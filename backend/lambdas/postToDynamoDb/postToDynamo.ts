@@ -4,24 +4,73 @@ import {
   GetCommand,
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { HandlerEvent } from "../utils/types";
+import { Logger, injectLambdaContext } from "@aws-lambda-powertools/logger";
+import { Metrics, MetricUnits, logMetrics } from "@aws-lambda-powertools/metrics";
+import middy from "@middy/core";
+import { randomUUID } from "crypto";
+
+const serviceName = process.env.POWERTOOLS_SERVICE_NAME!;
+const namespace = "JHT-Dynamix-IoT";
+
+const logger = new Logger({ serviceName });
+const metrics = new Metrics({ namespace, serviceName });
 
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-const TEMPS_TABLE = process.env.TABLE_NAME!;
-const DEVICES_TABLE = process.env.DEVICES_TABLE!;
+const TEMPS_TABLE = process.env.TABLE_NAME;
+const DEVICES_TABLE = process.env.DEVICES_TABLE;
 
-export const handler = async (event: HandlerEvent) => {
-  console.log("Received event:", JSON.stringify(event));
+if (!TEMPS_TABLE) {
+  logger.error("TABLE_NAME environment variable is not set.");
+  throw new Error("TABLE_NAME environment variable is not set.");
+}
 
-  const { deviceId, temperature, humidity, timestamp } = event;
+if (!DEVICES_TABLE) {
+  logger.error("DEVICES_TABLE environment variable is not set.");
+  throw new Error("DEVICES_TABLE environment variable is not set.");
+}
+
+type IngestEvent = {
+  deviceId?: string;
+  temperature?: unknown;
+  humidity?: unknown;
+  timestamp?: unknown;
+  userId?: string;
+};
+
+const appendLogContext = () => ({
+  before: (request: { event?: IngestEvent }) => {
+    const deviceId = request.event?.deviceId;
+    logger.appendKeys({
+      correlation_id: randomUUID(),
+      device_id: deviceId ?? "unknown",
+    });
+  },
+});
+
+const baseHandler = async (event: IngestEvent) => {
+  const { deviceId, temperature, humidity, timestamp } = event ?? {};
+
+  const startTime = Date.now();
+  const timestampIsValid =
+    typeof timestamp === "string" || typeof timestamp === "number";
+
   if (
     !deviceId ||
     typeof temperature !== "number" ||
     typeof humidity !== "number" ||
-    !timestamp
+    !timestampIsValid
   ) {
-    console.error("Invalid payload");
+    logger.warn("Invalid payload received", {
+      error_code: "InvalidMessageFormat",
+      details: {
+        deviceId,
+        temperatureType: typeof temperature,
+        humidityType: typeof humidity,
+        timestampType: typeof timestamp,
+      },
+    });
+    metrics.addMetric("InvalidMessageFormat", MetricUnits.Count, 1);
     return { statusCode: 400, body: "Invalid payload" };
   }
 
@@ -31,9 +80,9 @@ export const handler = async (event: HandlerEvent) => {
     const res = await ddb.send(
       new GetCommand({ TableName: DEVICES_TABLE, Key: { deviceId } })
     );
-    userId = (res.Item as any)?.userId ?? userId ?? "unknown";
-  } catch (e) {
-    console.warn("Device lookup failed, continuing:", e);
+    userId = (res.Item as { userId?: string })?.userId ?? userId ?? "unknown";
+  } catch (error) {
+    logger.warn("Device lookup failed, continuing.", { error });
     userId = userId ?? "unknown";
   }
 
@@ -42,10 +91,20 @@ export const handler = async (event: HandlerEvent) => {
 
   try {
     await ddb.send(new PutCommand({ TableName: TEMPS_TABLE, Item: item }));
-    console.log("Put OK");
+
+    const latency = Date.now() - startTime;
+
+    logger.info("Successfully ingested temperature reading");
+    metrics.addMetric("SuccessfulIngestion", MetricUnits.Count, 1);
+    metrics.addMetric("ProcessingLatency", MetricUnits.Milliseconds, latency);
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-  } catch (e) {
-    console.error("Put failed:", e);
-    return { statusCode: 500, body: "DDB write failed" };
+  } catch (error) {
+    logger.error("Error writing to DynamoDB", { error });
+    throw error;
   }
 };
+
+export const handler = middy(baseHandler)
+  .use(appendLogContext())
+  .use(injectLambdaContext(logger, { logEvent: true }))
+  .use(logMetrics(metrics, { captureColdStartMetric: true }));

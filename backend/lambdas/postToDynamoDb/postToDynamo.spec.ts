@@ -16,17 +16,25 @@ jest.mock("@aws-sdk/lib-dynamodb", () => {
 });
 
 describe("postToDynamoDb handler", () => {
-  // Import after mocks applied
-  const { handler } = require("./postToDynamo");
+  let handler: (event: any, context?: any) => Promise<any>;
+  const lambdaContext = {
+    awsRequestId: "test-request",
+    functionName: "SaveToDynamoFunction",
+  };
+
+  beforeAll(() => {
+    process.env.TABLE_NAME = "Temperatures";
+    process.env.DEVICES_TABLE = "Devices";
+    process.env.POWERTOOLS_SERVICE_NAME = "IngestionService";
+    ({ handler } = require("./postToDynamo"));
+  });
 
   beforeEach(() => {
     sendMock.mockReset();
-    process.env.TABLE_NAME = "Temperatures";
-    process.env.DEVICES_TABLE = "Devices";
   });
 
   it("returns 400 for invalid payload", async () => {
-    const res = await handler({} as any);
+    const res = await handler({} as any, lambdaContext as any);
     expect(res.statusCode).toBe(400);
     expect(sendMock).not.toHaveBeenCalled();
   });
@@ -39,10 +47,11 @@ describe("postToDynamoDb handler", () => {
     const event = {
       deviceId: "dev1",
       temperature: 22.5,
+      humidity: 40.2,
       timestamp: new Date().toISOString(),
     };
 
-    const res = await handler(event);
+    const res = await handler(event, lambdaContext as any);
     expect(res.statusCode).toBe(200);
 
     // First call GetCommand, second PutCommand
@@ -61,10 +70,11 @@ describe("postToDynamoDb handler", () => {
     const event = {
       deviceId: "dev2",
       temperature: 18.3,
+      humidity: 33.1,
       timestamp: new Date().toISOString(),
     };
 
-    const res = await handler(event);
+    const res = await handler(event, lambdaContext as any);
     expect(res.statusCode).toBe(200);
     const putCmd = sendMock.mock.calls[1][0];
     expect(putCmd.input.Item.userId).toBe("unknown");
@@ -79,17 +89,18 @@ describe("postToDynamoDb handler", () => {
     const event = {
       deviceId: "dev3",
       temperature: 30.1,
+      humidity: 55.4,
       timestamp: new Date().toISOString(),
       userId: overrideUser,
     };
 
-    const res = await handler(event);
+    const res = await handler(event, lambdaContext as any);
     expect(res.statusCode).toBe(200);
     const putCmd = sendMock.mock.calls[1][0];
     expect(putCmd.input.Item.userId).toBe(overrideUser);
   });
 
-  it("returns 500 when PutCommand fails", async () => {
+  it("throws when PutCommand fails", async () => {
     sendMock
       .mockResolvedValueOnce({ Item: { userId: "userX" } }) // Get ok
       .mockRejectedValueOnce(new Error("put failed")); // Put fails
@@ -97,10 +108,12 @@ describe("postToDynamoDb handler", () => {
     const event = {
       deviceId: "dev4",
       temperature: 10.0,
+      humidity: 12.3,
       timestamp: new Date().toISOString(),
     };
 
-    const res = await handler(event);
-    expect(res.statusCode).toBe(500);
+    await expect(handler(event, lambdaContext as any)).rejects.toThrow(
+      "put failed"
+    );
   });
 });

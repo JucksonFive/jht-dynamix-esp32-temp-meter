@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamoDb from "aws-cdk-lib/aws-dynamodb";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 import { Construct } from "constructs";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
@@ -54,12 +55,19 @@ export class LambdaStack extends cdk.Stack {
         TABLE_NAME: temperaturesTable.tableName,
         DEVICES_TABLE: deviceUserTable.tableName,
         ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
+        POWERTOOLS_SERVICE_NAME: "IngestionService",
       },
     });
 
     // Grant permissions for the save function
     temperaturesTable.grantWriteData(this.saveToDynamoFn);
     deviceUserTable.grantReadData(this.saveToDynamoFn);
+    this.saveToDynamoFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["cloudwatch:PutMetricData"],
+        resources: ["*"],
+      })
+    );
 
     temperaturesTable.addGlobalSecondaryIndex({
       indexName: "deviceId-timestamp-index",
