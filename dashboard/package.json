@@ -35,7 +35,8 @@
     "preview": "vite preview",
     "lint": "eslint --ext .ts,.tsx src",
     "test": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "eslintConfig": {
     "extends": [

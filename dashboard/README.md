@@ -41,7 +41,9 @@ To run the dashboard locally, you need to have Node.js and npm installed.
 -   `npm run dev`: Starts the development server.
 -   `npm run build`: Builds the app for production.
 -   `npm run preview`: Serves the production build locally.
--   `npm run test`: Runs the test suite.
+-   `npm run test`: Runs all component tests with coverage.
+-   `npm run test:watch`: Runs tests in watch mode.
+-   `npm run test:coverage`: Runs tests with a coverage report.
 
 ## Technologies Used
 
@@ -51,3 +53,29 @@ To run the dashboard locally, you need to have Node.js and npm installed.
 -   **Styling**: Tailwind CSS
 -   **Authentication**: AWS Amplify
 -   **API**: Fetch API for making requests to the backend.
+
+## Testing
+
+The dashboard uses Vitest and React Testing Library for component tests. CI
+enforces a minimum 70% coverage threshold across lines, statements, functions,
+and branches.
+
+### Running tests
+
+Run the full suite with coverage:
+
+```bash
+npm run test
+```
+
+Run tests in watch mode during development:
+
+```bash
+npm run test:watch
+```
+
+Generate a coverage report locally:
+
+```bash
+npm run test:coverage
+```
