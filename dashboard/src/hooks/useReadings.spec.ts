@@ -38,7 +38,12 @@ describe("hooks/useReadings.ts", () => {
     ];
 
     fetchAllUserReadings.mockResolvedValue(items);
-    getLatestReadingPerDevice.mockImplementation(() => new Map([["a", "t1"]]));
+    getLatestReadingPerDevice.mockImplementation(
+      () => new Map([
+        ["a", "t1"],
+        ["b", "t2"],
+      ])
+    );
 
     const user = { userId: "u" };
     const range = { from: "2025-12-24", to: "2025-12-25" };
@@ -57,6 +62,9 @@ describe("hooks/useReadings.ts", () => {
       { id: "b", temperature: 2, timestamp: "t2" },
     ]);
     expect(result.current.lastSeen).toBeInstanceOf(Map);
+    expect(result.current.latestTemperatures).toBeInstanceOf(Map);
+    expect(result.current.latestTemperatures.get("a")).toBe(1);
+    expect(result.current.latestTemperatures.get("b")).toBe(2);
   });
 
   it("polls when intervalMs > 0", async () => {

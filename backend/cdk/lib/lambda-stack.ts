@@ -23,6 +23,7 @@ export class LambdaStack extends cdk.Stack {
   public readonly authProtectedFn: lambda.Function;
   public readonly registerDeviceFn: NodejsFunction;
   public readonly getAllDevicesFn: NodejsFunction;
+  public readonly updateDeviceConfigFn: NodejsFunction;
   public readonly purgeDeviceReadingsFn: NodejsFunction;
   public readonly updateDeviceStatusFn: NodejsFunction;
   public readonly getDashboardConfigFn: NodejsFunction;
@@ -161,6 +162,26 @@ export class LambdaStack extends cdk.Stack {
       },
     });
     deviceUserTable.grantWriteData(this.registerDeviceFn);
+
+    // Lambda function for updating device configuration (thresholds, etc.)
+    this.updateDeviceConfigFn = new NodejsFunction(
+      this,
+      "UpdateDeviceConfigFn",
+      {
+        functionName: "UpdateDeviceConfigFunction",
+        entry: path.join(
+          __dirname,
+          "../../lambdas/updateDeviceConfig/updateDeviceConfig.ts"
+        ),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        environment: {
+          DEVICES_TABLE: deviceUserTable.tableName,
+          ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
+        },
+      }
+    );
+    deviceUserTable.grantWriteData(this.updateDeviceConfigFn);
 
     // Lambda function for deleting a user's device
     this.deleteUserDeviceFn = new NodejsFunction(

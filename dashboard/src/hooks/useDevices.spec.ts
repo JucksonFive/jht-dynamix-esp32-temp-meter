@@ -82,4 +82,23 @@ describe("hooks/useDevices.ts", () => {
       expect(result.current.devices.map((d) => d.deviceId)).toEqual(["b"]);
     });
   });
+
+  it("updateDevice merges updates into device list", async () => {
+    fetchUserDevices.mockResolvedValue([
+      { deviceId: "a", userId: "u", createdAt: "c", updatedAt: "u" },
+    ]);
+
+    const user = { userId: "u" };
+
+    const { result } = renderHook(() => useDevices(user));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() =>
+      result.current.updateDevice("a", { temperatureThreshold: 30 })
+    );
+
+    await waitFor(() => {
+      expect(result.current.devices[0].temperatureThreshold).toBe(30);
+    });
+  });
 });

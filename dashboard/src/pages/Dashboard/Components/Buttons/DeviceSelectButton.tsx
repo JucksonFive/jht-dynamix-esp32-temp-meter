@@ -1,5 +1,6 @@
 import React from "react";
 import DeviceInfo from "./DeviceInfo";
+import ErrorIndicator from "./ErrorIndicator";
 import DeviceStatusIndicator from "./DeviceStatusIndicator";
 
 interface DeviceSelectButtonProps {
@@ -8,6 +9,8 @@ interface DeviceSelectButtonProps {
   active: boolean;
   onSelect: (id: string) => void;
   title?: string;
+  alert?: boolean;
+  alertTitle?: string;
 }
 
 export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
@@ -16,6 +19,8 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
   active,
   onSelect,
   title,
+  alert = false,
+  alertTitle,
 }) => {
   // Device is online if last seen within 90 seconds (3x heartbeat interval)
   const isOnline = lastSeen
@@ -39,6 +44,13 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
       <div className="flex items-center gap-2">
         <DeviceStatusIndicator isOnline={isOnline} />
         <DeviceInfo id={id} lastSeen={lastSeen} />
+        {alert && (
+          <ErrorIndicator
+            title={alertTitle || "Threshold exceeded"}
+            size={12}
+            className="ml-auto"
+          />
+        )}
       </div>
     </button>
   );

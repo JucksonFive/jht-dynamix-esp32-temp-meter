@@ -24,6 +24,9 @@ vi.mock("./TemperatureChart", async () => ({
 vi.mock("./TemperatureHistoryHeader", async () => ({
   TemperatureHistoryHeader: () => <div data-testid="hdr" />,
 }));
+vi.mock("./DeviceThresholdPanel", async () => ({
+  default: () => <div data-testid="threshold" />,
+}));
 
 describe("pages/Dashboard/Components/TemperatureChart/TemperatureHistoryPanel.tsx", () => {
   it("passes selected device data to chart", () => {

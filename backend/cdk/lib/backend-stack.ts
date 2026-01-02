@@ -13,6 +13,7 @@ export interface BackendStackProps extends cdk.StackProps {
   fetchUserTemperaturesFn: NodejsFunction;
   registerDeviceFn: NodejsFunction;
   getAllDevicesFn: NodejsFunction;
+  updateDeviceConfigFn: NodejsFunction;
   fetchUserTemperatureBoundsFn: NodejsFunction;
   deleteUserDeviceFn: NodejsFunction;
   updateDeviceStatusFn: NodejsFunction;
@@ -30,6 +31,7 @@ export class BackendStack extends cdk.Stack {
       fetchUserTemperatureBoundsFn,
       getAllDevicesFn,
       registerDeviceFn,
+      updateDeviceConfigFn,
       deleteUserDeviceFn,
       updateDeviceStatusFn,
       getDashboardConfigFn,
@@ -148,6 +150,19 @@ export class BackendStack extends cdk.Stack {
     devicesResource.addMethod(
       "GET",
       new apigateway.LambdaIntegration(getAllDevicesFn),
+      {
+        authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+        apiKeyRequired: false,
+      }
+    );
+
+    const deviceConfigResource = devicesResource
+      .addResource("{deviceId}")
+      .addResource("config");
+    deviceConfigResource.addMethod(
+      "PUT",
+      new apigateway.LambdaIntegration(updateDeviceConfigFn),
       {
         authorizer,
         authorizationType: apigateway.AuthorizationType.COGNITO,

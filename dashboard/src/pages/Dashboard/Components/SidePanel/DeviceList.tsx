@@ -10,6 +10,7 @@ interface DeviceListProps {
   devices: Device[];
   selectedDeviceIds: string[];
   lastSeen?: Map<string, string>;
+  latestTemperatures?: Map<string, number>;
   onSelectSingle: (id: string) => void;
   onToggleMulti: (id: string) => void;
   onDeviceDeleted: (deviceId: string) => void;
@@ -20,6 +21,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   selectedDeviceIds,
   onSelectSingle,
   lastSeen,
+  latestTemperatures,
   onToggleMulti,
   onDeviceDeleted,
 }) => {
@@ -28,6 +30,12 @@ export const DeviceList: React.FC<DeviceListProps> = ({
     <ul className="space-y-2">
       {devices.map((d) => {
         const isActive = selectedDeviceIds.includes(d.deviceId);
+        const latestTemp = latestTemperatures?.get(d.deviceId);
+        const threshold = d.temperatureThreshold;
+        const isOverThreshold =
+          Number.isFinite(latestTemp) &&
+          typeof threshold === "number" &&
+          latestTemp > threshold;
         return (
           <li key={d.deviceId}>
             <div
@@ -44,6 +52,8 @@ export const DeviceList: React.FC<DeviceListProps> = ({
                 active={isActive}
                 onSelect={onSelectSingle}
                 title={t("tooltipSelectSingle")}
+                alert={isOverThreshold}
+                alertTitle={t("thresholdExceeded")}
               />
               <div className="flex items-center gap-2">
                 <DeviceMultiToggle

@@ -106,6 +106,17 @@ export async function deleteUserDevice(
   });
 }
 
+export async function updateDeviceThreshold(
+  deviceId: string,
+  temperatureThreshold: number | null
+): Promise<{ deviceId: string; temperatureThreshold: number | null }> {
+  return apiRequest<{ deviceId: string; temperatureThreshold: number | null }>({
+    method: "PUT",
+    path: `/devices/${encodeURIComponent(deviceId)}/config`,
+    data: { temperatureThreshold },
+  });
+}
+
 export async function fetchDashboardConfig(): Promise<Record<string, string>> {
   const url = resolveBaseApiUrl();
   if (!url) throw new Error("BASE API URL is not defined");
