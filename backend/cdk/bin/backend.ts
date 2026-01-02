@@ -66,6 +66,7 @@ const backendStack = new BackendStack(app, "BackendStack", {
   fetchUserTemperatureBoundsFn: lambdaStack.fetchUserTemperatureBoundsFn,
   getAllDevicesFn: lambdaStack.getAllDevicesFn,
   registerDeviceFn: lambdaStack.registerDeviceFn,
+  updateDeviceConfigFn: lambdaStack.updateDeviceConfigFn,
   deleteUserDeviceFn: lambdaStack.deleteUserDeviceFn,
   updateDeviceStatusFn: lambdaStack.updateDeviceStatusFn,
   getDashboardConfigFn: lambdaStack.getDashboardConfigFn,

@@ -14,6 +14,13 @@ export function useDevices(user: any) {
   const removeDevice = useCallback((deviceId: string) => {
     setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
   }, []);
+  const updateDevice = useCallback((deviceId: string, updates: Partial<Device>) => {
+    setDevices((prev) =>
+      prev.map((device) =>
+        device.deviceId === deviceId ? { ...device, ...updates } : device
+      )
+    );
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -43,5 +50,5 @@ export function useDevices(user: any) {
     return () => controller.abort();
   }, [user]);
 
-  return { devices, loading, error, removeDevice };
+  return { devices, loading, error, removeDevice, updateDevice };
 }

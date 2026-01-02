@@ -23,6 +23,9 @@ export function useReadings(
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<Nullable<number>>(null);
   const [lastSeen, setLastSeen] = useState<Map<string, string>>(new Map());
+  const [latestTemperatures, setLatestTemperatures] = useState<
+    Map<string, number>
+  >(new Map());
   const load = async (signal?: AbortSignal, r = range) => {
     try {
       setErr(null);
@@ -34,7 +37,15 @@ export function useReadings(
       });
       if (signal?.aborted) return;
 
-      setLastSeen(getLatestReadingPerDevice(items));
+      const latest = getLatestReadingPerDevice(items);
+      const temps = new Map<string, number>();
+      items.forEach((reading) => {
+        if (latest.get(reading.deviceId) === reading.timestamp) {
+          temps.set(reading.deviceId, reading.temperature);
+        }
+      });
+      setLastSeen(latest);
+      setLatestTemperatures(temps);
 
       setData(
         items.map((x: Reading) => ({
@@ -70,5 +81,12 @@ export function useReadings(
     };
   }, [user, range.from, range.to, intervalMs]);
 
-  return { data, loading, error, lastSeen, reload: () => load(undefined) };
+  return {
+    data,
+    loading,
+    error,
+    lastSeen,
+    latestTemperatures,
+    reload: () => load(undefined),
+  };
 }

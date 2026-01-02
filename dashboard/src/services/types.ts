@@ -20,4 +20,5 @@ export interface Device {
   updatedAt: string;
   status?: "online" | "offline";
   lastSeen?: string;
+  temperatureThreshold?: number;
 }

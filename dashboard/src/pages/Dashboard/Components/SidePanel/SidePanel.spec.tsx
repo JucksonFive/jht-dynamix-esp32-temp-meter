@@ -23,6 +23,7 @@ vi.mock("../../../../contexts/AppContext", async () => ({
     setSelectedDeviceIds,
     handleDeviceDeleted: vi.fn(),
     lastSeen: new Map(),
+    latestTemperatures: new Map(),
   }),
 }));
 

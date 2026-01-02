@@ -13,6 +13,7 @@ export const SidePanel: React.FC = () => {
     setSelectedDeviceIds,
     handleDeviceDeleted,
     lastSeen,
+    latestTemperatures,
   } = useAppContext();
 
   const onSelectSingle = (id: string) => setSelectedDeviceIds([id]);
@@ -65,6 +66,7 @@ export const SidePanel: React.FC = () => {
               devices={devices}
               selectedDeviceIds={selectedDeviceIds}
               lastSeen={lastSeen}
+              latestTemperatures={latestTemperatures}
               onSelectSingle={onSelectSingle}
               onToggleMulti={onToggleMulti}
               onDeviceDeleted={handleDeviceDeleted}

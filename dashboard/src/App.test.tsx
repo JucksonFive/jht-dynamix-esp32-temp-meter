@@ -16,6 +16,7 @@ vi.mock("./hooks/useDevices", () => {
       devices: [],
       loading: false,
       removeDevice: () => {},
+      updateDevice: () => {},
     }),
   };
 });
@@ -27,6 +28,7 @@ vi.mock("./hooks/useReadings", () => {
       loading: false,
       error: null,
       lastSeen: new Map(),
+      latestTemperatures: new Map(),
     }),
   };
 });

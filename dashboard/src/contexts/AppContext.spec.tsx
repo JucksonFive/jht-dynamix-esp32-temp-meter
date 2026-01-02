@@ -42,12 +42,14 @@ describe("contexts/AppContext.tsx", () => {
       devices: [],
       loading: false,
       removeDevice: vi.fn(),
+      updateDevice: vi.fn(),
     });
     useReadings.mockReturnValue({
       data: [],
       loading: false,
       error: null,
       lastSeen: new Map(),
+      latestTemperatures: new Map(),
     });
   });
 
@@ -74,7 +76,12 @@ describe("contexts/AppContext.tsx", () => {
 
   it("handleDeviceDeleted removes selection and calls removeDevice", async () => {
     const removeDevice = vi.fn();
-    useDevices.mockReturnValue({ devices: [], loading: false, removeDevice });
+    useDevices.mockReturnValue({
+      devices: [],
+      loading: false,
+      removeDevice,
+      updateDevice: vi.fn(),
+    });
     getCurrentUser.mockResolvedValueOnce({ userId: "u", username: "john" });
 
     const user = userEvent.setup();

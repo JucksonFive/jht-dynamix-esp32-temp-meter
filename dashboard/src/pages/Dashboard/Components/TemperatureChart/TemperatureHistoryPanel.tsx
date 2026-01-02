@@ -1,5 +1,6 @@
 import React from "react";
 import { useAppContext } from "../../../../contexts/AppContext";
+import DeviceThresholdPanel from "./DeviceThresholdPanel";
 import { TemperatureChart } from "./TemperatureChart";
 import { TemperatureHistoryHeader } from "./TemperatureHistoryHeader";
 
@@ -13,6 +14,7 @@ export const TemperatureHistoryPanel: React.FC = () => {
   return (
     <div>
       <TemperatureHistoryHeader selectedDeviceIds={selectedDeviceIds} />
+      <DeviceThresholdPanel />
       <TemperatureChart
         data={selectedData.map((d) => ({
           id: d.id,

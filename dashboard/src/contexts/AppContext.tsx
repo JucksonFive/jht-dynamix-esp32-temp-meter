@@ -24,6 +24,7 @@ interface AppContextType {
   devices: Device[];
   devicesLoading: boolean;
   removeDevice: (id: string) => void;
+  updateDevice: (id: string, updates: Partial<Device>) => void;
   handleDeviceDeleted: (id: string) => void;
 
   // Readings
@@ -41,6 +42,7 @@ interface AppContextType {
 
   lastSeen: Map<string, string>;
   setLastSeen: React.Dispatch<React.SetStateAction<Map<string, string>>>;
+  latestTemperatures: Map<string, number>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -76,7 +78,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, []);
 
   // Devices
-  const { devices, loading: devicesLoading, removeDevice } = useDevices(user);
+  const {
+    devices,
+    loading: devicesLoading,
+    removeDevice,
+    updateDevice,
+  } = useDevices(user);
 
   // Range
   const [range, setRange] = useState<Range>(() => {
@@ -91,6 +98,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     loading: dataLoading,
     error: dataError,
     lastSeen: ls,
+    latestTemperatures: latestTemps,
   } = useReadings(user, range, {
     intervalMs: MINUTE,
   });
@@ -113,6 +121,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     devices,
     devicesLoading,
     removeDevice,
+    updateDevice,
     handleDeviceDeleted,
     data,
     dataLoading,
@@ -122,6 +131,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     selectedDeviceIds,
     setSelectedDeviceIds,
     lastSeen: ls ?? new Map(),
+    latestTemperatures: latestTemps ?? new Map(),
     setLastSeen: () => {}, // Read-only
   };
 

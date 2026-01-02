@@ -8,6 +8,7 @@ import {
   fetchUserDevices,
   fetchUserReadings,
   getLatestReadingPerDevice,
+  updateDeviceThreshold,
 } from "./api";
 import { Mock } from "vitest";
 
@@ -132,6 +133,21 @@ describe("services/api.ts", () => {
     await fetchUserDevices({ signal: ac.signal });
     expect(axios.request).toHaveBeenCalledWith(
       expect.objectContaining({ signal: ac.signal })
+    );
+  });
+
+  it("updateDeviceThreshold sends PUT with payload", async () => {
+    (axios.request as unknown as Mock).mockResolvedValueOnce({
+      data: { deviceId: "dev-1", temperatureThreshold: 32 },
+    });
+    const res = await updateDeviceThreshold("dev-1", 32);
+    expect(res).toEqual({ deviceId: "dev-1", temperatureThreshold: 32 });
+    expect(axios.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: "PUT",
+        url: "https://api.example.test/devices/dev-1/config",
+        data: { temperatureThreshold: 32 },
+      })
     );
   });
 
