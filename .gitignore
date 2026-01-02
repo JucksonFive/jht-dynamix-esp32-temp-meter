@@ -6,6 +6,7 @@ backend/.env
 backend/cdk/*.js
 backend/cdk/!jest.config.js
 backend/cdk/*.d.ts
+backend/cdk-outputs.json
 backend/node_modules
 backend/coverage
 

@@ -20,14 +20,15 @@ To run the dashboard locally, you need to have Node.js and npm installed.
     ```
 
 2.  **Configure Environment Variables**:
-    Create a `.env.local` file in this directory and add the necessary AWS configuration, such as the Cognito User Pool ID, App Client ID, and API Gateway endpoint. You can get these values from the output of the CDK deployment.
+    The `dashboard/.env.local` file is generated for you when you deploy the
+    backend. From the `backend` directory, run:
 
+    ```bash
+    npm run deploy
     ```
-    VITE_APP_AWS_REGION=<Your-AWS-Region>
-    VITE_APP_COGNITO_USER_POOL_ID=<Your-Cognito-User-Pool-ID>
-    VITE_APP_COGNITO_USER_POOL_WEB_CLIENT_ID=<Your-Cognito-App-Client-ID>
-    VITE_APP_API_URL=<Your-API-Gateway-Endpoint>
-    ```
+
+    This writes the required values (region, Cognito IDs, and API URL) into
+    `dashboard/.env.local`.
 
 3.  **Run the Development Server**:
     ```bash
