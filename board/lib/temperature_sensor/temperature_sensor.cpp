@@ -6,13 +6,14 @@
 #include <storage_helper.h>
 #include "offline_sync_helper.h"
 #include <mqtt_helper.h>
-#include <Adafruit_AHTX0.h>
+#include <Adafruit_SHT31.h>
 
 namespace
 {
-    Adafruit_AHTX0 aht;
+    Adafruit_SHT31 sht31 = Adafruit_SHT31();
     constexpr uint8_t I2C_SDA = 8;
     constexpr uint8_t I2C_SCL = 9;
+    constexpr uint8_t SHT3X_I2C_ADDR = 0x44;                            // GY-SHT30-D default address
     constexpr unsigned long PUBLISH_INTERVAL_MS = 60UL * 60UL * 1000UL; // 1 hour
 }
 
@@ -20,28 +21,24 @@ void TempSensor::setup()
 {
     Wire.begin(I2C_SDA, I2C_SCL);
 
-    if (!aht.begin())
+    if (!sht31.begin(SHT3X_I2C_ADDR))
     {
-        Serial.println("[ERR] AHT10 not found. Check wiring / I2C pins.");
+        Serial.println("[ERR] SHT30 not found. Check wiring / I2C pins / address (0x44/0x45).");
         return;
     }
 
-    Serial.println("[OK] AHT10 initialized");
+    sht31.heater(false);
+    Serial.println("[OK] SHT30 initialized");
 }
 
 float TempSensor::readCelsius()
 {
-    sensors_event_t humidityEvent;
-    sensors_event_t tempEvent;
-
-    // aht.getEvent(&humidity, &temp) -> in this order
-    const bool ok = aht.getEvent(&humidityEvent, &tempEvent);
-    if (!ok)
+    const float temp = sht31.readTemperature();
+    if (isnan(temp))
     {
         return NAN;
     }
-
-    return tempEvent.temperature;
+    return temp;
 }
 
 void TempSensor::publishTemperature(
@@ -101,18 +98,15 @@ void TempSensor::publishTemperatureIfDue(
         return;
     }
 
-    sensors_event_t humidityEvent;
-    sensors_event_t tempEvent;
-    const bool ok = aht.getEvent(&humidityEvent, &tempEvent);
-    if (!ok)
+    const float temp = sht31.readTemperature();
+    const float humidity = sht31.readHumidity();
+
+    if (isnan(temp) || isnan(humidity))
     {
-        Serial.println("[Sensor] AHT10 read failed");
+        Serial.println("[Sensor] SHT30 read failed");
         lastPublish = millis();
         return;
     }
-
-    const float temp = tempEvent.temperature;
-    const float humidity = humidityEvent.relative_humidity;
 
     Serial.printf("[Sensor] Read temp=%.2f C, humidity=%.2f %%\n", temp, humidity);
     TempSensor::publishTemperature(temp, humidity, offlineSync, mqttTopic, userId, deviceId);
