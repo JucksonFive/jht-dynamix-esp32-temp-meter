@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
-  GetCommand,
   PutCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { HandlerEvent } from "../utils/types";
 
@@ -21,31 +21,34 @@ export const handler = async (event: HandlerEvent) => {
     typeof humidity !== "number" ||
     !timestamp
   ) {
-    console.error("Invalid payload");
     return { statusCode: 400, body: "Invalid payload" };
   }
 
-  // Resolve userId from Devices table
-  let userId = event.userId;
-  try {
-    const res = await ddb.send(
-      new GetCommand({ TableName: DEVICES_TABLE, Key: { deviceId } })
-    );
-    userId = (res.Item as any)?.userId ?? userId ?? "unknown";
-  } catch (e) {
-    console.warn("Device lookup failed, continuing:", e);
-    userId = userId ?? "unknown";
-  }
-
-  // Temperatures PK/SK = deviceId + timestamp
+  const userId = event.userId ?? "unknown";
   const item = { deviceId, timestamp, userId, temperature, humidity };
 
   try {
     await ddb.send(new PutCommand({ TableName: TEMPS_TABLE, Item: item }));
-    console.log("Put OK");
+
+    // Päivitä Devices.updatedAt jokaisella lukemalla (jos userId mukana)
+    if (event.userId) {
+      const updatedAt = new Date().toISOString();
+      await ddb.send(
+        new UpdateCommand({
+          TableName: DEVICES_TABLE,
+          Key: { userId: event.userId, deviceId },
+          UpdateExpression: "SET #updatedAt = :updatedAt",
+          ConditionExpression:
+            "attribute_exists(userId) AND attribute_exists(deviceId)",
+          ExpressionAttributeNames: { "#updatedAt": "updatedAt" },
+          ExpressionAttributeValues: { ":updatedAt": updatedAt },
+        })
+      );
+    }
+
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
   } catch (e) {
-    console.error("Put failed:", e);
+    console.error("Write failed:", e);
     return { statusCode: 500, body: "DDB write failed" };
   }
 };

@@ -59,7 +59,7 @@ export class LambdaStack extends cdk.Stack {
 
     // Grant permissions for the save function
     temperaturesTable.grantWriteData(this.saveToDynamoFn);
-    deviceUserTable.grantReadData(this.saveToDynamoFn);
+    deviceUserTable.grantReadWriteData(this.saveToDynamoFn);
 
     temperaturesTable.addGlobalSecondaryIndex({
       indexName: "deviceId-timestamp-index",
