@@ -7,6 +7,16 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      thresholds: {
+        statements: 70,
+        branches: 70,
+        functions: 70,
+        lines: 70,
+      },
+    },
   },
   build: {
     chunkSizeWarningLimit: 1000,
