@@ -14,9 +14,11 @@ const DEVICES_TABLE = process.env.DEVICES_TABLE!;
 export const handler = async (event: HandlerEvent) => {
   console.log("Received event:", JSON.stringify(event));
 
-  const { deviceId, temperature, humidity, timestamp } = event;
+  const { deviceId, temperature, humidity, timestamp, userId } = event;
+
   if (
     !deviceId ||
+    !userId ||
     typeof temperature !== "number" ||
     typeof humidity !== "number" ||
     !timestamp
@@ -24,7 +26,6 @@ export const handler = async (event: HandlerEvent) => {
     return { statusCode: 400, body: "Invalid payload" };
   }
 
-  const userId = event.userId ?? "unknown";
   const item = { deviceId, timestamp, userId, temperature, humidity };
 
   try {
