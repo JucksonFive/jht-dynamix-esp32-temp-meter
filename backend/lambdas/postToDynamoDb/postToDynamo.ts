@@ -31,20 +31,30 @@ export const handler = async (event: HandlerEvent) => {
   try {
     await ddb.send(new PutCommand({ TableName: TEMPS_TABLE, Item: item }));
 
-    // Päivitä Devices.updatedAt jokaisella lukemalla (jos userId mukana)
-    if (event.userId) {
-      const updatedAt = new Date().toISOString();
-      await ddb.send(
+    // Päivitä Devices.updatedAt jokaisella lukemalla (userId validoitu jo yllä)
+    const updatedAt = new Date().toISOString();
+    console.log(
+      "Updating device updatedAt",
+      JSON.stringify({ table: DEVICES_TABLE, userId, deviceId, updatedAt })
+    );
+
+    try {
+      const res = await ddb.send(
         new UpdateCommand({
           TableName: DEVICES_TABLE,
-          Key: { userId: event.userId, deviceId },
+          Key: { userId, deviceId },
           UpdateExpression: "SET #updatedAt = :updatedAt",
           ConditionExpression:
             "attribute_exists(userId) AND attribute_exists(deviceId)",
           ExpressionAttributeNames: { "#updatedAt": "updatedAt" },
           ExpressionAttributeValues: { ":updatedAt": updatedAt },
+          ReturnValues: "UPDATED_NEW",
         })
       );
+      console.log("Device updatedAt updated", JSON.stringify(res?.Attributes));
+    } catch (e) {
+      // Älä kaada mittaustallennusta, jos device-riviä ei löydy / ei ole rekisteröity
+      console.warn("Device updatedAt update failed", e);
     }
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
