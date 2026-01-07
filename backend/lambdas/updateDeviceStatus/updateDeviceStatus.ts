@@ -10,39 +10,22 @@ const DEVICES_TABLE = process.env.DEVICES_TABLE!;
 
 interface IoTStatusEvent {
   deviceId: string;
-  status: "online" | "offline";
-  timestamp?: string;
-  userId?: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-/**
- * Lambda function triggered by IoT Core when devices publish to devices/+/status
- *
- * IoT Rule listens to: devices/+/status
- *
- * Expected message format from ESP32:
- * Topic: devices/{deviceId}/status
- * Payload: {
- *   "deviceId": "esp32-12345",
- *   "status": "online" | "offline",
- *   "userId": "user-uuid",  // optional, will be looked up if not provided
- *   "timestamp": "2024-01-01T12:00:00.000Z"  // optional, will use current time if not provided
- * }
- *
- * Updates the Devices table with the device status and lastSeen timestamp
- */
 export const handler = async (event: IoTStatusEvent): Promise<void> => {
   console.log("Received IoT status event:", JSON.stringify(event, null, 2));
 
-  const { deviceId, status, timestamp } = event;
+  const { deviceId } = event;
 
-  if (!deviceId || !status) {
-    console.error("Missing required fields: deviceId or status");
-    throw new Error("Invalid event: deviceId and status are required");
+  if (!deviceId) {
+    console.error("Missing required  deviceId ");
+    throw new Error("Invalid event: deviceId is required");
   }
 
-  // Use provided timestamp or current time
-  const lastSeen = timestamp || new Date().toISOString();
+  const updatedAt = new Date().toISOString();
 
   try {
     let userId = event.userId;
@@ -72,8 +55,6 @@ export const handler = async (event: IoTStatusEvent): Promise<void> => {
       console.log(`Found userId: ${userId} for deviceId: ${deviceId}`);
     }
 
-    const now = new Date().toISOString();
-
     await ddb.send(
       new UpdateCommand({
         TableName: DEVICES_TABLE,
@@ -81,21 +62,18 @@ export const handler = async (event: IoTStatusEvent): Promise<void> => {
           userId,
           deviceId,
         },
-        UpdateExpression:
-          "SET #status = :status, #lastSeen = :lastSeen, #updatedAt = :updatedAt",
+        UpdateExpression: "SET #updatedAt = :updatedAt",
         ExpressionAttributeNames: {
-          "#lastSeen": "lastSeen",
           "#updatedAt": "updatedAt",
         },
         ExpressionAttributeValues: {
-          ":lastSeen": lastSeen,
-          ":updatedAt": now,
+          ":updatedAt": updatedAt,
         },
       })
     );
 
     console.log(
-      `Successfully updated device ${deviceId} status to ${status} at ${lastSeen}`
+      `Successfully updated device ${deviceId} updatedAt: ${updatedAt}`
     );
   } catch (error) {
     console.error("Error updating device status:", error);

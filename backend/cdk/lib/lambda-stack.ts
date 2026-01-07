@@ -59,7 +59,7 @@ export class LambdaStack extends cdk.Stack {
 
     // Grant permissions for the save function
     temperaturesTable.grantWriteData(this.saveToDynamoFn);
-    deviceUserTable.grantReadData(this.saveToDynamoFn);
+    deviceUserTable.grantReadWriteData(this.saveToDynamoFn);
 
     temperaturesTable.addGlobalSecondaryIndex({
       indexName: "deviceId-timestamp-index",
@@ -146,7 +146,7 @@ export class LambdaStack extends cdk.Stack {
         ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS!,
       },
     });
-    deviceUserTable.grantReadData(this.getAllDevicesFn);
+    deviceUserTable.grantReadWriteData(this.getAllDevicesFn);
 
     // Lambda function for registering a device
     this.registerDeviceFn = new NodejsFunction(this, "RegisterDeviceFn", {

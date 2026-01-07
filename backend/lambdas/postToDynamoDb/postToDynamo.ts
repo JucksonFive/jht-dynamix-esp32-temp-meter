@@ -1,8 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
-  GetCommand,
   PutCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { HandlerEvent } from "../utils/types";
 
@@ -14,38 +14,52 @@ const DEVICES_TABLE = process.env.DEVICES_TABLE!;
 export const handler = async (event: HandlerEvent) => {
   console.log("Received event:", JSON.stringify(event));
 
-  const { deviceId, temperature, humidity, timestamp } = event;
+  const { deviceId, temperature, humidity, timestamp, userId } = event;
+
   if (
     !deviceId ||
+    !userId ||
     typeof temperature !== "number" ||
     typeof humidity !== "number" ||
     !timestamp
   ) {
-    console.error("Invalid payload");
     return { statusCode: 400, body: "Invalid payload" };
   }
 
-  // Resolve userId from Devices table
-  let userId = event.userId;
-  try {
-    const res = await ddb.send(
-      new GetCommand({ TableName: DEVICES_TABLE, Key: { deviceId } })
-    );
-    userId = (res.Item as any)?.userId ?? userId ?? "unknown";
-  } catch (e) {
-    console.warn("Device lookup failed, continuing:", e);
-    userId = userId ?? "unknown";
-  }
-
-  // Temperatures PK/SK = deviceId + timestamp
   const item = { deviceId, timestamp, userId, temperature, humidity };
 
   try {
     await ddb.send(new PutCommand({ TableName: TEMPS_TABLE, Item: item }));
-    console.log("Put OK");
+
+    // Päivitä Devices.updatedAt jokaisella lukemalla (userId validoitu jo yllä)
+    const updatedAt = new Date().toISOString();
+    console.log(
+      "Updating device updatedAt",
+      JSON.stringify({ table: DEVICES_TABLE, userId, deviceId, updatedAt })
+    );
+
+    try {
+      const res = await ddb.send(
+        new UpdateCommand({
+          TableName: DEVICES_TABLE,
+          Key: { userId, deviceId },
+          UpdateExpression: "SET #updatedAt = :updatedAt",
+          ConditionExpression:
+            "attribute_exists(userId) AND attribute_exists(deviceId)",
+          ExpressionAttributeNames: { "#updatedAt": "updatedAt" },
+          ExpressionAttributeValues: { ":updatedAt": updatedAt },
+          ReturnValues: "UPDATED_NEW",
+        })
+      );
+      console.log("Device updatedAt updated", JSON.stringify(res?.Attributes));
+    } catch (e) {
+      // Älä kaada mittaustallennusta, jos device-riviä ei löydy / ei ole rekisteröity
+      console.warn("Device updatedAt update failed", e);
+    }
+
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
   } catch (e) {
-    console.error("Put failed:", e);
+    console.error("Write failed:", e);
     return { statusCode: 500, body: "DDB write failed" };
   }
 };
