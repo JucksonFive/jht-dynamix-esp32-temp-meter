@@ -40,7 +40,7 @@ export const DeviceList: React.FC<DeviceListProps> = ({
             >
               <DeviceSelectButton
                 id={d.deviceId}
-                lastSeen={lastSeen?.get(d.deviceId)}
+                updatedAt={d.updatedAt}
                 active={isActive}
                 onSelect={onSelectSingle}
                 title={t("tooltipSelectSingle")}

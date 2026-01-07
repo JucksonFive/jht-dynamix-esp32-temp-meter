@@ -22,7 +22,7 @@ describe("pages/Dashboard/Components/Buttons/DeviceSelectButton.tsx", () => {
     render(
       <DeviceSelectButton
         id="dev-1"
-        lastSeen="2025-12-24T00:04:30Z"
+        updatedAt="2025-12-24T00:04:30Z"
         active={false}
         onSelect={onSelect}
         title="t"

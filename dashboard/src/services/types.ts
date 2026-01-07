@@ -15,9 +15,8 @@ export type ReadingsResponse = {
 
 export interface Device {
   deviceId: string;
+  deviceName: string;
   userId: string;
   createdAt: string;
   updatedAt: string;
-  status?: "online" | "offline";
-  lastSeen?: string;
 }
