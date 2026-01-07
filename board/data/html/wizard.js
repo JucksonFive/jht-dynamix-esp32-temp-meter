@@ -61,6 +61,19 @@ function setWifiModalLoading(isLoading) {
   if (pwd) pwd.disabled = isLoading;
 }
 
+function setWifiModalStatus(message, kind) {
+  const el = document.getElementById("wifi-modal-status");
+  if (!el) return;
+  if (!message) {
+    el.classList.add("hidden");
+    el.textContent = "";
+    return;
+  }
+  el.textContent = message;
+  el.className = "status" + (kind ? ` ${kind}` : "");
+  el.classList.remove("hidden");
+}
+
 function setStep2NextEnabled(enabled) {
   const btn = document.getElementById("step2-next");
   if (!btn) return;
@@ -182,6 +195,7 @@ function openModal(ssid) {
 
   isWifiSubmitting = false;
   setWifiModalLoading(false);
+  setWifiModalStatus("", null);
 
   document.getElementById("selected-ssid").innerText = ssid;
   document.getElementById("password-modal").classList.remove("hidden");
@@ -199,6 +213,7 @@ function closeModal() {
   const scanSpinner = document.getElementById("scan-spinner");
   document.getElementById("password-modal").classList.add("hidden");
   document.getElementById("wifi-password").value = "";
+  setWifiModalStatus("", null);
   scanSpinner.classList.add("hidden");
 }
 
@@ -287,6 +302,7 @@ function submitWifi() {
 
   isWifiSubmitting = true;
   setWifiModalLoading(true);
+  setWifiModalStatus("", null);
 
   const wifiSpinner = document.getElementById("wifi-spinner");
   const wifiStatus = document.getElementById("wifi-status");
@@ -314,9 +330,8 @@ function submitWifi() {
       setWifiModalLoading(false);
 
       wifiSpinner.classList.add("hidden");
-      wifiStatus.innerText = "❌ Connection request failed.";
-      wifiStatus.className = "status error";
-      wifiStatus.classList.remove("hidden");
+      wifiStatus.classList.add("hidden");
+      setWifiModalStatus("❌ Connection request failed.", "error");
     })
     .catch((err) => {
       console.error("WiFi error:", err);
@@ -325,9 +340,8 @@ function submitWifi() {
       setWifiModalLoading(false);
 
       wifiSpinner.classList.add("hidden");
-      wifiStatus.innerText = "❌ Network error. Try again.";
-      wifiStatus.className = "status error";
-      wifiStatus.classList.remove("hidden");
+      wifiStatus.classList.add("hidden");
+      setWifiModalStatus("❌ Network error. Try again.", "error");
     });
 }
 
@@ -346,11 +360,12 @@ async function pollWifiConnectionStatus(
 
   if (result === "connected") {
     spinnerEl.classList.add("hidden");
-    statusEl.innerText = "✅ Connected to WiFi!";
-    statusEl.className = "status success";
-    statusEl.classList.remove("hidden");
+    statusEl.classList.add("hidden");
+    setWifiModalStatus("✅ Connected to WiFi!", "success");
 
-    closeModal();
+    setTimeout(() => {
+      closeModal();
+    }, 800);
 
     setTimeout(() => {
       // Only advance from Step 1 -> Step 2; never increment blindly
@@ -363,12 +378,13 @@ async function pollWifiConnectionStatus(
   }
 
   spinnerEl.classList.add("hidden");
-  statusEl.innerText =
+  statusEl.classList.add("hidden");
+  setWifiModalStatus(
     result === "failed"
       ? "❌ Incorrect password or network unreachable."
-      : "❌ Timeout waiting for WiFi connection.";
-  statusEl.className = "status error";
-  statusEl.classList.remove("hidden");
+      : "❌ Timeout waiting for WiFi connection.",
+    "error"
+  );
 
   const pwd = document.getElementById("wifi-password");
   if (pwd) {
