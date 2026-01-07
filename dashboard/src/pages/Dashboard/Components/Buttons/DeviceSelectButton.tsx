@@ -4,7 +4,7 @@ import DeviceStatusIndicator from "./DeviceStatusIndicator";
 
 interface DeviceSelectButtonProps {
   id: string;
-  lastSeen?: string;
+  updatedAt: string;
   active: boolean;
   onSelect: (id: string) => void;
   title?: string;
@@ -12,14 +12,14 @@ interface DeviceSelectButtonProps {
 
 export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
   id,
-  lastSeen,
+  updatedAt,
   active,
   onSelect,
   title,
 }) => {
   // Device is online if last seen within 90 seconds (3x heartbeat interval)
-  const isOnline = lastSeen
-    ? Date.now() - new Date(lastSeen).getTime() < 5 * 60 * 1000
+  const isOnline = updatedAt
+    ? Date.now() - new Date(updatedAt).getTime() < 5 * 60 * 1000
     : false;
 
   return (
@@ -38,7 +38,7 @@ export const DeviceSelectButton: React.FC<DeviceSelectButtonProps> = ({
     >
       <div className="flex items-center gap-2">
         <DeviceStatusIndicator isOnline={isOnline} />
-        <DeviceInfo id={id} lastSeen={lastSeen} />
+        <DeviceInfo id={id} updatedAt={updatedAt} />
       </div>
     </button>
   );
