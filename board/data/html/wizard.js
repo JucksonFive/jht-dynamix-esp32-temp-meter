@@ -1,6 +1,56 @@
 let currentStep = 1;
 let selectedSSID = "";
 
+let step2WifiGateToken = 0;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function getWifiStatusOnce() {
+  try {
+    const res = await fetch("/wifi-status");
+    const text = await res.text();
+    const data = JSON.parse(text);
+    return data?.status ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function waitForWifiConnected(
+  maxAttempts = 60,
+  intervalMs = 1000,
+  onProgress
+) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const st = await getWifiStatusOnce();
+    if (st === "connected") return "connected";
+    if (st === "failed") return "failed";
+    if (typeof onProgress === "function") onProgress(st, attempt);
+    await sleep(intervalMs);
+  }
+  return "timeout";
+}
+
+function setStep2NextEnabled(enabled) {
+  const btn = document.getElementById("step2-next");
+  if (!btn) return;
+  btn.disabled = !enabled;
+  btn.setAttribute("aria-disabled", (!enabled).toString());
+}
+
+async function watchStep2WifiGate() {
+  const token = ++step2WifiGateToken;
+  setStep2NextEnabled(false);
+
+  while (currentStep === 2 && token === step2WifiGateToken) {
+    const st = await getWifiStatusOnce();
+    const isConnected = st === "connected";
+    setStep2NextEnabled(isConnected);
+    if (isConnected) return;
+    await sleep(1000);
+  }
+}
+
 const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
@@ -13,7 +63,7 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
 
       // jos ei vielä valmis
       if (res.status === 202 || text === "Scan started") {
-        await new Promise((resolve) => setTimeout(resolve, interval));
+        await sleep(interval);
         continue;
       }
 
@@ -37,7 +87,7 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
       return;
     } catch (err) {
       console.warn("⚠️ WiFi scan retry error:", err.message);
-      await new Promise((resolve) => setTimeout(resolve, interval));
+      await sleep(interval);
     }
   }
 
@@ -85,6 +135,14 @@ function showStep(step) {
       }
     }
     index++;
+  }
+
+  // Step 2: keep Next disabled until WiFi is actually connected
+  if (step === 2) {
+    watchStep2WifiGate();
+  } else {
+    // Stop any running Step2 watcher
+    step2WifiGateToken++;
   }
 
   if (step === 3) {
@@ -158,19 +216,8 @@ function submitWifi() {
     body: formData,
   })
     .then((res) => {
-      if (res.status === 200) {
-        // Immediate success (already connected)
-        wifiSpinner.classList.add("hidden");
-        wifiStatus.innerText = "✅ Already connected";
-        wifiStatus.className = "status success";
-        wifiStatus.classList.remove("hidden");
-        setTimeout(() => {
-          currentStep++;
-          showStep(currentStep);
-        }, 1200);
-        return;
-      }
-      if (res.status === 202) {
+      if (res.status === 200 || res.status === 202) {
+        // Always verify connection status before advancing to Step 2
         pollWifiConnectionStatus(wifiSpinner, wifiStatus);
         return;
       }
@@ -194,49 +241,56 @@ async function pollWifiConnectionStatus(
   maxAttempts = 60,
   intervalMs = 1000
 ) {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      const res = await fetch("/wifi-status");
-      const text = await res.text();
-      const data = JSON.parse(text);
-      const st = data.status;
-      if (st === "connected") {
-        spinnerEl.classList.add("hidden");
-        statusEl.innerText = "✅ Connected to WiFi!";
-        statusEl.className = "status success";
-        statusEl.classList.remove("hidden");
-        setTimeout(() => {
-          currentStep++;
-          showStep(currentStep);
-        }, 1500);
-        return;
+  const result = await waitForWifiConnected(maxAttempts, intervalMs, () =>
+    statusEl.classList.add("hidden")
+  );
+
+  if (result === "connected") {
+    spinnerEl.classList.add("hidden");
+    statusEl.innerText = "✅ Connected to WiFi!";
+    statusEl.className = "status success";
+    statusEl.classList.remove("hidden");
+    setTimeout(() => {
+      // Only advance from Step 1 -> Step 2; never increment blindly
+      if (currentStep === 1) {
+        currentStep = 2;
+        showStep(currentStep);
       }
-      if (st === "failed") {
-        spinnerEl.classList.add("hidden");
-        statusEl.innerText = "❌ Incorrect password or network unreachable.";
-        statusEl.className = "status error";
-        statusEl.classList.remove("hidden");
-        return;
-      }
-      // still connecting
-      statusEl.classList.add("hidden");
-    } catch (e) {
-      console.warn("Status poll error", e);
-    }
-    await new Promise((r) => setTimeout(r, intervalMs));
+    }, 1500);
+    return;
   }
+
   spinnerEl.classList.add("hidden");
-  statusEl.innerText = "❌ Timeout waiting for WiFi connection.";
+  statusEl.innerText =
+    result === "failed"
+      ? "❌ Incorrect password or network unreachable."
+      : "❌ Timeout waiting for WiFi connection.";
   statusEl.className = "status error";
   statusEl.classList.remove("hidden");
 }
 
-function handleUserAuth(username, userPassword, deviceId) {
+async function handleUserAuth(username, userPassword, deviceId) {
   // Use the correct spinner elements from HTML
   const authSpinner = document.getElementById("auth-spinner");
   const authStatus = document.getElementById("auth-status");
 
   authSpinner.classList.remove("hidden");
+  authStatus.innerText = "⏳ Waiting for WiFi connection...";
+  authStatus.className = "status";
+  authStatus.classList.remove("hidden");
+
+  const wifiResult = await waitForWifiConnected(30, 1000);
+  if (wifiResult !== "connected") {
+    authSpinner.classList.add("hidden");
+    authStatus.innerText =
+      wifiResult === "failed"
+        ? "❌ WiFi connection failed. Please reconnect WiFi first."
+        : "❌ WiFi not connected yet. Please wait and try again.";
+    authStatus.className = "status error";
+    authStatus.classList.remove("hidden");
+    return;
+  }
+
   authStatus.classList.add("hidden");
 
   const formData = new FormData();
@@ -257,7 +311,7 @@ function handleUserAuth(username, userPassword, deviceId) {
 
         // Auto advance to next step after delay
         setTimeout(() => {
-          currentStep++;
+          currentStep = 3;
           showStep(currentStep);
         }, 1500);
       } else {

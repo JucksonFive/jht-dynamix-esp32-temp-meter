@@ -36,8 +36,8 @@
             <h3>Enter Password for <span id="selected-ssid"></span></h3>
             <input type="password" id="wifi-password" placeholder="WiFi Password" />
             <div class="button-group">
-              <button onclick="closeModal()">Cancel</button>
-              <button onclick="submitWifi()">Connect</button>
+              <button type="button" onclick="closeModal()">Cancel</button>
+              <button type="button" onclick="submitWifi()">Connect</button>
             </div>
           </div>
         </div>
@@ -54,7 +54,7 @@
         <h2>2. JT-Credentials</h2>
         <input type="text" name="deviceId" placeholder="Device ID" required />
         <input type="text" name="username" placeholder="Username" required />
-        <input id="wifi-password" type="password" name="userPassword" placeholder="Password" required />
+        <input id="user-password" type="password" name="userPassword" placeholder="Password" required />
 
         <p class="register-link">
           No account yet? <a href="http://localhost:5173/" target="_blank">Create one here</a>
@@ -62,7 +62,7 @@
 
         <div class="button-group">
           <button type="button" onclick="prevStep()">Back</button>
-          <button type="button" onclick="nextStep()">Next</button>
+          <button id="step2-next" type="button" onclick="nextStep()" disabled aria-disabled="true">Next</button>
         </div>
         <div id="auth-feedback">
           <div id="auth-spinner" class="spinner hidden">
