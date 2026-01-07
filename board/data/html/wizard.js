@@ -3,6 +3,8 @@ let selectedSSID = "";
 
 let step2WifiGateToken = 0;
 
+let isWifiSubmitting = false;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function getWifiStatusOnce() {
@@ -29,6 +31,30 @@ async function waitForWifiConnected(
     await sleep(intervalMs);
   }
   return "timeout";
+}
+
+function setWifiModalLoading(isLoading) {
+  const connectBtn = document.getElementById("wifi-connect-btn");
+  const cancelBtn = document.getElementById("wifi-cancel-btn");
+  const pwd = document.getElementById("wifi-password");
+
+  if (connectBtn) {
+    if (!connectBtn.dataset.defaultText) {
+      connectBtn.dataset.defaultText = connectBtn.textContent || "Connect";
+    }
+    connectBtn.textContent = isLoading
+      ? "Connecting..."
+      : connectBtn.dataset.defaultText;
+    connectBtn.disabled = isLoading;
+    connectBtn.setAttribute("aria-disabled", isLoading.toString());
+  }
+
+  if (cancelBtn) {
+    cancelBtn.disabled = isLoading;
+    cancelBtn.setAttribute("aria-disabled", isLoading.toString());
+  }
+
+  if (pwd) pwd.disabled = isLoading;
 }
 
 function setStep2NextEnabled(enabled) {
@@ -100,6 +126,10 @@ const loadWifiList = () => {
 function openModal(ssid) {
   const scanSpinner = document.getElementById("scan-spinner");
   selectedSSID = ssid;
+
+  isWifiSubmitting = false;
+  setWifiModalLoading(false);
+
   document.getElementById("selected-ssid").innerText = ssid;
   document.getElementById("password-modal").classList.remove("hidden");
   scanSpinner.classList.add("hidden");
@@ -112,6 +142,7 @@ function openModal(ssid) {
 }
 
 function closeModal() {
+  if (isWifiSubmitting) return;
   const scanSpinner = document.getElementById("scan-spinner");
   document.getElementById("password-modal").classList.add("hidden");
   document.getElementById("wifi-password").value = "";
@@ -194,18 +225,22 @@ function prevStep() {
 }
 
 function submitWifi() {
+  if (isWifiSubmitting) return;
   const password = document.getElementById("wifi-password").value.trim();
   if (!password) {
     alert("Please enter WiFi password");
     return;
   }
 
+  isWifiSubmitting = true;
+  setWifiModalLoading(true);
+
   const wifiSpinner = document.getElementById("wifi-spinner");
   const wifiStatus = document.getElementById("wifi-status");
 
-  wifiSpinner.classList.remove("hidden");
+  // Loading is shown on the modal button; keep modal open.
+  wifiSpinner.classList.add("hidden");
   wifiStatus.classList.add("hidden");
-  closeModal();
 
   const formData = new FormData();
   formData.append("ssid", selectedSSID);
@@ -221,6 +256,10 @@ function submitWifi() {
         pollWifiConnectionStatus(wifiSpinner, wifiStatus);
         return;
       }
+
+      isWifiSubmitting = false;
+      setWifiModalLoading(false);
+
       wifiSpinner.classList.add("hidden");
       wifiStatus.innerText = "❌ Connection request failed.";
       wifiStatus.className = "status error";
@@ -228,6 +267,10 @@ function submitWifi() {
     })
     .catch((err) => {
       console.error("WiFi error:", err);
+
+      isWifiSubmitting = false;
+      setWifiModalLoading(false);
+
       wifiSpinner.classList.add("hidden");
       wifiStatus.innerText = "❌ Network error. Try again.";
       wifiStatus.className = "status error";
@@ -245,11 +288,17 @@ async function pollWifiConnectionStatus(
     statusEl.classList.add("hidden")
   );
 
+  isWifiSubmitting = false;
+  setWifiModalLoading(false);
+
   if (result === "connected") {
     spinnerEl.classList.add("hidden");
     statusEl.innerText = "✅ Connected to WiFi!";
     statusEl.className = "status success";
     statusEl.classList.remove("hidden");
+
+    closeModal();
+
     setTimeout(() => {
       // Only advance from Step 1 -> Step 2; never increment blindly
       if (currentStep === 1) {
@@ -267,6 +316,12 @@ async function pollWifiConnectionStatus(
       : "❌ Timeout waiting for WiFi connection.";
   statusEl.className = "status error";
   statusEl.classList.remove("hidden");
+
+  const pwd = document.getElementById("wifi-password");
+  if (pwd) {
+    pwd.value = "";
+    pwd.focus();
+  }
 }
 
 async function handleUserAuth(username, userPassword, deviceId) {
