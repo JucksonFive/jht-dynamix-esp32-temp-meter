@@ -5,6 +5,9 @@ let step2WifiGateToken = 0;
 
 let isWifiSubmitting = false;
 
+let scanWifiToken = 0;
+let isWifiScanning = false;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function getWifiStatusOnce() {
@@ -39,14 +42,15 @@ function setWifiModalLoading(isLoading) {
   const pwd = document.getElementById("wifi-password");
 
   if (connectBtn) {
-    if (!connectBtn.dataset.defaultText) {
-      connectBtn.dataset.defaultText = connectBtn.textContent || "Connect";
+    if (!connectBtn.dataset.defaultHtml) {
+      connectBtn.dataset.defaultHtml = connectBtn.innerHTML || "Connect";
     }
-    connectBtn.textContent = isLoading
-      ? "Connecting..."
-      : connectBtn.dataset.defaultText;
+    connectBtn.innerHTML = isLoading
+      ? '<img src="favicon.svg" alt="Loading" class="spinner-icon" />'
+      : connectBtn.dataset.defaultHtml;
     connectBtn.disabled = isLoading;
     connectBtn.setAttribute("aria-disabled", isLoading.toString());
+    connectBtn.setAttribute("aria-busy", isLoading.toString());
   }
 
   if (cancelBtn) {
@@ -77,13 +81,45 @@ async function watchStep2WifiGate() {
   }
 }
 
+function setScanRetryVisible(visible) {
+  const btn = document.getElementById("scan-retry-btn");
+  if (!btn) return;
+  btn.classList.toggle("hidden", !visible);
+  btn.disabled = isWifiScanning;
+  btn.setAttribute("aria-disabled", isWifiScanning.toString());
+}
+
+function setScanStatus(message, kind) {
+  const el = document.getElementById("scan-status");
+  if (!el) return;
+  if (!message) {
+    el.classList.add("hidden");
+    return;
+  }
+
+  el.textContent = message;
+  el.className = "status" + (kind ? ` ${kind}` : "");
+  el.classList.remove("hidden");
+}
+
 const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
+  const token = ++scanWifiToken;
+  if (isWifiScanning) return;
+  isWifiScanning = true;
+
+  const scanSpinner = document.getElementById("scan-spinner");
+  const list = document.getElementById("wifi-list");
+
+  if (list) list.innerHTML = "";
+  if (scanSpinner) scanSpinner.classList.remove("hidden");
+  setScanStatus("", null);
+  setScanRetryVisible(false);
+
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const scanSpinner = document.getElementById("scan-spinner");
-
       const res = await fetch("/scan-wifi");
-      scanSpinner.classList.remove("hidden");
+      if (token !== scanWifiToken) return;
+      if (scanSpinner) scanSpinner.classList.remove("hidden");
       const text = await res.text();
       console.log(`📡 Attempt ${attempt + 1}:`, text);
 
@@ -99,17 +135,28 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
         throw new Error("Invalid JSON structure: " + JSON.stringify(data));
       }
 
+      if (data.networks.length === 0) {
+        if (scanSpinner) scanSpinner.classList.add("hidden");
+        setScanStatus("No WiFi networks found. Please retry.", "error");
+        isWifiScanning = false;
+        setScanRetryVisible(true);
+        return;
+      }
+
       // renderöi lista
-      const list = document.getElementById("wifi-list");
-      list.innerHTML = "";
+      if (list) list.innerHTML = "";
       for (const network of data.networks) {
         const item = document.createElement("li");
         item.className = "wifi-item";
         item.textContent = network.ssid;
         item.onclick = () => openModal(network.ssid);
-        list.appendChild(item);
+        if (list) list.appendChild(item);
       }
 
+      if (scanSpinner) scanSpinner.classList.add("hidden");
+      setScanStatus("", null);
+      isWifiScanning = false;
+      setScanRetryVisible(false);
       return;
     } catch (err) {
       console.warn("⚠️ WiFi scan retry error:", err.message);
@@ -118,8 +165,14 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
   }
 
   console.error("❌ WiFi scan failed after max attempts");
+
+  if (scanSpinner) scanSpinner.classList.add("hidden");
+  setScanStatus("❌ WiFi scan failed. Please retry.", "error");
+  isWifiScanning = false;
+  setScanRetryVisible(true);
 };
 const loadWifiList = () => {
+  if (isWifiScanning) return;
   pollWifiList();
 };
 
