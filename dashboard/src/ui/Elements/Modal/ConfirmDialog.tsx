@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Nullable } from "../../../utils/types";
+import { Nullable } from "src/utils/types";
 
 export interface ConfirmDialogProps {
   open: boolean;

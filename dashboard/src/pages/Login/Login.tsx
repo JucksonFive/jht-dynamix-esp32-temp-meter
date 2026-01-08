@@ -1,10 +1,10 @@
 import { getCurrentUser, signIn, signUp } from "@aws-amplify/auth";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { getRuntimeConfig } from "../../utils/runtimeConfig";
-import { Nullable } from "../../utils/types";
-import AuthActions from "./Components/AuthActions";
-import { Logo } from "./Components/Logo";
+import { getRuntimeConfig } from "src/utils/runtimeConfig";
+import { Nullable } from "src/utils/types";
+import AuthActions from "src/pages/Login/Components/AuthActions";
+import { Logo } from "src/pages/Login/Components/Logo";
 
 export const Login = () => {
   const { t } = useTranslation();

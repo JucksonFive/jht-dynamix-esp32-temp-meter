@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { SidePanelHeader } from "./SidePanelHeader";
+import { SidePanelHeader } from "src/pages/Dashboard/Components/SidePanel/SidePanelHeader";
 
 vi.mock("../Buttons/InfoButton", async () => ({
   InfoButton: () => <div data-testid="info" />,

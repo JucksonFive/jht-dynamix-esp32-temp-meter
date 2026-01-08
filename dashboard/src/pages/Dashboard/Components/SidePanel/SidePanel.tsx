@@ -1,9 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useAppContext } from "../../../../contexts/AppContext";
-import SelectAllDevicesButton from "../Buttons/SelectAllDevicesButton";
-import { DeviceList } from "./DeviceList";
-import { SidePanelHeader } from "./SidePanelHeader";
+import { useAppContext } from "src/contexts/AppContext";
+import SelectAllDevicesButton from "src/pages/Dashboard/Components/Buttons/SelectAllDevicesButton";
+import { DeviceList } from "src/pages/Dashboard/Components/SidePanel/DeviceList";
+import { SidePanelHeader } from "src/pages/Dashboard/Components/SidePanel/SidePanelHeader";
 
 export const SidePanel: React.FC = () => {
   const { t } = useTranslation();

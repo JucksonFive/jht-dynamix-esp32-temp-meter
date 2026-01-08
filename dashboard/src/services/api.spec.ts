@@ -8,7 +8,7 @@ import {
   fetchUserDevices,
   fetchUserReadings,
   getLatestReadingPerDevice,
-} from "./api";
+} from "src/services/api";
 import { Mock } from "vitest";
 
 vi.mock("axios", async () => {
@@ -147,7 +147,7 @@ describe("services/api.ts", () => {
   });
 
   it("fetchDashboardConfig uses fetch and stores runtime config", async () => {
-    const { setRuntimeConfig } = await import("../utils/runtimeConfig");
+    const { setRuntimeConfig } = await import("src/utils/runtimeConfig");
 
     globalThis.fetch = vi.fn(async () => {
       return {

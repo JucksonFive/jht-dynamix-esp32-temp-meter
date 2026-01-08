@@ -1,10 +1,10 @@
 import { lazy } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppContext } from "./contexts/AppContext";
-import "./locale/i18n"; // initialize i18
+import { useAppContext } from "src/contexts/AppContext";
+import "src/locale/i18n"; // initialize i18
 
-const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
-const Login = lazy(() => import("./pages/Login/Login"));
+const Dashboard = lazy(() => import("src/pages/Dashboard/Dashboard"));
+const Login = lazy(() => import("src/pages/Login/Login"));
 
 function App() {
   const { t } = useTranslation();

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { Dashboard } from "./Dashboard";
+import { Dashboard } from "src/pages/Dashboard/Dashboard";
 
 const useAppContext = vi.fn();
 vi.mock("../../contexts/AppContext", async () => ({

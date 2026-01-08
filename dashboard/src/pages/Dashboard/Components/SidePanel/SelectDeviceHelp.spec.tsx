@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { SelectDeviceHelp } from "./SelectDeviceHelp";
+import { SelectDeviceHelp } from "src/pages/Dashboard/Components/SidePanel/SelectDeviceHelp";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

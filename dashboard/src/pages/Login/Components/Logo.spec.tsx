@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { Logo } from "./Logo";
+import { Logo } from "src/pages/Login/Components/Logo";
 
 describe("pages/Login/Components/Logo.tsx", () => {
   it("renders an accessible svg logo", () => {

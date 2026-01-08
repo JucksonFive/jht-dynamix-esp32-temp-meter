@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import DeviceMultiToggle from "./DeviceMultiToggle";
+import DeviceMultiToggle from "src/pages/Dashboard/Components/Buttons/DeviceMultiToggle";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

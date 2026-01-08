@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { DeviceSelectButton } from "./DeviceSelectButton";
+import { DeviceSelectButton } from "src/pages/Dashboard/Components/Buttons/DeviceSelectButton";
 
 vi.mock("./DeviceStatusIndicator", async () => ({
   default: ({ isOnline }: any) => (

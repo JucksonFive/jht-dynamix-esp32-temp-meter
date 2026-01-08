@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AppProvider, useAppContext } from "./AppContext";
+import { AppProvider, useAppContext } from "src/contexts/AppContext";
 
 const getCurrentUser = vi.fn();
 const signOut = vi.fn();

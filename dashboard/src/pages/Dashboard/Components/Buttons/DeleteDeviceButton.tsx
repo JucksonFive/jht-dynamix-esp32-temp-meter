@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FiTrash2 } from "react-icons/fi";
-import { deleteUserDevice } from "../../../../services/api";
-import ConfirmDialog from "../../../../ui/Elements/Modal/ConfirmDialog";
-import { Nullable } from "../../../../utils/types";
-import ErrorIndicator from "./ErrorIndicator";
+import { deleteUserDevice } from "src/services/api";
+import ConfirmDialog from "src/ui/Elements/Modal/ConfirmDialog";
+import { Nullable } from "src/utils/types";
+import ErrorIndicator from "src/pages/Dashboard/Components/Buttons/ErrorIndicator";
 
 interface DeleteDeviceButtonProps {
   deviceId: string;

@@ -1,10 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { Device } from "../../../../services/types";
-import DeleteDeviceButton from "../Buttons/DeleteDeviceButton";
-import DeviceMultiToggle from "../Buttons/DeviceMultiToggle";
-import { DeviceSelectButton } from "../Buttons/DeviceSelectButton";
+import { Device } from "src/services/types";
+import DeleteDeviceButton from "src/pages/Dashboard/Components/Buttons/DeleteDeviceButton";
+import DeviceMultiToggle from "src/pages/Dashboard/Components/Buttons/DeviceMultiToggle";
+import { DeviceSelectButton } from "src/pages/Dashboard/Components/Buttons/DeviceSelectButton";
 
 interface DeviceListProps {
   devices: Device[];

@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { useReadings } from "./useReadings";
+import { useReadings } from "src/hooks/useReadings";
 
 const fetchAllUserReadings = vi.fn();
 const getLatestReadingPerDevice = vi.fn();

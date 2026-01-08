@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   fetchAllUserReadings,
   getLatestReadingPerDevice,
-} from "../services/api";
-import type { Reading } from "../services/types";
-import type { Nullable, Range } from "../utils/types";
+} from "src/services/api";
+import type { Reading } from "src/services/types";
+import type { Nullable, Range } from "src/utils/types";
 
 export interface DeviceData {
   id: string;

@@ -1,4 +1,4 @@
-import { applyButtonVariants, buttonIntents, buttonSizes } from "./variants";
+import { applyButtonVariants, buttonIntents, buttonSizes } from "src/ui/variants";
 
 describe("ui/variants.ts", () => {
   describe("applyButtonVariants", () => {

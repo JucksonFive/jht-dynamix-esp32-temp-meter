@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { DateRangeFilter } from "./DateRangeFilter";
+import { DateRangeFilter } from "src/pages/Dashboard/Components/DateRange/DateRangeFilter";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

@@ -1,4 +1,4 @@
-import "./setupTests";
+import "src/setupTests";
 
 describe("setupTests.ts", () => {
   it("registers jest-dom matchers", () => {

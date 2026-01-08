@@ -1,4 +1,4 @@
-import reportWebVitals from "./reportWebVitals";
+import reportWebVitals from "src/reportWebVitals";
 
 vi.mock("web-vitals", async () => {
   return {

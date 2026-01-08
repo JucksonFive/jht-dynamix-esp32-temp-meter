@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { TemperatureHistoryPanel } from "./TemperatureHistoryPanel";
+import { TemperatureHistoryPanel } from "src/pages/Dashboard/Components/TemperatureChart/TemperatureHistoryPanel";
 
 const ctx = {
   data: [

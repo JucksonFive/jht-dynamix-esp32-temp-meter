@@ -1,5 +1,5 @@
 import React from "react";
-import { applyButtonVariants, ButtonVariantConfig } from "../../variants";
+import { applyButtonVariants, ButtonVariantConfig } from "src/ui/variants";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,

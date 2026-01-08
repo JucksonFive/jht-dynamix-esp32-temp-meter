@@ -1,4 +1,4 @@
-import type { Device, Reading, ReadingsResponse } from "./types";
+import type { Device, Reading, ReadingsResponse } from "src/services/types";
 
 describe("services/types.ts", () => {
   it("defines expected type shapes", () => {

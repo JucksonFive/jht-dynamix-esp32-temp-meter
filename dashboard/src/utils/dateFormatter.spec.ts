@@ -6,7 +6,7 @@ import {
   formatTime,
   parseYMD,
   toLocalOffsetIso,
-} from "./dateFormatter";
+} from "src/utils/dateFormatter";
 
 describe("utils/dateFormatter.ts", () => {
   it("formats date/time outputs with expected shape", () => {

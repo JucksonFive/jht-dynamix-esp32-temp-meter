@@ -1,6 +1,6 @@
 import React from "react";
-import DeviceInfo from "./DeviceInfo";
-import DeviceStatusIndicator from "./DeviceStatusIndicator";
+import DeviceInfo from "src/pages/Dashboard/Components/Buttons/DeviceInfo";
+import DeviceStatusIndicator from "src/pages/Dashboard/Components/Buttons/DeviceStatusIndicator";
 
 interface DeviceSelectButtonProps {
   id: string;

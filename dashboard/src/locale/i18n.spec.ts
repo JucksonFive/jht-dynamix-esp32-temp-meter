@@ -1,4 +1,4 @@
-import i18n from "./i18n";
+import i18n from "src/locale/i18n";
 
 describe("locale/i18n.ts", () => {
   it("initializes with English resources", () => {

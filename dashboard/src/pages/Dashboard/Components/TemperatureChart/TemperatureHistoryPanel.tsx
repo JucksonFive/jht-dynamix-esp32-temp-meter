@@ -1,7 +1,7 @@
 import React from "react";
-import { useAppContext } from "../../../../contexts/AppContext";
-import { TemperatureChart } from "./TemperatureChart";
-import { TemperatureHistoryHeader } from "./TemperatureHistoryHeader";
+import { useAppContext } from "src/contexts/AppContext";
+import { TemperatureChart } from "src/pages/Dashboard/Components/TemperatureChart/TemperatureChart";
+import { TemperatureHistoryHeader } from "src/pages/Dashboard/Components/TemperatureChart/TemperatureHistoryHeader";
 
 export const TemperatureHistoryPanel: React.FC = () => {
   const { data, range, selectedDeviceIds } = useAppContext();

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { SelectAllDevicesButton } from "./SelectAllDevicesButton";
+import { SelectAllDevicesButton } from "src/pages/Dashboard/Components/Buttons/SelectAllDevicesButton";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

@@ -1,9 +1,9 @@
-import { useAppContext } from "../../contexts/AppContext";
-import { DateRangeFilter } from "./Components/DateRange/DateRangeFilter";
-import { HeaderBar } from "./Components/HeaderBar";
-import { SelectDeviceHelp } from "./Components/SidePanel/SelectDeviceHelp";
-import { SidePanel } from "./Components/SidePanel/SidePanel";
-import { TemperatureHistoryPanel } from "./Components/TemperatureChart/TemperatureHistoryPanel";
+import { useAppContext } from "src/contexts/AppContext";
+import { DateRangeFilter } from "src/pages/Dashboard/Components/DateRange/DateRangeFilter";
+import { HeaderBar } from "src/pages/Dashboard/Components/HeaderBar";
+import { SelectDeviceHelp } from "src/pages/Dashboard/Components/SidePanel/SelectDeviceHelp";
+import { SidePanel } from "src/pages/Dashboard/Components/SidePanel/SidePanel";
+import { TemperatureHistoryPanel } from "src/pages/Dashboard/Components/TemperatureChart/TemperatureHistoryPanel";
 
 export const Dashboard = () => {
   const { selectedDeviceIds, handleLogout } = useAppContext();

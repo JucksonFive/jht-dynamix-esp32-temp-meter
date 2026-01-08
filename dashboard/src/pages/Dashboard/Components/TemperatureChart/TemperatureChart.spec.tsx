@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { TemperatureChart } from "./TemperatureChart";
+import { TemperatureChart } from "src/pages/Dashboard/Components/TemperatureChart/TemperatureChart";
 
 const bucketizeMulti = vi.fn();
 vi.mock("../../../../utils/utils", async () => ({

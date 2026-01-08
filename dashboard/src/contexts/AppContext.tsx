@@ -6,11 +6,11 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { useDevices } from "../hooks/useDevices";
-import { useReadings } from "../hooks/useReadings";
-import { Device } from "../services/types";
-import { toLocalOffsetIso } from "../utils/dateFormatter";
-import { DeviceData, Nullable, Range, User } from "../utils/types";
+import { useDevices } from "src/hooks/useDevices";
+import { useReadings } from "src/hooks/useReadings";
+import { Device } from "src/services/types";
+import { toLocalOffsetIso } from "src/utils/dateFormatter";
+import { DeviceData, Nullable, Range, User } from "src/utils/types";
 const ONE_DAY = 864e5;
 const MINUTE = 60 * 1000;
 

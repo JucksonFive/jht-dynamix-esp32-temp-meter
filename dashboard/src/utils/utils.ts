@@ -1,4 +1,4 @@
-import { Range } from "./types";
+import { Range } from "src/utils/types";
 
 export interface MultiPoint {
   id: string;

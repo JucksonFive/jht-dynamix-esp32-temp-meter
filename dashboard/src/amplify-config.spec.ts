@@ -1,4 +1,4 @@
-import { buildAmplifyConfig } from "./amplify-config";
+import { buildAmplifyConfig } from "src/amplify-config";
 
 vi.mock("./utils/runtimeConfig", async () => {
   return {

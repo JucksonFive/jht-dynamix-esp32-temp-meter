@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { fetchUserDevices } from "../services/api";
-import { Device } from "../services/types";
+import { fetchUserDevices } from "src/services/api";
+import { Device } from "src/services/types";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-import { Nullable } from "../utils/types";
+import { Nullable } from "src/utils/types";
 
 export function useDevices(user: any) {
   const { t } = useTranslation();

@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { TemperatureHistoryHeader } from "./TemperatureHistoryHeader";
+import { TemperatureHistoryHeader } from "src/pages/Dashboard/Components/TemperatureChart/TemperatureHistoryHeader";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),
