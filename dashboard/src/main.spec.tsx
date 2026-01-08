@@ -33,7 +33,7 @@ describe("main.tsx", () => {
 
     document.body.innerHTML = '<div id="root"></div>';
 
-    await import("./main");
+    await import("src/main");
     await Promise.resolve();
 
     expect(fetchDashboardConfig).toHaveBeenCalledTimes(1);

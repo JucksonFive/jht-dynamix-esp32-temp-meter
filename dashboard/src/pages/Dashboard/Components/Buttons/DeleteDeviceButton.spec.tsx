@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { DeleteDeviceButton } from "./DeleteDeviceButton";
+import { DeleteDeviceButton } from "src/pages/Dashboard/Components/Buttons/DeleteDeviceButton";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

@@ -1,4 +1,4 @@
-import { Nullable } from "../utils/types";
+import { Nullable } from "src/utils/types";
 
 export type Reading = {
   deviceId: string;

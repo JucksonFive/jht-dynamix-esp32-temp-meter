@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { LogoutButton } from "./LogoutButton";
+import { LogoutButton } from "src/pages/Dashboard/Components/Buttons/LogoutButton";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

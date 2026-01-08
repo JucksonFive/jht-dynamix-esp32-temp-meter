@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ConfirmDialog } from "./ConfirmDialog";
+import { ConfirmDialog } from "src/ui/Elements/Modal/ConfirmDialog";
 
 describe("ui/Elements/Modal/ConfirmDialog.tsx", () => {
   const baseProps = {

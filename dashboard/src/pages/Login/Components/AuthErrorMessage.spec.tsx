@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { AuthErrorMessage } from "./AuthErrorMessage";
+import { AuthErrorMessage } from "src/pages/Login/Components/AuthErrorMessage";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

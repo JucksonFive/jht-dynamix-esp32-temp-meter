@@ -1,4 +1,4 @@
-import { bucketizeMulti, pickBucketMs, spanMs, type MultiPoint } from "./utils";
+import { bucketizeMulti, pickBucketMs, spanMs, type MultiPoint } from "src/utils/utils";
 
 describe("utils/utils.ts", () => {
   it("spanMs clamps to >= 0", () => {

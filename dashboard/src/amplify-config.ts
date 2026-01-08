@@ -1,4 +1,4 @@
-import { getRuntimeConfig } from "./utils/runtimeConfig";
+import { getRuntimeConfig } from "src/utils/runtimeConfig";
 
 export const buildAmplifyConfig = () => {
   const cfg = getRuntimeConfig();

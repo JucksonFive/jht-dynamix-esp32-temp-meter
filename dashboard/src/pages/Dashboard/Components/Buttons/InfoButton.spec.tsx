@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { InfoButton } from "./InfoButton";
+import { InfoButton } from "src/pages/Dashboard/Components/Buttons/InfoButton";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

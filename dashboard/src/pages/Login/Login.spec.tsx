@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Login } from "./Login";
+import { Login } from "src/pages/Login/Login";
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),
 }));

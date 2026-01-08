@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import { AuthButtonContent } from "./AuthButtonContent";
+import { AuthButtonContent } from "src/pages/Login/Components/Buttons/AuthButtonContent";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { DateRangePicker } from "./DateRangePicker";
+import { DateRangePicker } from "src/pages/Dashboard/Components/DateRange/DateRangePicker";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

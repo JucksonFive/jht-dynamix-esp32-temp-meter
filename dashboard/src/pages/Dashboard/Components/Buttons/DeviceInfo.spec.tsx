@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { DeviceInfo } from "./DeviceInfo";
+import { DeviceInfo } from "src/pages/Dashboard/Components/Buttons/DeviceInfo";
 
 vi.mock("i18next", async () => ({
   t: (k: string) => k,

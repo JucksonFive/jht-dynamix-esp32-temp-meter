@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
-import App from "./App";
-import { AppProvider } from "./contexts/AppContext";
+import App from "src/App";
+import { AppProvider } from "src/contexts/AppContext";
 
 vi.mock("aws-amplify/auth", () => {
   return {

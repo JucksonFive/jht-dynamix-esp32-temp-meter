@@ -1,4 +1,4 @@
-import type { Nullable, QueryParams, Range, User } from "./types";
+import type { Nullable, QueryParams, Range, User } from "src/utils/types";
 
 describe("utils/types.ts", () => {
   it("defines expected type shapes", () => {

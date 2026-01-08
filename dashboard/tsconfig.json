@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "bundler",            // <-- key change (or "node16"/"nodenext")
+    "moduleResolution": "bundler",
+    "baseUrl": ".",            // <-- key change (or "node16"/"nodenext")
     "jsx": "react-jsx",
     "types": ["vite/client", "vitest", "vitest/globals", "node"],
     "lib": ["ES2022", "DOM", "DOM.Iterable"],

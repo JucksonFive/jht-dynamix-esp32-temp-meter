@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
+import App from "src/App";
+import "src/index.css";
 
 import { Amplify } from "aws-amplify";
-import { buildAmplifyConfig } from "./amplify-config";
-import { AppProvider } from "./contexts/AppContext";
-import { fetchDashboardConfig } from "./services/api";
-import { setRuntimeConfig } from "./utils/runtimeConfig";
+import { buildAmplifyConfig } from "src/amplify-config";
+import { AppProvider } from "src/contexts/AppContext";
+import { fetchDashboardConfig } from "src/services/api";
+import { setRuntimeConfig } from "src/utils/runtimeConfig";
 
 const bootstrap = async () => {
   try {

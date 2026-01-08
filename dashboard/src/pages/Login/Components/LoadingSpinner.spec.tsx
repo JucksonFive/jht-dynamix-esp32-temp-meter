@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { LoadingSpinner } from "./LoadingSpinner";
+import { LoadingSpinner } from "src/pages/Login/Components/LoadingSpinner";
 
 describe("pages/Login/Components/LoadingSpinner.tsx", () => {
   it("renders status role and sr-only label", () => {

@@ -2,8 +2,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { Button } from "./Button";
-import { buttonIntents, buttonSizes } from "../../variants";
+import { Button } from "src/ui/Elements/Button/Button";
+import { buttonIntents, buttonSizes } from "src/ui/variants";
 
 describe("ui/Elements/Button/Button.tsx", () => {
   it("renders children and forwards button props", async () => {

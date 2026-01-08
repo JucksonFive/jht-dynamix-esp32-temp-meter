@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import DeviceStatusIndicator from "./DeviceStatusIndicator";
+import DeviceStatusIndicator from "src/pages/Dashboard/Components/Buttons/DeviceStatusIndicator";
 
 describe("pages/Dashboard/Components/Buttons/DeviceStatusIndicator.tsx", () => {
   it("renders green indicator when online", () => {

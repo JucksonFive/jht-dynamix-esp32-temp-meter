@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { HeaderBar } from "./HeaderBar";
+import { HeaderBar } from "src/pages/Dashboard/Components/HeaderBar";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

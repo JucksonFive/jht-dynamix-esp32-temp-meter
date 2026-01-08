@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { DeviceList } from "./DeviceList";
+import { DeviceList } from "src/pages/Dashboard/Components/SidePanel/DeviceList";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

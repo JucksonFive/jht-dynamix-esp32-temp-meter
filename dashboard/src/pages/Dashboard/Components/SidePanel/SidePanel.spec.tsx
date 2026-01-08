@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { SidePanel } from "./SidePanel";
+import { SidePanel } from "src/pages/Dashboard/Components/SidePanel/SidePanel";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),

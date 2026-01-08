@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import checkAllIcon from "../../../../ui/icons/check-all.svg";
-import indeterminateIcon from "../../../../ui/icons/indeterminate.svg";
+import checkAllIcon from "src/ui/icons/check-all.svg";
+import indeterminateIcon from "src/ui/icons/indeterminate.svg";
 
 interface SelectAllDevicesButtonProps {
   total: number;

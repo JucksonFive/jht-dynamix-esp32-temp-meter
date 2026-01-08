@@ -1,9 +1,9 @@
 import React from "react";
-import { Button } from "../../../ui/Elements/Button/Button";
-import { Nullable } from "../../../utils/types";
-import { AuthErrorMessage } from "./AuthErrorMessage";
-import { AuthButtonContent } from "./Buttons/AuthButtonContent";
-import { ToggleAuthModeButton } from "./Buttons/ToggleAuthModeButton";
+import { Button } from "src/ui/Elements/Button/Button";
+import { Nullable } from "src/utils/types";
+import { AuthErrorMessage } from "src/pages/Login/Components/AuthErrorMessage";
+import { AuthButtonContent } from "src/pages/Login/Components/Buttons/AuthButtonContent";
+import { ToggleAuthModeButton } from "src/pages/Login/Components/Buttons/ToggleAuthModeButton";
 
 export interface AuthActionsProps {
   mode: "signin" | "signup";

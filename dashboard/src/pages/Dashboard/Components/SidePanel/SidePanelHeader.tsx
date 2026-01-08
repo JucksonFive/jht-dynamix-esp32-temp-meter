@@ -1,5 +1,5 @@
 import React from "react";
-import { InfoButton } from "../Buttons/InfoButton";
+import { InfoButton } from "src/pages/Dashboard/Components/Buttons/InfoButton";
 
 interface SidePanelHeaderProps {
   title: string;

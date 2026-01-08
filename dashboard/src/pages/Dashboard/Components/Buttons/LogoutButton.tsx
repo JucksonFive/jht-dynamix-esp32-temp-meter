@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "../../../../ui/Elements/Button/Button";
+import { Button } from "src/ui/Elements/Button/Button";
 
 interface LogoutButtonProps {
   onLogout: () => void;

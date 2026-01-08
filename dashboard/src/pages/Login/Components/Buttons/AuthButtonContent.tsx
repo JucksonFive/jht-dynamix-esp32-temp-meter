@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { LoadingSpinner } from "../LoadingSpinner";
+import { LoadingSpinner } from "src/pages/Login/Components/LoadingSpinner";
 
 export interface AuthButtonContentProps {
   mode: "signin" | "signup";

@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useAppContext } from "../../../../contexts/AppContext";
-import { DateRangePicker } from "./DateRangePicker";
+import { useAppContext } from "src/contexts/AppContext";
+import { DateRangePicker } from "src/pages/Dashboard/Components/DateRange/DateRangePicker";
 
 interface DateRangeFilterProps {
   className?: string;

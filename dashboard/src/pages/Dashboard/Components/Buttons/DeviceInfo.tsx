@@ -1,6 +1,6 @@
 import { t } from "i18next";
 import React from "react";
-import { formatDateTime } from "../../../../utils/dateFormatter";
+import { formatDateTime } from "src/utils/dateFormatter";
 
 interface DeviceInfoProps {
   id: string;

@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import LogoutButton from "./Buttons/LogoutButton";
+import LogoutButton from "src/pages/Dashboard/Components/Buttons/LogoutButton";
 
 interface HeaderBarProps {
   onLogout: () => void;

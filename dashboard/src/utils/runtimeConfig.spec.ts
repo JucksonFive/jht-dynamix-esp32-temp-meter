@@ -2,7 +2,7 @@ import {
   getRuntimeConfig,
   setRuntimeConfig,
   type RuntimeConfig,
-} from "./runtimeConfig";
+} from "src/utils/runtimeConfig";
 
 describe("utils/runtimeConfig.ts", () => {
   it("merges config on setRuntimeConfig", () => {

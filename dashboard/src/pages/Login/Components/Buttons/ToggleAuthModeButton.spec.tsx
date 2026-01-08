@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { ToggleAuthModeButton } from "./ToggleAuthModeButton";
+import { ToggleAuthModeButton } from "src/pages/Login/Components/Buttons/ToggleAuthModeButton";
 
 vi.mock("react-i18next", async () => ({
   useTranslation: () => ({ t: (k: string) => k }),
