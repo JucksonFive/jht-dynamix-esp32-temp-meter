@@ -4,6 +4,9 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "baseUrl": ".",            // <-- key change (or "node16"/"nodenext")
+    "paths": {
+      "src/*": ["src/*"]
+    },
     "jsx": "react-jsx",
     "types": ["vite/client", "vitest", "vitest/globals", "node"],
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
