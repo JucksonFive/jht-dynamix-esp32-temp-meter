@@ -3,22 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JT-DYNAMIX</title>
-  <meta name="description" content="JT-DYNAMIX – Älykäs lämpötila- ja IoT-alusta" />
-  <link rel="icon" type="image/svg+xml" href="/jt-dynamix-icon.svg" />
+    <title>JT-DYNAMIX</title>
+    <meta
+      name="description"
+      content="JT-DYNAMIX – Älykäs IoT-alusta lämpötilan, laitteiden ja ympäristön seurantaan."
+    />
 
-  <!-- Open Graph / Facebook / WhatsApp -->
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="fi_FI" />
-  <meta property="og:site_name" content="JT-DYNAMIX" />
-  <meta property="og:title" content="JT-DYNAMIX – Älykäs lämpötila- ja IoT-alusta" />
-  <meta property="og:description" content="Älykäs IoT-alusta lämpötilan, laitteiden ja ympäristön seurantaan. Turvallinen, laajennettava ja nopeat deployt." />
-  <!-- Replace /jt-dynamix-og.png with a 1200x630 PNG logo. Fallback to poster if not yet present -->
-    <!-- Using SVG logo for now; recommend adding /jt-dynamix-og.png (1200x630) later for wider preview support -->
+    <link rel="canonical" href="https://jt-dynamix.com/" />
+    <meta
+      name="robots"
+      content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
+    />
+    <meta
+      name="googlebot"
+      content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/jt-dynamix-icon.svg" />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fi_FI" />
+    <meta property="og:site_name" content="JT-DYNAMIX" />
+    <meta property="og:title" content="JT-DYNAMIX – Älykäs lämpötila- ja IoT-alusta" />
+    <meta
+      property="og:description"
+      content="Älykäs IoT-alusta lämpötilan, laitteiden ja ympäristön seurantaan. Nopeasti käyttöönotettava, turvallinen ja laajennettava."
+    />
+    <meta property="og:url" content="https://jt-dynamix.com/" />
+    <meta property="og:image" content="/jt-dynamix-og.png" />
+    <meta property="og:image:alt" content="JT-DYNAMIX" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:image" content="/jt-dynamix-logo.svg" />
     <meta property="og:image:alt" content="JT-DYNAMIX Logo" />
     <meta property="og:image:type" content="image/svg+xml" />
-  <meta property="og:url" content="https://jt-dynamix.com/" />
+
+    <!-- Twitter/X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JT-DYNAMIX – Älykäs IoT-alusta" />
+    <meta
+      name="twitter:description"
+      content="Älykäs IoT-alusta lämpötilan, laitteiden ja ympäristön seurantaan."
+    />
+    <meta name="twitter:image" content="/jt-dynamix-og.png" />
+    <meta name="twitter:image:alt" content="JT-DYNAMIX" />
+
+    <!-- Structured data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "JT-DYNAMIX",
+            "url": "https://jt-dynamix.com/",
+            "email": "info@jt-dynamix.com"
+          },
+          {
+            "@type": "WebSite",
+            "name": "JT-DYNAMIX",
+            "url": "https://jt-dynamix.com/",
+            "inLanguage": ["fi", "en"]
+          }
+        ]
+      }
+    </script>
   </head>
   <body class="bg-white text-gray-800 selection:bg-brand-primary/20 selection:text-brand-dark">
     <div id="root"></div>

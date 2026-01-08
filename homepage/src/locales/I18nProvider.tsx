@@ -25,37 +25,45 @@ export const I18nProvider: React.FC<{
   defaultLang?: LocaleKey;
   children: React.ReactNode;
 }> = ({ defaultLang = "fi", children }) => {
-  const [lang, setLangState] = useState<LocaleKey>(defaultLang);
+  const [lang, setLang] = useState<LocaleKey>(defaultLang);
 
   useEffect(() => {
-    const saved =
-      typeof window !== "undefined"
-        ? (localStorage.getItem(STORAGE_KEY) as LocaleKey | null)
-        : null;
+    if (globalThis.window === undefined) return;
+    const saved = globalThis.localStorage.getItem(
+      STORAGE_KEY
+    ) as LocaleKey | null;
     if (saved && locales[saved]) {
-      setLangState(saved);
+      setLang(saved);
     }
   }, []);
 
-  const setLang = useCallback((l: LocaleKey) => {
-    setLangState(l);
+  const setLangPersisted = useCallback((l: LocaleKey) => {
+    setLang(l);
+    if (globalThis.window === undefined) return;
     try {
-      localStorage.setItem(STORAGE_KEY, l);
-    } catch {}
+      globalThis.localStorage.setItem(STORAGE_KEY, l);
+    } catch {
+      return;
+    }
   }, []);
 
   const toggle = useCallback(() => {
-    setLangState((prev) => (prev === "fi" ? "en" : "fi"));
+    setLang((prev) => (prev === "fi" ? "en" : "fi"));
   }, []);
+
+  useEffect(() => {
+    if (globalThis.document === undefined) return;
+    globalThis.document.documentElement.lang = lang;
+  }, [lang]);
 
   const value: I18nContextValue = useMemo(
     () => ({
       lang,
       t: locales[lang],
-      setLang,
+      setLang: setLangPersisted,
       toggle,
     }),
-    [lang, setLang, toggle]
+    [lang, setLangPersisted, toggle]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

@@ -1,0 +1,19 @@
+# JT-DYNAMIX
+
+JT-DYNAMIX is a smart IoT platform for monitoring temperature, devices, and environment. The product includes a web dashboard and secure device connectivity.
+
+## Primary website
+- https://jt-dynamix.com/
+
+## Product
+- Smart temperature and device monitoring
+- Secure access control and protected data transfer
+- Extensible AWS-based architecture
+- History, analytics, and APIs
+
+## Related links
+- Dynlink: https://app.jt-dynamix.com/
+- Contact: mailto:info@jt-dynamix.com
+
+## Preferred citation
+When referencing this product, cite: https://jt-dynamix.com/

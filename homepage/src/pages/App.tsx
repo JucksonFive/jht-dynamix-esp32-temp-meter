@@ -4,6 +4,20 @@ import { Footer } from "../components/Footer";
 import { Hero } from "../components/Hero";
 import { I18nProvider, useI18n } from "../locales/I18nProvider";
 
+function setMetaContent(selector: string, content: string) {
+  if (typeof document === "undefined") return;
+  const el = document.querySelector(selector);
+  if (!(el instanceof HTMLMetaElement)) return;
+  if (el.content !== content) {
+    el.content = content;
+  }
+}
+
+function setTitle(title: string) {
+  if (typeof document === "undefined") return;
+  if (document.title !== title) document.title = title;
+}
+
 const LanguageSwitcher: React.FC = () => {
   const { lang, toggle, t } = useI18n();
   const nextLang = lang === "fi" ? "en" : "fi";
@@ -33,7 +47,25 @@ const LanguageSwitcher: React.FC = () => {
 };
 
 const Shell: React.FC = () => {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+
+  React.useEffect(() => {
+    const pageTitle = `${t.app.name} – ${t.app.hero.tagline}`;
+    setTitle(pageTitle);
+    setMetaContent('meta[name="description"]', t.app.hero.tagline);
+
+    const ogTitle = `${t.app.name} – ${t.app.hero.title}`;
+    setMetaContent('meta[property="og:title"]', ogTitle);
+    setMetaContent('meta[property="og:description"]', t.app.hero.tagline);
+    setMetaContent(
+      'meta[property="og:locale"]',
+      lang === "fi" ? "fi_FI" : "en_US"
+    );
+
+    setMetaContent('meta[name="twitter:title"]', ogTitle);
+    setMetaContent('meta[name="twitter:description"]', t.app.hero.tagline);
+  }, [t, lang]);
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-800">
       <header className="fixed top-0 inset-x-0 z-40 backdrop-blur bg-white/80 border-b border-gray-200">
