@@ -6,11 +6,11 @@ import { useTranslation } from "react-i18next";
 type DateStr = string;
 
 interface Props {
-  value: { from: DateStr; to: DateStr };
+  value: Readonly<{ from: DateStr; to: DateStr }>;
   onChange: (r: { from: DateStr; to: DateStr }) => void;
 }
 
-export const DateRangePicker = ({ value, onChange }: Props) => {
+export const DateRangePicker = ({ value, onChange }: Readonly<Props>) => {
   const { t } = useTranslation();
   const fromDate = value.from ? new Date(value.from) : null;
   const toDate = value.to ? new Date(value.to) : null;

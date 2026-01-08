@@ -27,10 +27,10 @@ const PALETTE = [
 export function TemperatureChart({
   data,
   range,
-}: {
+}: Readonly<{
   data: MultiPoint[];
   range: Range;
-}) {
+}>) {
   const { rows, deviceIds } = useMemo(
     () => bucketizeMulti(data, range),
     [data, range.from, range.to]

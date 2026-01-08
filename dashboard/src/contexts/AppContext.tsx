@@ -61,6 +61,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Nullable<User>>(null);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [bootLoading, setBootLoading] = useState(true);
+  const [didInitRangeFromDevices, setDidInitRangeFromDevices] = useState(false);
   // Initialize user
   useEffect(() => {
     (async () => {
@@ -84,6 +85,75 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const from = toLocalOffsetIso(new Date(Date.now() - ONE_DAY));
     return { from, to: now };
   });
+
+  useEffect(() => {
+    if (didInitRangeFromDevices) return;
+    if (!devices.length) return;
+
+    const latestUpdatedAtMs = Math.max(
+      ...devices
+        .map((d) => new Date(d.updatedAt).getTime())
+        .filter((ms) => Number.isFinite(ms))
+    );
+
+    if (!Number.isFinite(latestUpdatedAtMs)) {
+      setDidInitRangeFromDevices(true);
+      return;
+    }
+
+    setRange((prev) => {
+      const prevToMs = new Date(prev.to).getTime();
+      const nowMs = Date.now();
+      const prevLooksLikeDefaultNow =
+        Number.isFinite(prevToMs) && Math.abs(prevToMs - nowMs) < 2 * MINUTE;
+
+      if (!prevLooksLikeDefaultNow) return prev;
+
+      const to = toLocalOffsetIso(new Date(latestUpdatedAtMs));
+      const from = toLocalOffsetIso(new Date(latestUpdatedAtMs - ONE_DAY));
+      return { from, to };
+    });
+
+    setDidInitRangeFromDevices(true);
+  }, [devices, didInitRangeFromDevices]);
+
+  useEffect(() => {
+    if (!selectedDeviceIds.length) return;
+    if (!devices.length) return;
+
+    const selectedUpdatedAtMs = devices
+      .filter((d) => selectedDeviceIds.includes(d.deviceId))
+      .map((d) => new Date(d.updatedAt).getTime())
+      .filter((ms) => Number.isFinite(ms));
+
+    if (!selectedUpdatedAtMs.length) return;
+
+    const latestSelectedUpdatedAtMs = Math.max(...selectedUpdatedAtMs);
+
+    setRange((prev) => {
+      const prevFromMs = new Date(prev.from).getTime();
+      const prevToMs = new Date(prev.to).getTime();
+      const prevSpanMs =
+        Number.isFinite(prevFromMs) &&
+        Number.isFinite(prevToMs) &&
+        prevToMs > prevFromMs
+          ? prevToMs - prevFromMs
+          : ONE_DAY;
+
+      if (
+        Number.isFinite(prevToMs) &&
+        Math.abs(prevToMs - latestSelectedUpdatedAtMs) < 1000
+      ) {
+        return prev;
+      }
+
+      const to = toLocalOffsetIso(new Date(latestSelectedUpdatedAtMs));
+      const from = toLocalOffsetIso(
+        new Date(latestSelectedUpdatedAtMs - prevSpanMs)
+      );
+      return { from, to };
+    });
+  }, [devices, selectedDeviceIds]);
 
   // Readings
   const {
