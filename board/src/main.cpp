@@ -11,6 +11,7 @@
 #include <wifi_scan_helper.h>
 #include "reset_helper.h"
 #include "offline_sync_helper.h"
+#include "ota_helper.h"
 #include "../lib/common_helper/common_helper.h"
 
 OfflineSyncHelper offlineSync;
@@ -111,6 +112,9 @@ void setup()
   loadUserAndDeviceIds();
 
   initOfflineSync();
+
+  // Initialize OTA
+  OTAHelper::setup(clientId.c_str());
 }
 
 static inline bool handleSetupFlow()
@@ -128,6 +132,10 @@ void loop()
 {
   WifiScanHelper::processScanResult();
   ResetHelper::loop();
+  
+  if (isSetupComplete()) {
+    OTAHelper::handle();
+  }
 
   if (!handleSetupFlow())
   {
