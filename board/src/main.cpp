@@ -15,7 +15,7 @@
 
 OfflineSyncHelper offlineSync;
 unsigned long lastSyncAttempt = 0;
-const unsigned long SYNC_INTERVAL = 5000; // sync every 60 seconds
+const unsigned long SYNC_INTERVAL = 10UL * 1000UL; // sync every 10 seconds
 
 String mqtt_server_str;
 String mqtt_topic_str;

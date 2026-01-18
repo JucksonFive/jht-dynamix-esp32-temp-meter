@@ -13,8 +13,9 @@ namespace
     Adafruit_SHT31 sht31 = Adafruit_SHT31();
     constexpr uint8_t I2C_SDA = 5;
     constexpr uint8_t I2C_SCL = 6;
-    constexpr uint8_t SHT3X_I2C_ADDR = 0x44;                            // GY-SHT30-D default address
-    constexpr unsigned long PUBLISH_INTERVAL_MS = 60UL * 60UL * 1000UL; // 1 hour
+    constexpr uint8_t SHT3X_I2C_ADDR = 0x44; // GY-SHT30-D default address
+    // 60 sekuntia * 1000 millisekuntia
+    constexpr unsigned long PUBLISH_INTERVAL_MS = 60UL * 1000UL;
 }
 
 void TempSensor::setup()
