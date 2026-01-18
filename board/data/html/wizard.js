@@ -22,9 +22,9 @@ async function getWifiStatusOnce() {
 }
 
 async function waitForWifiConnected(
-  maxAttempts = 60,
-  intervalMs = 1000,
-  onProgress
+  maxAttempts = 10,
+  intervalMs = 500,
+  onProgress,
 ) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const st = await getWifiStatusOnce();
@@ -34,6 +34,16 @@ async function waitForWifiConnected(
     await sleep(intervalMs);
   }
   return "timeout";
+}
+
+function cancelWifiScan() {
+  scanWifiToken++;
+  isWifiScanning = false;
+
+  fetch("/cancel-wifi-scan", {
+    method: "POST",
+    keepalive: true,
+  }).catch(() => {});
 }
 
 function setWifiModalLoading(isLoading) {
@@ -54,6 +64,7 @@ function setWifiModalLoading(isLoading) {
   }
 
   if (cancelBtn) {
+    cancelWifiScan();
     cancelBtn.disabled = isLoading;
     cancelBtn.setAttribute("aria-disabled", isLoading.toString());
   }
@@ -169,7 +180,7 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
       if (scanSpinner) scanSpinner.classList.add("hidden");
       setScanStatus("", null);
       isWifiScanning = false;
-      setScanRetryVisible(false);
+      setScanRetryVisible(true);
       return;
     } catch (err) {
       console.warn("⚠️ WiFi scan retry error:", err.message);
@@ -210,6 +221,7 @@ function openModal(ssid) {
 
 function closeModal() {
   if (isWifiSubmitting) return;
+
   const scanSpinner = document.getElementById("scan-spinner");
   document.getElementById("password-modal").classList.add("hidden");
   document.getElementById("wifi-password").value = "";
@@ -249,7 +261,7 @@ function showStep(step) {
     const formData = new FormData(form);
     const summary = [...formData.entries()]
       .filter(
-        ([k, v]) => v && !document.querySelector(`input[name="${k}"]`).disabled
+        ([k, v]) => v && !document.querySelector(`input[name="${k}"]`).disabled,
       )
       .map(([k, v]) => `${k}: ${v}`)
       .join("\n");
@@ -269,7 +281,7 @@ function nextStep() {
     const deviceId = form.querySelector("input[name='deviceId']").value.trim();
     if (!username || !userPassword || !deviceId) {
       alert(
-        "Please enter username, password, and device ID before proceeding."
+        "Please enter username, password, and device ID before proceeding.",
       );
       return;
     }
@@ -281,13 +293,6 @@ function nextStep() {
 
   if (currentStep < 3) {
     currentStep++;
-    showStep(currentStep);
-  }
-}
-
-function prevStep() {
-  if (currentStep > 1) {
-    currentStep--;
     showStep(currentStep);
   }
 }
@@ -349,10 +354,10 @@ async function pollWifiConnectionStatus(
   spinnerEl,
   statusEl,
   maxAttempts = 60,
-  intervalMs = 1000
+  intervalMs = 1000,
 ) {
   const result = await waitForWifiConnected(maxAttempts, intervalMs, () =>
-    statusEl.classList.add("hidden")
+    statusEl.classList.add("hidden"),
   );
 
   isWifiSubmitting = false;
@@ -383,7 +388,7 @@ async function pollWifiConnectionStatus(
     result === "failed"
       ? "❌ Incorrect password or network unreachable."
       : "❌ Timeout waiting for WiFi connection.",
-    "error"
+    "error",
   );
 
   const pwd = document.getElementById("wifi-password");
@@ -457,6 +462,13 @@ async function handleUserAuth(username, userPassword, deviceId) {
 document.addEventListener("DOMContentLoaded", () => {
   showStep(currentStep);
   if (currentStep === 1) loadWifiList();
+
+  window.addEventListener("beforeunload", () => {
+    cancelWifiScan();
+  });
+  window.addEventListener("pagehide", () => {
+    cancelWifiScan();
+  });
   // Global key handler for Enter inside password modal
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
