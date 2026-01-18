@@ -108,3 +108,22 @@ String WifiScanHelper::getResultAndClear()
 
     return result;
 }
+
+void WifiScanHelper::cancelScan()
+{
+    if (!scanInProgress)
+    {
+        WiFi.scanDelete();
+        resultReady = false;
+        scanResult.clear();
+        errorCount = 0;
+        Serial.println("[WifiScanHelper] Scan cancelled");
+        return;
+    }
+    WiFi.scanDelete();
+    scanInProgress = false;
+    resultReady = false;
+    scanResult.clear();
+    errorCount = 0;
+    Serial.println("[WifiScanHelper] Scan cancelled");
+}

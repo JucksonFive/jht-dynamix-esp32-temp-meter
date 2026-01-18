@@ -19,6 +19,7 @@ public:
     static void processScanResult();
     static bool hasResult();
     static String getResultAndClear();
+    static void cancelScan();
 };
 
 #endif

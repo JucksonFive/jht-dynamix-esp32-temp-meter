@@ -66,6 +66,11 @@ void startSetupWebServer()
 
   request->send(200, "application/json", json); });
 
+  server.on("/cancel-wifi-scan", HTTP_POST, [](AsyncWebServerRequest *request)
+            {
+    WifiScanHelper::cancelScan();
+    request->send(200, "text/plain", "Scan cancelled"); });
+
   server.on("/connect-to-wifi", HTTP_POST, [](AsyncWebServerRequest *request)
             {
     if (!request->hasParam("ssid", true) || !request->hasParam("password", true))

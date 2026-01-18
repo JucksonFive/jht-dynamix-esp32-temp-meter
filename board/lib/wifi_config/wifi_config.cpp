@@ -64,7 +64,7 @@ void startWifiConnectTask(String ssid, String pass)
     WiFi.begin(creds.first.c_str(), creds.second.c_str());
 
     // 4) Odotus watchdog-ystävällisesti
-    const uint32_t deadline = millis() + 10000;
+    const uint32_t deadline = millis() + 5000;
     while (millis() < deadline && WiFi.status() != WL_CONNECTED) {
       vTaskDelay(pdMS_TO_TICKS(100));
     }
