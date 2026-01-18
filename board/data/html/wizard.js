@@ -1,19 +1,144 @@
 let currentStep = 1;
 let selectedSSID = "";
 
+let step2WifiGateToken = 0;
+
+let isWifiSubmitting = false;
+
+let scanWifiToken = 0;
+let isWifiScanning = false;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function getWifiStatusOnce() {
+  try {
+    const res = await fetch("/wifi-status");
+    const text = await res.text();
+    const data = JSON.parse(text);
+    return data?.status ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function waitForWifiConnected(
+  maxAttempts = 60,
+  intervalMs = 1000,
+  onProgress
+) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const st = await getWifiStatusOnce();
+    if (st === "connected") return "connected";
+    if (st === "failed") return "failed";
+    if (typeof onProgress === "function") onProgress(st, attempt);
+    await sleep(intervalMs);
+  }
+  return "timeout";
+}
+
+function setWifiModalLoading(isLoading) {
+  const connectBtn = document.getElementById("wifi-connect-btn");
+  const cancelBtn = document.getElementById("wifi-cancel-btn");
+  const pwd = document.getElementById("wifi-password");
+
+  if (connectBtn) {
+    if (!connectBtn.dataset.defaultHtml) {
+      connectBtn.dataset.defaultHtml = connectBtn.innerHTML || "Connect";
+    }
+    connectBtn.innerHTML = isLoading
+      ? '<img src="favicon.svg" alt="Loading" class="spinner-icon" />'
+      : connectBtn.dataset.defaultHtml;
+    connectBtn.disabled = isLoading;
+    connectBtn.setAttribute("aria-disabled", isLoading.toString());
+    connectBtn.setAttribute("aria-busy", isLoading.toString());
+  }
+
+  if (cancelBtn) {
+    cancelBtn.disabled = isLoading;
+    cancelBtn.setAttribute("aria-disabled", isLoading.toString());
+  }
+
+  if (pwd) pwd.disabled = isLoading;
+}
+
+function setWifiModalStatus(message, kind) {
+  const el = document.getElementById("wifi-modal-status");
+  if (!el) return;
+  if (!message) {
+    el.classList.add("hidden");
+    el.textContent = "";
+    return;
+  }
+  el.textContent = message;
+  el.className = "status" + (kind ? ` ${kind}` : "");
+  el.classList.remove("hidden");
+}
+
+function setStep2NextEnabled(enabled) {
+  const btn = document.getElementById("step2-next");
+  if (!btn) return;
+  btn.disabled = !enabled;
+  btn.setAttribute("aria-disabled", (!enabled).toString());
+}
+
+async function watchStep2WifiGate() {
+  const token = ++step2WifiGateToken;
+  setStep2NextEnabled(false);
+
+  while (currentStep === 2 && token === step2WifiGateToken) {
+    const st = await getWifiStatusOnce();
+    const isConnected = st === "connected";
+    setStep2NextEnabled(isConnected);
+    if (isConnected) return;
+    await sleep(1000);
+  }
+}
+
+function setScanRetryVisible(visible) {
+  const btn = document.getElementById("scan-retry-btn");
+  if (!btn) return;
+  btn.classList.toggle("hidden", !visible);
+  btn.disabled = isWifiScanning;
+  btn.setAttribute("aria-disabled", isWifiScanning.toString());
+}
+
+function setScanStatus(message, kind) {
+  const el = document.getElementById("scan-status");
+  if (!el) return;
+  if (!message) {
+    el.classList.add("hidden");
+    return;
+  }
+
+  el.textContent = message;
+  el.className = "status" + (kind ? ` ${kind}` : "");
+  el.classList.remove("hidden");
+}
+
 const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
+  const token = ++scanWifiToken;
+  if (isWifiScanning) return;
+  isWifiScanning = true;
+
+  const scanSpinner = document.getElementById("scan-spinner");
+  const list = document.getElementById("wifi-list");
+
+  if (list) list.innerHTML = "";
+  if (scanSpinner) scanSpinner.classList.remove("hidden");
+  setScanStatus("", null);
+  setScanRetryVisible(false);
+
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const scanSpinner = document.getElementById("scan-spinner");
-
       const res = await fetch("/scan-wifi");
-      scanSpinner.classList.remove("hidden");
+      if (token !== scanWifiToken) return;
+      if (scanSpinner) scanSpinner.classList.remove("hidden");
       const text = await res.text();
       console.log(`📡 Attempt ${attempt + 1}:`, text);
 
       // jos ei vielä valmis
       if (res.status === 202 || text === "Scan started") {
-        await new Promise((resolve) => setTimeout(resolve, interval));
+        await sleep(interval);
         continue;
       }
 
@@ -23,33 +148,55 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
         throw new Error("Invalid JSON structure: " + JSON.stringify(data));
       }
 
+      if (data.networks.length === 0) {
+        if (scanSpinner) scanSpinner.classList.add("hidden");
+        setScanStatus("No WiFi networks found. Please retry.", "error");
+        isWifiScanning = false;
+        setScanRetryVisible(true);
+        return;
+      }
+
       // renderöi lista
-      const list = document.getElementById("wifi-list");
-      list.innerHTML = "";
+      if (list) list.innerHTML = "";
       for (const network of data.networks) {
         const item = document.createElement("li");
         item.className = "wifi-item";
         item.textContent = network.ssid;
         item.onclick = () => openModal(network.ssid);
-        list.appendChild(item);
+        if (list) list.appendChild(item);
       }
 
+      if (scanSpinner) scanSpinner.classList.add("hidden");
+      setScanStatus("", null);
+      isWifiScanning = false;
+      setScanRetryVisible(false);
       return;
     } catch (err) {
       console.warn("⚠️ WiFi scan retry error:", err.message);
-      await new Promise((resolve) => setTimeout(resolve, interval));
+      await sleep(interval);
     }
   }
 
   console.error("❌ WiFi scan failed after max attempts");
+
+  if (scanSpinner) scanSpinner.classList.add("hidden");
+  setScanStatus("❌ WiFi scan failed. Please retry.", "error");
+  isWifiScanning = false;
+  setScanRetryVisible(true);
 };
 const loadWifiList = () => {
+  if (isWifiScanning) return;
   pollWifiList();
 };
 
 function openModal(ssid) {
   const scanSpinner = document.getElementById("scan-spinner");
   selectedSSID = ssid;
+
+  isWifiSubmitting = false;
+  setWifiModalLoading(false);
+  setWifiModalStatus("", null);
+
   document.getElementById("selected-ssid").innerText = ssid;
   document.getElementById("password-modal").classList.remove("hidden");
   scanSpinner.classList.add("hidden");
@@ -62,9 +209,11 @@ function openModal(ssid) {
 }
 
 function closeModal() {
+  if (isWifiSubmitting) return;
   const scanSpinner = document.getElementById("scan-spinner");
   document.getElementById("password-modal").classList.add("hidden");
   document.getElementById("wifi-password").value = "";
+  setWifiModalStatus("", null);
   scanSpinner.classList.add("hidden");
 }
 
@@ -85,6 +234,14 @@ function showStep(step) {
       }
     }
     index++;
+  }
+
+  // Step 2: keep Next disabled until WiFi is actually connected
+  if (step === 2) {
+    watchStep2WifiGate();
+  } else {
+    // Stop any running Step2 watcher
+    step2WifiGateToken++;
   }
 
   if (step === 3) {
@@ -136,18 +293,23 @@ function prevStep() {
 }
 
 function submitWifi() {
+  if (isWifiSubmitting) return;
   const password = document.getElementById("wifi-password").value.trim();
   if (!password) {
     alert("Please enter WiFi password");
     return;
   }
 
+  isWifiSubmitting = true;
+  setWifiModalLoading(true);
+  setWifiModalStatus("", null);
+
   const wifiSpinner = document.getElementById("wifi-spinner");
   const wifiStatus = document.getElementById("wifi-status");
 
-  wifiSpinner.classList.remove("hidden");
+  // Loading is shown on the modal button; keep modal open.
+  wifiSpinner.classList.add("hidden");
   wifiStatus.classList.add("hidden");
-  closeModal();
 
   const formData = new FormData();
   formData.append("ssid", selectedSSID);
@@ -158,33 +320,28 @@ function submitWifi() {
     body: formData,
   })
     .then((res) => {
-      if (res.status === 200) {
-        // Immediate success (already connected)
-        wifiSpinner.classList.add("hidden");
-        wifiStatus.innerText = "✅ Already connected";
-        wifiStatus.className = "status success";
-        wifiStatus.classList.remove("hidden");
-        setTimeout(() => {
-          currentStep++;
-          showStep(currentStep);
-        }, 1200);
-        return;
-      }
-      if (res.status === 202) {
+      if (res.status === 200 || res.status === 202) {
+        // Always verify connection status before advancing to Step 2
         pollWifiConnectionStatus(wifiSpinner, wifiStatus);
         return;
       }
+
+      isWifiSubmitting = false;
+      setWifiModalLoading(false);
+
       wifiSpinner.classList.add("hidden");
-      wifiStatus.innerText = "❌ Connection request failed.";
-      wifiStatus.className = "status error";
-      wifiStatus.classList.remove("hidden");
+      wifiStatus.classList.add("hidden");
+      setWifiModalStatus("❌ Connection request failed.", "error");
     })
     .catch((err) => {
       console.error("WiFi error:", err);
+
+      isWifiSubmitting = false;
+      setWifiModalLoading(false);
+
       wifiSpinner.classList.add("hidden");
-      wifiStatus.innerText = "❌ Network error. Try again.";
-      wifiStatus.className = "status error";
-      wifiStatus.classList.remove("hidden");
+      wifiStatus.classList.add("hidden");
+      setWifiModalStatus("❌ Network error. Try again.", "error");
     });
 }
 
@@ -194,49 +351,70 @@ async function pollWifiConnectionStatus(
   maxAttempts = 60,
   intervalMs = 1000
 ) {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      const res = await fetch("/wifi-status");
-      const text = await res.text();
-      const data = JSON.parse(text);
-      const st = data.status;
-      if (st === "connected") {
-        spinnerEl.classList.add("hidden");
-        statusEl.innerText = "✅ Connected to WiFi!";
-        statusEl.className = "status success";
-        statusEl.classList.remove("hidden");
-        setTimeout(() => {
-          currentStep++;
-          showStep(currentStep);
-        }, 1500);
-        return;
+  const result = await waitForWifiConnected(maxAttempts, intervalMs, () =>
+    statusEl.classList.add("hidden")
+  );
+
+  isWifiSubmitting = false;
+  setWifiModalLoading(false);
+
+  if (result === "connected") {
+    spinnerEl.classList.add("hidden");
+    statusEl.classList.add("hidden");
+    setWifiModalStatus("✅ Connected to WiFi!", "success");
+
+    setTimeout(() => {
+      closeModal();
+    }, 800);
+
+    setTimeout(() => {
+      // Only advance from Step 1 -> Step 2; never increment blindly
+      if (currentStep === 1) {
+        currentStep = 2;
+        showStep(currentStep);
       }
-      if (st === "failed") {
-        spinnerEl.classList.add("hidden");
-        statusEl.innerText = "❌ Incorrect password or network unreachable.";
-        statusEl.className = "status error";
-        statusEl.classList.remove("hidden");
-        return;
-      }
-      // still connecting
-      statusEl.classList.add("hidden");
-    } catch (e) {
-      console.warn("Status poll error", e);
-    }
-    await new Promise((r) => setTimeout(r, intervalMs));
+    }, 1500);
+    return;
   }
+
   spinnerEl.classList.add("hidden");
-  statusEl.innerText = "❌ Timeout waiting for WiFi connection.";
-  statusEl.className = "status error";
-  statusEl.classList.remove("hidden");
+  statusEl.classList.add("hidden");
+  setWifiModalStatus(
+    result === "failed"
+      ? "❌ Incorrect password or network unreachable."
+      : "❌ Timeout waiting for WiFi connection.",
+    "error"
+  );
+
+  const pwd = document.getElementById("wifi-password");
+  if (pwd) {
+    pwd.value = "";
+    pwd.focus();
+  }
 }
 
-function handleUserAuth(username, userPassword, deviceId) {
+async function handleUserAuth(username, userPassword, deviceId) {
   // Use the correct spinner elements from HTML
   const authSpinner = document.getElementById("auth-spinner");
   const authStatus = document.getElementById("auth-status");
 
   authSpinner.classList.remove("hidden");
+  authStatus.innerText = "⏳ Waiting for WiFi connection...";
+  authStatus.className = "status";
+  authStatus.classList.remove("hidden");
+
+  const wifiResult = await waitForWifiConnected(30, 1000);
+  if (wifiResult !== "connected") {
+    authSpinner.classList.add("hidden");
+    authStatus.innerText =
+      wifiResult === "failed"
+        ? "❌ WiFi connection failed. Please reconnect WiFi first."
+        : "❌ WiFi not connected yet. Please wait and try again.";
+    authStatus.className = "status error";
+    authStatus.classList.remove("hidden");
+    return;
+  }
+
   authStatus.classList.add("hidden");
 
   const formData = new FormData();
@@ -257,7 +435,7 @@ function handleUserAuth(username, userPassword, deviceId) {
 
         // Auto advance to next step after delay
         setTimeout(() => {
-          currentStep++;
+          currentStep = 3;
           showStep(currentStep);
         }, 1500);
       } else {
