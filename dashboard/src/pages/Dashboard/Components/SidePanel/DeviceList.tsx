@@ -1,10 +1,12 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { Device } from "src/services/types";
 import DeleteDeviceButton from "src/pages/Dashboard/Components/Buttons/DeleteDeviceButton";
 import DeviceMultiToggle from "src/pages/Dashboard/Components/Buttons/DeviceMultiToggle";
 import { DeviceSelectButton } from "src/pages/Dashboard/Components/Buttons/DeviceSelectButton";
+import FactoryResetButton from "src/pages/Dashboard/Components/Buttons/FactoryResetButton";
+import RestartDeviceButton from "src/pages/Dashboard/Components/Buttons/RestartDeviceButton";
+import { Device } from "src/services/types";
 
 interface DeviceListProps {
   devices: Device[];
@@ -50,6 +52,8 @@ export const DeviceList: React.FC<DeviceListProps> = ({
                   active={isActive}
                   onToggle={() => onToggleMulti(d.deviceId)}
                 />
+                <RestartDeviceButton deviceId={d.deviceId} />
+                <FactoryResetButton deviceId={d.deviceId} />
                 <DeleteDeviceButton
                   deviceId={d.deviceId}
                   onDeleted={onDeviceDeleted}
