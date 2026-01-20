@@ -97,12 +97,39 @@ export async function fetchUserDevices(opts?: {
 }
 
 export async function deleteUserDevice(
-  deviceId: string
+  deviceId: string,
 ): Promise<{ message: string }> {
   return apiRequest<{ message: string }>({
     method: "DELETE",
     path: "/delete-user-device",
     params: { deviceId },
+  });
+}
+
+export async function rebootDevice(deviceId: string): Promise<{
+  message: string;
+  deviceId: string;
+  cmd: "reboot";
+  reqId: string;
+  ts: number;
+}> {
+  return apiRequest({
+    method: "POST",
+    path: `/devices/${encodeURIComponent(deviceId)}/commands/reboot`,
+  });
+}
+
+export async function factoryResetDevice(deviceId: string, confirm: string) {
+  return apiRequest<{
+    message: string;
+    deviceId: string;
+    cmd: "factory_reset";
+    reqId: string;
+    ts: number;
+  }>({
+    method: "POST",
+    path: `/devices/${encodeURIComponent(deviceId)}/commands/factory-reset`,
+    data: { confirm },
   });
 }
 
@@ -117,7 +144,7 @@ export async function fetchDashboardConfig(): Promise<Record<string, string>> {
 }
 
 export const getLatestReadingPerDevice = (
-  readings: ReadingsResponse["items"]
+  readings: ReadingsResponse["items"],
 ): Map<string, string> => {
   const latest = new Map<string, string>();
   readings.forEach((reading) => {
