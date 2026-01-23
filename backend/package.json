@@ -9,6 +9,8 @@
     "watch": "tsc -w",
     "test": "jest --coverage",
     "cdk": "cdk",
+    "deploy": "npm run cdk -- deploy --all --require-approval never --outputs-file ./cdk-outputs.json",
+    "postdeploy": "node scripts/generate-env.mjs",
     "lint": "eslint --ext .ts src"
   },
   "devDependencies": {

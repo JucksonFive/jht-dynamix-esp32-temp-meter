@@ -35,16 +35,18 @@ To deploy the backend infrastructure, you need to have the AWS CDK installed and
 
 3.  **Deploy the Stacks**:
     ```bash
-    npm run cdk deploy --all
+    npm run deploy
     ```
 
-This will deploy all the necessary resources to your AWS account.
+This will deploy all the necessary resources to your AWS account and generate
+`dashboard/.env.local` from the CDK outputs.
 
 ## Useful Commands
 
 -   `npm run build`: Compile TypeScript to JavaScript.
 -   `npm run watch`: Watch for changes and compile.
 -   `npm run test`: Run unit tests.
--   `npm run cdk deploy`: Deploy the specified stack.
+-   `npm run deploy`: Deploy all backend stacks and generate the dashboard
+    environment file.
 -   `npm run cdk diff`: Compare the deployed stack with the current state.
 -   `npm run cdk synth`: Synthesize the CloudFormation template.

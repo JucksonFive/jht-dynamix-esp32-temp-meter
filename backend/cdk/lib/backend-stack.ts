@@ -260,5 +260,14 @@ export class BackendStack extends cdk.Stack {
       principal: "iot.amazonaws.com",
       sourceArn: `arn:aws:iot:${this.region}:${this.account}:rule/device_status_rule`,
     });
+
+    new cdk.CfnOutput(this, "TemperatureApiUrl", {
+      value: api.url,
+      description: "API Gateway endpoint URL for the dashboard",
+    });
+    new cdk.CfnOutput(this, "AwsRegion", {
+      value: this.region,
+      description: "AWS region for the deployment",
+    });
   }
 }
