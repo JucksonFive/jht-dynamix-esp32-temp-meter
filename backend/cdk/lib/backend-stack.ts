@@ -4,6 +4,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as iot from "aws-cdk-lib/aws-iot";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as cognito from "aws-cdk-lib/aws-cognito";
+import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 
@@ -18,6 +19,7 @@ export interface BackendStackProps extends cdk.StackProps {
   updateDeviceStatusFn: NodejsFunction;
   getDashboardConfigFn: NodejsFunction;
   userPool: cognito.IUserPool;
+  regionalWafArn: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -259,6 +261,12 @@ export class BackendStack extends cdk.Stack {
       functionName: updateDeviceStatusFn.functionName,
       principal: "iot.amazonaws.com",
       sourceArn: `arn:aws:iot:${this.region}:${this.account}:rule/device_status_rule`,
+    });
+
+    // Associate WAF with the API Gateway stage
+    new wafv2.CfnWebACLAssociation(this, "ApiGatewayWafAssociation", {
+      resourceArn: api.deploymentStage.stageArn,
+      webAclArn: props.regionalWafArn,
     });
   }
 }

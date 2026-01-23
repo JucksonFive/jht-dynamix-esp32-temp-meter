@@ -12,6 +12,7 @@ interface Props extends cdk.StackProps {
   domainName: string;
   siteDomain: string;
   certificateArn: string;
+  globalWafArn?: string;
 }
 
 export class HomepageHostingStack extends cdk.Stack {
@@ -83,6 +84,7 @@ export class HomepageHostingStack extends cdk.Stack {
       enableLogging: true,
       logBucket: logBucket,
       logFilePrefix: "homepage-access-logs/",
+      webAclId: props.globalWafArn,
       defaultBehavior: {
         origin: origins.S3BucketOrigin.withOriginAccessControl(siteBucket, {
           originAccessControl,
