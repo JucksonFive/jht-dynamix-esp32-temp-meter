@@ -113,6 +113,43 @@ void setup()
   initOfflineSync();
 }
 
+// LISÄYS: Globaali tilatieto
+bool isOnline = false;
+unsigned long lastConnectionCheck = 0;
+const unsigned long CONNECTION_CHECK_INTERVAL = 5000; // Tarkista tila 5s välein
+
+// LISÄYS: Uusi funktio, joka päivittää 'isOnline' muuttujaa nopeasti
+void checkConnectionStatus()
+{
+  unsigned long now = millis();
+  if (now - lastConnectionCheck >= CONNECTION_CHECK_INTERVAL)
+  {
+    lastConnectionCheck = now;
+
+    bool wifiOk = (WiFi.status() == WL_CONNECTED);
+    bool mqttOk = MQTT::isConnected();
+
+    if (wifiOk && mqttOk)
+    {
+      if (!isOnline)
+      {
+        Serial.println("[Status] System is ONLINE");
+        isOnline = true;
+      }
+    }
+    else
+    {
+      if (isOnline)
+      {
+        Serial.printf("[Status] System went OFFLINE (WiFi: %s, MQTT: %s)\n",
+                      wifiOk ? "OK" : "FAIL",
+                      mqttOk ? "OK" : "FAIL");
+        isOnline = false;
+      }
+    }
+  }
+}
+
 static inline bool handleSetupFlow()
 {
   if (!isSetupComplete())
@@ -133,9 +170,25 @@ void loop()
   {
     return;
   }
-  MQTT::maintainMqttConnection(clientId);
-  TempSensor::publishTemperatureIfDue(offlineSync, mqtt_topic_str, userId, deviceId);
-  OfflineSyncHelper::attemptOfflineSync(offlineSync, lastSyncAttempt, SYNC_INTERVAL);
 
-  delay(100); // Short delay to prevent watchdog reset
+  // 1. Tarkista tila nopeasti
+  checkConnectionStatus();
+
+  // Varmistetaan että MQTT yrittää yhdistää vain jos WiFi on pystyssä
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    MQTT::maintainMqttConnection(clientId);
+  }
+
+  // 3. Sensorin luku toimii riippumatta yhteydestä
+  // TempSensorille voi välittää isOnline-tiedon tai antaa sen päättää itse MQTT::isConnected():n perusteella
+  TempSensor::publishTemperatureIfDue(offlineSync, mqtt_topic_str, userId, deviceId);
+
+  // 4. Synkronointi vain jos ollaan online
+  if (isOnline)
+  {
+    OfflineSyncHelper::attemptOfflineSync(offlineSync, lastSyncAttempt, SYNC_INTERVAL);
+  }
+
+  delay(100);
 }
