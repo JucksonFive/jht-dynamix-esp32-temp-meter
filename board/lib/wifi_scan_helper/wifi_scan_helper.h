@@ -20,6 +20,22 @@ public:
     static bool hasResult();
     static String getResultAndClear();
     static void cancelScan();
+
+#if defined(UNIT_TEST) || defined(PIO_UNIT_TESTING)
+    struct WifiScanApi
+    {
+        int (*scanNetworks)(bool async);
+        int16_t (*scanComplete)();
+        String (*ssid)(uint8_t index);
+        int32_t (*rssi)(uint8_t index);
+        int32_t (*channel)(uint8_t index);
+        wifi_auth_mode_t (*encryptionType)(uint8_t index);
+        void (*scanDelete)();
+    };
+
+    static void setTestApi(const WifiScanApi &api);
+    static void resetTestApi();
+#endif
 };
 
 #endif

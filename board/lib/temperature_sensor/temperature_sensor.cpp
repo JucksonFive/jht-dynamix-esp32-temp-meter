@@ -15,6 +15,13 @@ namespace
     constexpr uint8_t I2C_SCL = 9;
     constexpr uint8_t SHT3X_I2C_ADDR = 0x44;                            // GY-SHT30-D default address
     constexpr unsigned long PUBLISH_INTERVAL_MS = 60UL * 60UL * 1000UL; // 1 hour
+#if defined(UNIT_TEST) || defined(PIO_UNIT_TESTING)
+    constexpr const char *USER_PATH = "/user.test.json";
+    constexpr const char *DEVICE_PATH = "/device.test.json";
+#else
+    constexpr const char *USER_PATH = "/user.json";
+    constexpr const char *DEVICE_PATH = "/device.json";
+#endif
 }
 
 void TempSensor::setup()
@@ -54,8 +61,8 @@ void TempSensor::publishTemperature(
     char payload[256];
     const char *ts = TimeHelper::getLocalTimestamp();
 
-    const String resolvedUserId = StorageHelper::getConfigValue("/user.json", "userId");
-    const String resolvedDeviceId = StorageHelper::getConfigValue("/device.json", "deviceId");
+    const String resolvedUserId = StorageHelper::getConfigValue(USER_PATH, "userId");
+    const String resolvedDeviceId = StorageHelper::getConfigValue(DEVICE_PATH, "deviceId");
 
     if (!StorageHelper::buildPayload(
             payload,

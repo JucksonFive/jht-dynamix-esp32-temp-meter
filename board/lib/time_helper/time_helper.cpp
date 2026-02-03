@@ -90,6 +90,10 @@ const char *TimeHelper::getLocalTimestamp()
 
 void TimeHelper::scheduleRestart(unsigned long delayMs)
 {
+#if defined(UNIT_TEST) || defined(PIO_UNIT_TESTING)
+    (void)delayMs;
+    return;
+#endif
     if (delayMs == 0)
     {
         ESP.restart();

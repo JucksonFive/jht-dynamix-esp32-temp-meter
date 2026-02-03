@@ -193,8 +193,16 @@ bool isSetupComplete()
   }
 
   // Check if both WiFi credentials and device linking are complete
-  bool wifiConfigExists = LittleFS.exists("/wifi.json");
-  bool deviceLinked = LittleFS.exists("/device.json");
+#if defined(UNIT_TEST) || defined(PIO_UNIT_TESTING)
+  const char *wifiPath = "/wifi.test.json";
+  const char *devicePath = "/device.test.json";
+#else
+  const char *wifiPath = "/wifi.json";
+  const char *devicePath = "/device.json";
+#endif
+
+  bool wifiConfigExists = LittleFS.exists(wifiPath);
+  bool deviceLinked = LittleFS.exists(devicePath);
 
   Serial.printf("[Setup] WiFi config exists: %s, Device linked: %s\n",
                 wifiConfigExists ? "YES" : "NO",

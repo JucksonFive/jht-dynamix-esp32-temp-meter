@@ -2,7 +2,11 @@
 #include <LittleFS.h>
 #include <mqtt_helper.h>
 
+#if defined(UNIT_TEST) || defined(PIO_UNIT_TESTING)
+const char *OfflineSyncHelper::QUEUE_FILE = "/offline_queue.test.json";
+#else
 const char *OfflineSyncHelper::QUEUE_FILE = "/offline_queue.json";
+#endif
 
 bool OfflineSyncHelper::createQueueFile()
 {

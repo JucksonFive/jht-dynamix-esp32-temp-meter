@@ -50,7 +50,11 @@ namespace ResetHelper
 
     bool performFactoryReset()
     {
+#if defined(UNIT_TEST) || defined(PIO_UNIT_TESTING)
+        const char *files[] = {"/wifi.test.json", "/device.test.json"};
+#else
         const char *files[] = {"/wifi.json", "/device.json"};
+#endif
         bool any = false;
         for (auto f : files)
         {
