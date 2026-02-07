@@ -1,30 +1,29 @@
-// Central UI variant configuration for reusable components (buttons etc.)
-// Extend by adding more intents, sizes, or component-specific tokens.
+// Central UI variant configuration for Refined Minimal design system
 
 export const buttonIntents = {
   primary:
-    "bg-black text-white hover:bg-gray-900 focus:ring-2 focus:ring-black/40",
+    "bg-primary-500 text-white hover:bg-primary-600 focus:ring-2 focus:ring-primary-500/40",
   danger:
-    "bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-red-500/40",
+    "bg-status-hot text-white hover:bg-red-600 focus:ring-2 focus:ring-status-hot/40",
   secondary:
-    "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-2 focus:ring-gray-400/40",
+    "bg-neutral-100 dark:bg-[#231f1f] text-neutral-800 dark:text-[#d4c5c5] hover:bg-neutral-200 dark:hover:bg-[#2d2626] focus:ring-2 focus:ring-neutral-400/40 border border-neutral-200 dark:border-[#2d2626]",
   outline:
-    "border border-gray-300 text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-gray-300/50",
+    "border border-neutral-300 dark:border-[#3d3434] text-neutral-800 dark:text-[#d4c5c5] hover:border-primary-500 hover:text-primary-600 focus:ring-2 focus:ring-primary-500/40",
   ghost:
-    "bg-transparent text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-gray-200/60",
-  link: "bg-transparent text-blue-600 hover:underline px-0",
+    "bg-transparent text-neutral-500 dark:text-[#a39999] hover:bg-neutral-100 dark:hover:bg-[#231f1f] hover:text-neutral-900 dark:hover:text-[#f5f0f0] focus:ring-2 focus:ring-neutral-400/40",
+  link: "bg-transparent text-primary-600 dark:text-[#fb7185] hover:underline px-0",
 } as const;
 
 export const buttonSizes = {
-  sm: "text-sm px-3 py-1.5",
+  sm: "text-xs px-3 py-1.5",
   md: "text-sm px-4 py-2",
-  lg: "text-base px-5 py-3",
+  lg: "text-sm px-5 py-3",
 } as const;
 
 export interface ButtonVariantConfig {
   intent?: keyof typeof buttonIntents;
   size?: keyof typeof buttonSizes;
-  rounded?: boolean | "full"; // true -> rounded, false -> none, "full" -> rounded-full
+  rounded?: boolean | "full";
 }
 
 export const applyButtonVariants = (cfg: ButtonVariantConfig = {}) => {
@@ -33,11 +32,10 @@ export const applyButtonVariants = (cfg: ButtonVariantConfig = {}) => {
   const rounded =
     cfg.rounded === "full"
       ? "rounded-full"
-      : cfg.rounded === false
-      ? ""
-      : "rounded";
+      : cfg.rounded === true
+        ? "rounded-lg"
+        : "rounded-lg";
   return [
-    // base
     "inline-flex items-center justify-center font-medium transition-colors select-none",
     "disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none",
     buttonIntents[intent],

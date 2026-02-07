@@ -2,6 +2,15 @@ import { render, screen } from "@testing-library/react";
 
 import { TemperatureChart } from "src/pages/Dashboard/Components/TemperatureChart/TemperatureChart";
 
+vi.mock("src/contexts/ThemeContext", async () => ({
+  useTheme: () => ({
+    mode: "dark",
+    resolved: "dark",
+    setMode: vi.fn(),
+    toggle: vi.fn(),
+  }),
+}));
+
 const bucketizeMulti = vi.fn();
 vi.mock("../../../../utils/utils", async () => ({
   bucketizeMulti: (...args: any[]) => bucketizeMulti(...args),
@@ -50,7 +59,7 @@ describe("pages/Dashboard/Components/TemperatureChart/TemperatureChart.tsx", () 
           from: new Date(0).toISOString(),
           to: new Date(10 * 3600_000).toISOString(),
         }}
-      />
+      />,
     );
 
     expect(screen.getByTestId("xaxis")).toBeInTheDocument();
@@ -73,7 +82,7 @@ describe("pages/Dashboard/Components/TemperatureChart/TemperatureChart.tsx", () 
           from: new Date(0).toISOString(),
           to: new Date(10 * 3600_000).toISOString(),
         }}
-      />
+      />,
     );
 
     expect(xAxisDomain).toEqual([0, 10 * 3600_000]);

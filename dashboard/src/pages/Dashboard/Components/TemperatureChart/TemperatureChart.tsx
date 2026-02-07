@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTheme } from "src/contexts/ThemeContext";
 import { fmtTime } from "src/utils/dateFormatter";
 import { Range } from "src/utils/types";
 import { MultiPoint, bucketizeMulti } from "src/utils/utils";
@@ -31,9 +32,30 @@ export function TemperatureChart({
   data: MultiPoint[];
   range: Range;
 }>) {
+  const { resolved } = useTheme();
+  const isDark = resolved === "dark";
+
+  const chartColors = isDark
+    ? {
+        grid: "#2d2626",
+        axis: "#3d3434",
+        tick: "#a39999",
+        label: "#f5f0f0",
+        tooltipBg: "#1a1717",
+        tooltipBorder: "#2d2626",
+      }
+    : {
+        grid: "#e5e5e5",
+        axis: "#d4d4d4",
+        tick: "#737373",
+        label: "#171717",
+        tooltipBg: "#ffffff",
+        tooltipBorder: "#e5e5e5",
+      };
+
   const { rows, deviceIds } = useMemo(
     () => bucketizeMulti(data, range),
-    [data, range.from, range.to]
+    [data, range.from, range.to],
   );
   // Determine X domain: if data span is much smaller than selected range, zoom to data.
   const dataMin = rows.length
@@ -62,20 +84,20 @@ export function TemperatureChart({
           data={rows}
           margin={{ top: 10, right: 20, bottom: 10, left: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+          <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
           <XAxis
             dataKey="ts"
             type="number"
             domain={xDomain}
             tickFormatter={(v) => fmtTime(new Date(v))}
-            stroke="#9ca3af"
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
+            stroke={chartColors.axis}
+            tick={{ fill: chartColors.tick, fontSize: 12 }}
           />
           <YAxis
             unit="°C"
             width={48}
-            stroke="#9ca3af"
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
+            stroke={chartColors.axis}
+            tick={{ fill: chartColors.tick, fontSize: 12 }}
           />
           <Tooltip
             labelFormatter={(v) => new Date(v as number).toLocaleString()}
@@ -84,12 +106,13 @@ export function TemperatureChart({
               name,
             ]}
             contentStyle={{
-              background: "#1c2330",
-              border: "1px solid #334155",
+              background: chartColors.tooltipBg,
+              border: `1px solid ${chartColors.tooltipBorder}`,
               borderRadius: "0.75rem",
               padding: "0.5rem 0.75rem",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
             }}
-            labelStyle={{ color: "#e2e8f0" }}
+            labelStyle={{ color: chartColors.label }}
           />
           <Legend />
           {deviceIds.map((id, i) => (

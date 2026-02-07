@@ -14,7 +14,12 @@ export const AuthErrorMessage: React.FC<AuthErrorMessageProps> = ({
   const { t } = useTranslation();
   if (!error) return null;
   return (
-    <div className={["text-red-600 text-sm text-center", className].join(" ")}>
+    <div
+      className={[
+        "text-red-600 dark:text-red-400 text-sm text-center",
+        className,
+      ].join(" ")}
+    >
       <p>{t("authError")}</p>
     </div>
   );

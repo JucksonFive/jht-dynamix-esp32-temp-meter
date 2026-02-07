@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "src/ui/Elements/Button/Button";
 
 interface LogoutButtonProps {
   onLogout: () => void;
@@ -13,20 +12,18 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <Button
-      intent="ghost"
-      size="sm"
+    <button
       onClick={onLogout}
       className={[
-        "relative overflow-hidden font-medium",
-        "bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan text-white",
-        "shadow-lg shadow-neon-purple/30 hover:shadow-neon-purple/50",
-        "focus:ring-neon-purple/40",
+        "px-4 py-2 text-sm font-medium rounded-lg",
+        "bg-accent-500 text-white",
+        "hover:bg-accent-600",
+        "transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500/40",
         className,
       ].join(" ")}
     >
-      <span className="relative z-10">{t("logout")}</span>
-    </Button>
+      {t("logout")}
+    </button>
   );
 };
 

@@ -19,6 +19,11 @@ vi.mock("../../utils/runtimeConfig", async () => ({
   getRuntimeConfig: (...args: any[]) => getRuntimeConfig(...args),
 }));
 
+// Mock the Three.js scene — cannot run WebGL in JSDOM
+vi.mock("./Components/LoginScene", async () => ({
+  default: () => <div data-testid="login-scene" />,
+}));
+
 describe("pages/Login/Login.tsx", () => {
   let reloadMock: ReturnType<typeof vi.fn>;
   let originalLocation: Location;
@@ -68,7 +73,7 @@ describe("pages/Login/Login.tsx", () => {
       expect(signIn).toHaveBeenCalledWith({
         username: "a@b.com",
         password: "pw",
-      })
+      }),
     );
     await waitFor(() => expect(getCurrentUser).toHaveBeenCalledTimes(1));
 

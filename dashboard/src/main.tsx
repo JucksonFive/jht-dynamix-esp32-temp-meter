@@ -6,6 +6,7 @@ import "src/index.css";
 import { Amplify } from "aws-amplify";
 import { buildAmplifyConfig } from "src/amplify-config";
 import { AppProvider } from "src/contexts/AppContext";
+import { ThemeProvider } from "src/contexts/ThemeContext";
 import { fetchDashboardConfig } from "src/services/api";
 import { setRuntimeConfig } from "src/utils/runtimeConfig";
 
@@ -19,10 +20,12 @@ const bootstrap = async () => {
 
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-      <AppProvider>
-        <App />
-      </AppProvider>
-    </React.StrictMode>
+      <ThemeProvider>
+        <AppProvider>
+          <App />
+        </AppProvider>
+      </ThemeProvider>
+    </React.StrictMode>,
   );
 };
 

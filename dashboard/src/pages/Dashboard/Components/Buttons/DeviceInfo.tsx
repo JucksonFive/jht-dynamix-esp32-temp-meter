@@ -10,8 +10,10 @@ interface DeviceInfoProps {
 export const DeviceInfo: React.FC<DeviceInfoProps> = ({ id, updatedAt }) => {
   return (
     <div className="flex-1">
-      <span>{id}</span>
-      <span className="block text-[10px] text-gray-500">
+      <span className="font-medium text-neutral-900 dark:text-[#f5f0f0]">
+        {id}
+      </span>
+      <span className="block text-[10px] text-neutral-500 dark:text-[#a39999]">
         {t("lastSeen")}: {formatDateTime(updatedAt)}
       </span>
     </div>

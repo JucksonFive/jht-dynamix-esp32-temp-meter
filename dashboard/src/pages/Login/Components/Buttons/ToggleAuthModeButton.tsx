@@ -20,7 +20,7 @@ export const ToggleAuthModeButton: React.FC<ToggleAuthModeButtonProps> = ({
         intent="link"
         size="sm"
         onClick={onToggleMode}
-        className="text-neon-purple hover:text-neon-pink"
+        className="text-accent-600 dark:text-[#fb7185] hover:text-accent-700"
       >
         {mode === "signin" ? t("authCreateAccount") : t("authAlreadyAccount")}
       </Button>

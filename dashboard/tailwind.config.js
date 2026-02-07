@@ -1,32 +1,55 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: "class",
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        midnight: {
-          900: "#0d1017",
-          800: "#141924",
-          700: "#1c2330",
-          600: "#252f40",
+        primary: {
+          50: "#fff1f2",
+          100: "#ffe4e6",
+          200: "#fecdd3",
+          300: "#fda4af",
+          400: "#fb7185",
+          500: "#e11d48",
+          600: "#be123c",
+          700: "#9f1239",
+          800: "#881337",
+          900: "#4c0519",
         },
-        neon: {
-          purple: "#805ad5",
-          fuchsia: "#d946ef",
-          pink: "#ec4899",
-          blue: "#6366f1",
-          cyan: "#06b6d4",
+        neutral: {
+          50: "#fdf8f8",
+          100: "#f9f5f5",
+          200: "#f0e5e5",
+          300: "#d4d4d4",
+          400: "#a3a3a3",
+          500: "#737373",
+          600: "#525252",
+          700: "#404040",
+          800: "#262626",
+          900: "#171717",
+        },
+        accent: {
+          50: "#fff1f2",
+          100: "#ffe4e6",
+          200: "#fecdd3",
+          400: "#fb7185",
+          500: "#e11d48",
+          600: "#be123c",
+          700: "#9f1239",
+        },
+        status: {
+          cold: "#3b82f6",
+          normal: "#22c55e",
+          warm: "#eab308",
+          hot: "#ef4444",
         },
       },
-      backgroundImage: {
-        "gradient-dashboard":
-          "radial-gradient(circle at 20% 20%, rgba(124,58,237,0.15), transparent 60%), radial-gradient(circle at 80% 30%, rgba(6,182,212,0.12), transparent 65%), linear-gradient(135deg, #111827 0%, #1f2937 60%, #0f172a 100%)",
+      fontFamily: {
+        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        "glow-purple":
-          "0 0 0 1px rgba(124,58,237,0.4), 0 4px 24px -4px rgba(124,58,237,0.35)",
-        "inner-soft": "inset 0 1px 0 0 rgba(255,255,255,0.04)",
+        card: "0 1px 3px rgba(0,0,0,0.08)",
       },
     },
   },

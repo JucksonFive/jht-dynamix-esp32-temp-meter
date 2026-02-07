@@ -13,8 +13,8 @@ export const DeviceStatusIndicator: React.FC<DeviceStatusIndicatorProps> = ({
         className={[
           "w-2 h-2 rounded-full",
           isOnline
-            ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"
-            : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]",
+            ? "bg-status-normal shadow-[0_0_6px_rgba(34,197,94,0.6)]"
+            : "bg-status-hot shadow-[0_0_6px_rgba(239,68,68,0.6)]",
           "animate-pulse",
         ].join(" ")}
       />

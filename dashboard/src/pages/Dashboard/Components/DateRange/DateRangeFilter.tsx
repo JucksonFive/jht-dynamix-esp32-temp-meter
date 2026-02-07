@@ -8,14 +8,14 @@ interface DateRangeFilterProps {
 }
 
 export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
-  className = "mb-6 flex flex-col sm:flex-row sm:items-end gap-4 relative z-40",
+  className = "mb-4 flex flex-col sm:flex-row sm:items-end gap-4 relative z-40",
 }) => {
   const { t } = useTranslation();
   const { range, setRange } = useAppContext();
   return (
     <section className={className}>
-      <div className="bg-midnight-800/70 backdrop-blur-xl rounded-2xl shadow-inner-soft ring-1 ring-white/10 p-5 w-full sm:w-auto border border-white/5">
-        <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-400 mb-2">
+      <div className="panel p-4 w-full sm:w-auto bg-white dark:bg-[#1a1717] border border-neutral-300 dark:border-[#3d3434]">
+        <div className="text-xs font-medium uppercase tracking-wider text-neutral-600 dark:text-[#a39999] mb-3">
           {t("dateRange")}
         </div>
         <DateRangePicker
