@@ -30,9 +30,17 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("aws-amplify")) return "amplify";
-            if (id.includes("recharts")) return "recharts";
-            if (id.includes("date-fns")) return "date-fns";
+            if (id.includes("three")) return "three";
+            if (id.includes("@react-three")) return "r3f";
+            if (id.includes("react-dom")) return "react-dom";
+            if (id.includes("react")) return "react";
+            if (id.includes("aws-amplify") || id.includes("@aws-amplify"))
+              return "amplify";
+            if (id.includes("recharts") || id.includes("d3-"))
+              return "recharts";
+            if (id.includes("date-fns") || id.includes("react-datepicker"))
+              return "date-fns";
+            if (id.includes("i18next")) return "i18n";
             return "vendor";
           }
         },
