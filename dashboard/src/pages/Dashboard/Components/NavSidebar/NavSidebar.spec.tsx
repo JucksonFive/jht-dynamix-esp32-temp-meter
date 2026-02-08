@@ -28,11 +28,11 @@ vi.mock("../Buttons/LogoutButton", async () => ({
 }));
 
 describe("pages/Dashboard/Components/NavSidebar/NavSidebar.tsx", () => {
-  let onToggle: ReturnType<typeof vi.fn>;
+  const onToggle = vi.fn<() => void>();
 
   beforeEach(() => {
     handleLogout.mockClear();
-    onToggle = vi.fn();
+    onToggle.mockClear();
   });
 
   it("renders collapsed sidebar with nav toggle", () => {
