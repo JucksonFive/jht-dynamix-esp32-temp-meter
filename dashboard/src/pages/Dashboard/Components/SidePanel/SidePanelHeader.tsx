@@ -12,7 +12,9 @@ export const SidePanelHeader: React.FC<SidePanelHeaderProps> = ({
 }) => {
   return (
     <div className={["flex items-center gap-2 mb-3", className].join(" ")}>
-      <h2 className="text-lg font-semibold">{title}</h2>
+      <h2 className="text-sm font-semibold text-neutral-900 dark:text-[#f5f0f0]">
+        {title}
+      </h2>
       <InfoButton />
     </div>
   );

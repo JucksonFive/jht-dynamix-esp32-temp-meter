@@ -27,7 +27,7 @@ const DeviceMultiToggle: React.FC<DeviceMultiToggleProps> = ({
     >
       <input
         type="checkbox"
-        className="h-4 w-4 accent-neon-purple focus:ring-neon-purple/50"
+        className="h-4 w-4 accent-accent-600 focus:ring-accent-500/50 rounded"
         checked={active}
         onChange={onToggle}
         aria-checked={active}

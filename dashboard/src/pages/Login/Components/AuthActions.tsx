@@ -1,9 +1,9 @@
 import React from "react";
-import { Button } from "src/ui/Elements/Button/Button";
-import { Nullable } from "src/utils/types";
 import { AuthErrorMessage } from "src/pages/Login/Components/AuthErrorMessage";
 import { AuthButtonContent } from "src/pages/Login/Components/Buttons/AuthButtonContent";
 import { ToggleAuthModeButton } from "src/pages/Login/Components/Buttons/ToggleAuthModeButton";
+import { Button } from "src/ui/Elements/Button/Button";
+import { Nullable } from "src/utils/types";
 
 export interface AuthActionsProps {
   mode: "signin" | "signup";
@@ -25,12 +25,12 @@ export const AuthActions: React.FC<AuthActionsProps> = ({
   return (
     <div>
       <Button
-        intent="ghost"
+        intent="primary"
         size="md"
         onClick={onAuth}
         disabled={disabled}
         aria-busy={loading}
-        className="w-full mb-4 gap-2 relative overflow-hidden bg-gradient-to-r from-neon-purple via-neon-pink to-neon-cyan text-white shadow-lg shadow-neon-purple/30 hover:shadow-neon-purple/50 focus:ring-neon-purple/40"
+        className="w-full mb-4 gap-2 bg-accent-500 text-white hover:bg-accent-600 font-medium"
       >
         <AuthButtonContent mode={mode} loading={loading} />
       </Button>

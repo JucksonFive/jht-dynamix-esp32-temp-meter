@@ -24,7 +24,7 @@ export const InfoButton: React.FC<InfoButtonProps> = ({
       title={ttl}
       onClick={onClick}
       className={[
-        "text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded transition-colors",
+        "text-neutral-500 dark:text-[#a39999] hover:text-neutral-800 dark:hover:text-[#f5f0f0] focus:outline-none focus:ring-2 focus:ring-accent-500 rounded transition-colors",
         className,
       ].join(" ")}
     >

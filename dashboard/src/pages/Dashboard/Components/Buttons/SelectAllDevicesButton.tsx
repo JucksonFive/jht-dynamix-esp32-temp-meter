@@ -27,15 +27,15 @@ export const SelectAllDevicesButton: React.FC<SelectAllDevicesButtonProps> = ({
         onClick={() => (allSelected ? onUnselectAll() : onSelectAll())}
         title={t("tooltipSelectAll")}
         className={[
-          "w-full flex items-center justify-between text-left px-2.5 py-2 rounded-lg",
-          "transition-colors border",
+          "w-full flex items-center justify-between text-left px-3 py-2",
+          "transition-colors border rounded-lg text-sm",
           allSelected
-            ? "bg-gradient-to-r from-neon-purple/25 via-neon-pink/25 to-neon-cyan/25 border-neon-purple/40 text-neon-purple"
-            : "bg-white/5 border-white/10 hover:border-neon-purple/40 hover:bg-white/10 text-gray-300 hover:text-gray-100",
-          "focus:outline-none focus:ring-2 focus:ring-neon-purple/40",
+            ? "bg-accent-50 dark:bg-[#2d1219] border-accent-500 dark:border-[#f43f5e] text-accent-600 dark:text-[#fb7185]"
+            : "bg-neutral-50 dark:bg-[#231f1f] border-neutral-200 dark:border-[#2d2626] text-neutral-800 dark:text-[#d4c5c5] hover:border-accent-500 hover:text-accent-600",
+          "focus:outline-none focus:ring-2 focus:ring-accent-500/40",
         ].join(" ")}
       >
-        <span className="text-sm font-medium">
+        <span className="font-medium">
           {allSelected ? t("unselectAll") : t("selectAll")}
         </span>
         <span
@@ -43,21 +43,13 @@ export const SelectAllDevicesButton: React.FC<SelectAllDevicesButtonProps> = ({
           aria-hidden="true"
         >
           {allSelected && (
-            <img
-              src={checkAllIcon}
-              alt="all"
-              className="w-4 h-4 text-green-400"
-            />
+            <img src={checkAllIcon} alt="all" className="w-4 h-4" />
           )}
           {isIndeterminate && !allSelected && (
-            <img
-              src={indeterminateIcon}
-              alt="partial"
-              className="w-4 h-4 text-current"
-            />
+            <img src={indeterminateIcon} alt="partial" className="w-4 h-4" />
           )}
           {!allSelected && !isIndeterminate && (
-            <span className="text-[10px] text-gray-300">
+            <span className="text-[10px] text-neutral-500 dark:text-[#a39999]">
               {selected > 0 ? selected : 0}
             </span>
           )}

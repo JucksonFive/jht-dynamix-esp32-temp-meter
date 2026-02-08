@@ -16,9 +16,9 @@ export const DateRangePicker = ({ value, onChange }: Readonly<Props>) => {
   const toDate = value.to ? new Date(value.to) : null;
 
   return (
-    <div className="flex flex-col gap-3 relative z-30 text-xs">
-      <div className="flex flex-col gap-1 w-full">
-        <label className="block text-[10px] uppercase tracking-wide font-semibold text-gray-400">
+    <div className="flex flex-col sm:flex-row gap-4 relative z-30 text-sm">
+      <div className="flex flex-col gap-1">
+        <label className="block text-xs font-medium text-neutral-600 dark:text-[#a39999]">
           {t("fromLabel")}
         </label>
         <div className="relative group">
@@ -33,16 +33,16 @@ export const DateRangePicker = ({ value, onChange }: Readonly<Props>) => {
             }
             maxDate={toDate || undefined}
             dateFormat="dd.MM.yyyy"
-            className="w-full pl-8 rounded-md bg-midnight-700/60 border border-white/10 focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/40 text-gray-200 placeholder-gray-500 text-[11px] py-2 backdrop-blur-sm transition-colors"
+            className="w-full pl-8 bg-neutral-50 dark:bg-[#231f1f] border border-neutral-200 dark:border-[#2d2626] rounded-lg focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 text-neutral-900 dark:text-[#f5f0f0] placeholder-neutral-400 dark:placeholder-[#5d5050] text-sm py-2 px-3 transition-colors"
             popperClassName="z-50"
           />
-          <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-neon-purple/70 group-focus-within:text-neon-purple">
-            📅
+          <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-accent-500/70 group-focus-within:text-accent-500">
+            ◷
           </span>
         </div>
       </div>
-      <div className="flex flex-col gap-1 w-full">
-        <label className="block text-[10px] uppercase tracking-wide font-semibold text-gray-400">
+      <div className="flex flex-col gap-1">
+        <label className="block text-xs font-medium text-neutral-600 dark:text-[#a39999]">
           {t("toLabel")}
         </label>
         <div className="relative group">
@@ -58,11 +58,11 @@ export const DateRangePicker = ({ value, onChange }: Readonly<Props>) => {
             minDate={fromDate || undefined}
             maxDate={new Date()}
             dateFormat="dd.MM.yyyy"
-            className="w-full pl-8 rounded-md bg-midnight-700/60 border border-white/10 focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/40 text-gray-200 placeholder-gray-500 text-[11px] py-2 backdrop-blur-sm transition-colors"
+            className="w-full pl-8 bg-neutral-50 dark:bg-[#231f1f] border border-neutral-200 dark:border-[#2d2626] rounded-lg focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 text-neutral-900 dark:text-[#f5f0f0] placeholder-neutral-400 dark:placeholder-[#5d5050] text-sm py-2 px-3 transition-colors"
             popperClassName="z-50"
           />
-          <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-neon-purple/70 group-focus-within:text-neon-purple">
-            📅
+          <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-accent-500/70 group-focus-within:text-accent-500">
+            ◷
           </span>
         </div>
       </div>

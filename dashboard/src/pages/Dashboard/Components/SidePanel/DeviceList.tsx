@@ -1,10 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { Device } from "src/services/types";
 import DeleteDeviceButton from "src/pages/Dashboard/Components/Buttons/DeleteDeviceButton";
 import DeviceMultiToggle from "src/pages/Dashboard/Components/Buttons/DeviceMultiToggle";
 import { DeviceSelectButton } from "src/pages/Dashboard/Components/Buttons/DeviceSelectButton";
+import { Device } from "src/services/types";
 
 interface DeviceListProps {
   devices: Device[];
@@ -32,10 +32,10 @@ export const DeviceList: React.FC<DeviceListProps> = ({
           <li key={d.deviceId}>
             <div
               className={[
-                "flex items-center gap-2 rounded-lg px-2.5 py-2 transition-colors group",
+                "flex items-center gap-2 px-3 py-2 transition-all group border rounded-xl",
                 isActive
-                  ? "bg-gradient-to-r from-neon-purple/25 via-neon-pink/25 to-neon-cyan/25 border border-neon-purple/40 shadow-glow-purple"
-                  : "bg-white/5 border border-white/10 hover:border-neon-purple/40 hover:bg-white/10",
+                  ? "device-selected border-accent-500 bg-accent-50 dark:bg-[#2d1219] dark:border-[#f43f5e]"
+                  : "bg-white dark:bg-[#1a1717] border-neutral-300 dark:border-[#3d3434] hover:border-neutral-400 dark:hover:border-[#4d4040] hover:shadow-sm",
               ].join(" ")}
             >
               <DeviceSelectButton
@@ -60,7 +60,9 @@ export const DeviceList: React.FC<DeviceListProps> = ({
         );
       })}
       {devices.length === 0 && (
-        <li className="text-sm text-gray-500">{t("noDevices")}</li>
+        <li className="text-sm text-neutral-500 dark:text-[#a39999]">
+          {t("noDevices")}
+        </li>
       )}
     </ul>
   );

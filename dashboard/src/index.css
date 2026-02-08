@@ -2,38 +2,191 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Themed react-datepicker overrides for dark neon dashboard */
+/* Rosewood Elegant Theme — Light + Dark ("Ember Night") */
+
+:root {
+  --bg-primary: #fdf8f8;
+  --bg-card: #ffffff;
+  --bg-surface: #f9f5f5;
+  --border: #f0e5e5;
+  --border-strong: #d4d4d4;
+  --text-primary: #171717;
+  --text-secondary: #737373;
+  --accent: #e11d48;
+  --accent-hover: #be123c;
+  --accent-light: #fff1f2;
+  
+  --status-cold: #3b82f6;
+  --status-normal: #22c55e;
+  --status-warm: #eab308;
+  --status-hot: #ef4444;
+
+  /* Chart tokens */
+  --chart-grid: #e5e5e5;
+  --chart-axis: #d4d4d4;
+  --chart-tick: #737373;
+  --chart-label: #171717;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-border: #e5e5e5;
+}
+
+.dark {
+  --bg-primary: #0f0d0d;
+  --bg-card: #1a1717;
+  --bg-surface: #231f1f;
+  --border: #2d2626;
+  --border-strong: #3d3434;
+  --text-primary: #f5f0f0;
+  --text-secondary: #a39999;
+  --accent: #f43f5e;
+  --accent-hover: #e11d48;
+  --accent-light: #2d1219;
+
+  --status-cold: #60a5fa;
+  --status-normal: #4ade80;
+  --status-warm: #facc15;
+  --status-hot: #f87171;
+
+  /* Chart tokens */
+  --chart-grid: #2d2626;
+  --chart-axis: #3d3434;
+  --chart-tick: #a39999;
+  --chart-label: #f5f0f0;
+  --chart-tooltip-bg: #1a1717;
+  --chart-tooltip-border: #2d2626;
+}
+
+/* Subtle pulse animation */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.97);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Panel / Card */
+.panel {
+  @apply bg-white border border-neutral-200 rounded-xl dark:bg-[#1a1717] dark:border-[#2d2626];
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.dark .panel {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.panel-header {
+  @apply border-b border-neutral-200 px-4 py-3 dark:border-[#2d2626];
+}
+
+/* Device selected state */
+.device-selected {
+  @apply bg-primary-50 border-primary-500 dark:bg-[#2d1219] dark:border-[#f43f5e];
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* Status indicators */
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+.status-online { @apply bg-status-normal; }
+.status-warning { @apply bg-status-warm; }
+.status-error { @apply bg-status-hot; }
+.status-offline { @apply bg-neutral-400; }
+
+/* Temperature bar */
+.temp-bar {
+  @apply rounded-full;
+  background: linear-gradient(90deg, 
+    var(--status-cold) 0%, 
+    var(--status-normal) 40%, 
+    var(--status-warm) 70%, 
+    var(--status-hot) 100%
+  );
+}
+
+/* React Datepicker - Light Theme */
 .react-datepicker-popper { z-index: 50; }
 .react-datepicker {
-	@apply bg-midnight-800/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-xl text-gray-100 p-2; 
-	font-size: 0.75rem; /* base small */
+  @apply bg-white border border-neutral-200 rounded-xl text-neutral-900 p-3 shadow-lg;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 0.875rem;
 }
 .react-datepicker__triangle { display: none; }
 .react-datepicker__header {
-	@apply bg-transparent border-b border-white/10 pb-2 mb-2; 
+  @apply bg-transparent border-b border-neutral-200 pb-3 mb-3;
 }
 .react-datepicker__current-month {
-	@apply text-xs font-semibold tracking-wide text-gray-200; 
+  @apply text-sm font-semibold text-neutral-900;
 }
 .react-datepicker__day-name {
-	@apply text-[10px] font-medium text-gray-400 w-8; 
+  @apply text-xs text-neutral-500 w-8 font-medium;
 }
 .react-datepicker__day {
-	@apply w-8 h-8 leading-8 rounded-md text-gray-300 transition-colors; 
+  @apply w-8 h-8 leading-8 rounded-lg text-neutral-700 transition-colors;
 }
 .react-datepicker__day:hover {
-	@apply bg-neon-purple/25 text-gray-100; 
+  @apply bg-neutral-100 text-neutral-900;
 }
 .react-datepicker__day--keyboard-selected,
 .react-datepicker__day--selected {
-	@apply bg-gradient-to-br from-neon-purple via-neon-pink to-neon-cyan text-white shadow-glow-purple font-semibold; 
+  @apply bg-accent-600 text-white font-medium;
 }
-.react-datepicker__day--outside-month { @apply opacity-30 text-gray-500; }
+.react-datepicker__day--outside-month { @apply opacity-30 text-neutral-400; }
 .react-datepicker__day--disabled { @apply opacity-20 cursor-not-allowed line-through; }
-.react-datepicker__navigation-icon::before { @apply border-white/60; }
-.react-datepicker__navigation:hover *::before { @apply border-neon-purple; }
+.react-datepicker__navigation-icon::before { @apply border-neutral-400; }
+.react-datepicker__navigation:hover *::before { @apply border-accent-600; }
 .react-datepicker__month-container { @apply float-none; }
 .react-datepicker__month { @apply m-0; }
 .react-datepicker__day--today:not(.react-datepicker__day--selected) {
-	@apply ring-1 ring-neon-purple/50; 
+  @apply ring-1 ring-accent-500/50;
+}
+
+/* React Datepicker — Dark overrides */
+.dark .react-datepicker {
+  @apply bg-[#1a1717] border-[#2d2626] text-[#f5f0f0];
+}
+.dark .react-datepicker__header {
+  @apply bg-transparent border-[#2d2626];
+}
+.dark .react-datepicker__current-month {
+  @apply text-[#f5f0f0];
+}
+.dark .react-datepicker__day-name {
+  @apply text-[#a39999];
+}
+.dark .react-datepicker__day {
+  @apply text-[#d4c5c5];
+}
+.dark .react-datepicker__day:hover {
+  @apply bg-[#2d2626] text-[#f5f0f0];
+}
+.dark .react-datepicker__day--keyboard-selected,
+.dark .react-datepicker__day--selected {
+  @apply bg-accent-600 text-white;
+}
+.dark .react-datepicker__day--outside-month {
+  @apply text-[#5d5050];
+}
+.dark .react-datepicker__navigation-icon::before {
+  @apply border-[#a39999];
+}
+.dark .react-datepicker__navigation:hover *::before {
+  @apply border-accent-500;
 }

@@ -9,6 +9,9 @@ vi.mock("../../contexts/AppContext", async () => ({
 vi.mock("./Components/HeaderBar", async () => ({
   HeaderBar: () => <div data-testid="hdr" />,
 }));
+vi.mock("./Components/NavSidebar/NavSidebar", async () => ({
+  NavSidebar: () => <div data-testid="nav" />,
+}));
 vi.mock("./Components/DateRange/DateRangeFilter", async () => ({
   DateRangeFilter: () => <div data-testid="range" />,
 }));
@@ -26,7 +29,6 @@ describe("pages/Dashboard/Dashboard.tsx", () => {
   it("shows help when no device selected", () => {
     useAppContext.mockReturnValueOnce({
       selectedDeviceIds: [],
-      handleLogout: vi.fn(),
     });
     render(<Dashboard />);
     expect(screen.getByTestId("hdr")).toBeInTheDocument();
@@ -38,7 +40,6 @@ describe("pages/Dashboard/Dashboard.tsx", () => {
   it("shows chart when at least one device selected", () => {
     useAppContext.mockReturnValueOnce({
       selectedDeviceIds: ["a"],
-      handleLogout: vi.fn(),
     });
     render(<Dashboard />);
     expect(screen.getByTestId("chart")).toBeInTheDocument();
