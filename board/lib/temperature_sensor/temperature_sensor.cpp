@@ -75,8 +75,15 @@ void TempSensor::publishTemperature(
     if (MQTT::isConnected())
     {
         Serial.printf("[MQTT] About to publish on topic=%s\n", mqttTopic.c_str());
-        MQTT::publish(mqttTopic.c_str(), payload);
-        Serial.printf("[MQTT] publish topic=%s len=%d | %s\n", mqttTopic.c_str(), strlen(payload), payload);
+        if (MQTT::publish(mqttTopic.c_str(), payload))
+        {
+            Serial.printf("[MQTT] publish topic=%s len=%d | %s\n", mqttTopic.c_str(), strlen(payload), payload);
+        }
+        else
+        {
+            Serial.println("[MQTT] publish failed, queuing offline");
+            offlineSync.queueEvent(mqttTopic.c_str(), payload, millis());
+        }
     }
     else
     {
