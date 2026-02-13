@@ -55,15 +55,15 @@ export function TemperatureChart({
 
   const { rows, deviceIds } = useMemo(
     () => bucketizeMulti(data, range),
-    [data, range.from, range.to],
+    [data, range],
   );
   // Determine X domain: if data span is much smaller than selected range, zoom to data.
   const dataMin = rows.length
-    ? Math.min(...rows.map((r: any) => r.ts as number))
+    ? Math.min(...rows.map((r) => r.ts as number))
     : new Date(range.from).getTime();
 
   const dataMax = rows.length
-    ? Math.max(...rows.map((r: any) => r.ts as number))
+    ? Math.max(...rows.map((r) => r.ts as number))
     : new Date(range.to).getTime();
 
   const selectedSpan =
@@ -101,10 +101,12 @@ export function TemperatureChart({
           />
           <Tooltip
             labelFormatter={(v) => new Date(v as number).toLocaleString()}
-            formatter={(val: any, name) => [
-              `${(val as number).toFixed(2)} °C`,
-              name,
-            ]}
+            formatter={(val) => {
+              if (typeof val === "number") {
+                return [`${val.toFixed(2)} °C`];
+              }
+              return ["N/A"];
+            }}
             contentStyle={{
               background: chartColors.tooltipBg,
               border: `1px solid ${chartColors.tooltipBorder}`,

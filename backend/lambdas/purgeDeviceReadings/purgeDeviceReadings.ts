@@ -37,7 +37,7 @@ async function processRecord(record: SQSRecord) {
   let body: { deviceId?: string };
   try {
     body = JSON.parse(record.body || "{}");
-  } catch (e) {
+  } catch {
     console.error("Invalid JSON in SQS message body", { body: record.body });
     // No re-throw, as this message is poison and won't succeed on retry.
     return;
@@ -52,7 +52,7 @@ async function processRecord(record: SQSRecord) {
   console.log(`Starting purge for deviceId: ${deviceId}`);
 
   let totalDeleted = 0;
-  let lastEvaluatedKey: Record<string, any> | undefined;
+  let lastEvaluatedKey: Record<string, unknown> | undefined;
 
   do {
     const queryResult: QueryCommandOutput = await ddb.send(
@@ -68,7 +68,7 @@ async function processRecord(record: SQSRecord) {
           "#ts": "timestamp",
         },
         ExclusiveStartKey: lastEvaluatedKey,
-      })
+      }),
     );
 
     // ...
@@ -86,7 +86,7 @@ async function processRecord(record: SQSRecord) {
       // ...
       totalDeleted += deletedCount;
       console.log(
-        `Attempted to delete a batch of ${items.length} items. Successfully deleted: ${deletedCount}. Total deleted so far: ${totalDeleted}`
+        `Attempted to delete a batch of ${items.length} items. Successfully deleted: ${deletedCount}. Total deleted so far: ${totalDeleted}`,
       );
     }
 
@@ -94,7 +94,7 @@ async function processRecord(record: SQSRecord) {
   } while (lastEvaluatedKey);
 
   console.log(
-    `Purge complete for deviceId: ${deviceId}. Total items deleted: ${totalDeleted}.`
+    `Purge complete for deviceId: ${deviceId}. Total items deleted: ${totalDeleted}.`,
   );
 }
 
@@ -104,7 +104,7 @@ async function processRecord(record: SQSRecord) {
  * @param items - An array of items, each with at least the primary key attributes.
  * @returns The number of items successfully deleted.
  */
-async function batchDelete(items: Record<string, any>[]): Promise<number> {
+async function batchDelete(items: Record<string, unknown>[]): Promise<number> {
   let totalDeleted = 0;
 
   // Split items into chunks of BATCH_WRITE_MAX
@@ -131,8 +131,8 @@ async function batchDelete(items: Record<string, any>[]): Promise<number> {
           `Retrying ${
             unprocessedItems.length
           } unprocessed items. Attempt ${attempt}. Waiting ${delay.toFixed(
-            0
-          )}ms.`
+            0,
+          )}ms.`,
         );
         await new Promise((res) => setTimeout(res, delay));
       }
@@ -147,10 +147,10 @@ async function batchDelete(items: Record<string, any>[]): Promise<number> {
 
       unprocessedItems = (result.UnprocessedItems?.[TABLE_NAME] || []).filter(
         (
-          item
+          item,
         ): item is {
-          DeleteRequest: { Key: { deviceId: any; timestamp: any } };
-        } => item.DeleteRequest !== undefined
+          DeleteRequest: { Key: { deviceId: string; timestamp: string } };
+        } => item.DeleteRequest !== undefined,
       );
       attempt++;
     }
@@ -163,7 +163,7 @@ async function batchDelete(items: Record<string, any>[]): Promise<number> {
         "Failed to delete all items in a chunk after max retries.",
         {
           unprocessedCount: unprocessedItems.length,
-        }
+        },
       );
     }
   }

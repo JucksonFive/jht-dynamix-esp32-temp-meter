@@ -8,7 +8,7 @@ const TABLE_NAME = process.env.TABLE_NAME!;
 const GSI_NAME = process.env.GSI_NAME!;
 
 export const handler = async (
-  event: APIGatewayEvent
+  event: APIGatewayEvent,
 ): Promise<APIGatewayProxyResult> => {
   const userId = getUserId(event);
   const qs = event.queryStringParameters ?? {};
@@ -19,7 +19,7 @@ export const handler = async (
   if (!userId)
     return response(401, { message: "Unauthorized: Missing UserId" });
 
-  const exprValues: Record<string, any> = { ":userId": userId };
+  const exprValues: Record<string, string> = { ":userId": userId };
   let keyCondition = "userId = :userId";
   if (from && to) {
     keyCondition += " AND #ts BETWEEN :from AND :to";
@@ -50,7 +50,7 @@ export const handler = async (
         ScanIndexForward: false, // newest first
         Limit: limit,
         ExclusiveStartKey: exclusiveStartKey,
-      })
+      }),
     );
 
     const items = result.Items ?? [];

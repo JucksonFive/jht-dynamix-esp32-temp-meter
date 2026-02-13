@@ -14,7 +14,9 @@ const bootstrap = async () => {
   try {
     const cfg = await fetchDashboardConfig();
     setRuntimeConfig(cfg);
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Failed to fetch dashboard config:", e);
+  }
 
   Amplify.configure(buildAmplifyConfig());
 

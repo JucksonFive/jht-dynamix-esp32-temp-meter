@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FiTrash2 } from "react-icons/fi";
+import ErrorIndicator from "src/pages/Dashboard/Components/Buttons/ErrorIndicator";
 import { deleteUserDevice } from "src/services/api";
 import ConfirmDialog from "src/ui/Elements/Modal/ConfirmDialog";
 import { Nullable } from "src/utils/types";
-import ErrorIndicator from "src/pages/Dashboard/Components/Buttons/ErrorIndicator";
 
 interface DeleteDeviceButtonProps {
   deviceId: string;
@@ -29,9 +29,9 @@ export const DeleteDeviceButton: React.FC<DeleteDeviceButtonProps> = ({
       setLoading(true);
       await deleteUserDevice(deviceId);
       onDeleted?.(deviceId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Delete device failed", err);
-      setError(err.message || "Delete failed");
+      setError(err instanceof Error ? err.message : "Delete failed");
     } finally {
       setLoading(false);
       setOpen(false);

@@ -9,7 +9,7 @@ jest.mock("@aws-sdk/lib-dynamodb", () => {
     ...actual,
     DynamoDBDocumentClient: {
       from: () => ({
-        send: (command: any) => sendMock(command),
+        send: (command: unknown) => sendMock(command),
       }),
     },
   };
@@ -17,6 +17,7 @@ jest.mock("@aws-sdk/lib-dynamodb", () => {
 
 describe("postToDynamoDb handler", () => {
   // Import after mocks applied
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { handler } = require("./postToDynamo");
 
   beforeEach(() => {
@@ -26,7 +27,7 @@ describe("postToDynamoDb handler", () => {
   });
 
   it("returns 400 for invalid payload", async () => {
-    const res = await handler({} as any);
+    const res = await handler({} as unknown);
     expect(res.statusCode).toBe(400);
     expect(sendMock).not.toHaveBeenCalled();
   });

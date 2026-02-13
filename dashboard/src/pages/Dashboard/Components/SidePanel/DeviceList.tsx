@@ -9,7 +9,6 @@ import { Device } from "src/services/types";
 interface DeviceListProps {
   devices: Device[];
   selectedDeviceIds: string[];
-  lastSeen?: Map<string, string>;
   onSelectSingle: (id: string) => void;
   onToggleMulti: (id: string) => void;
   onDeviceDeleted: (deviceId: string) => void;
@@ -19,7 +18,6 @@ export const DeviceList: React.FC<DeviceListProps> = ({
   devices,
   selectedDeviceIds,
   onSelectSingle,
-  lastSeen,
   onToggleMulti,
   onDeviceDeleted,
 }) => {

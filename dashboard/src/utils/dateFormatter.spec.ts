@@ -13,11 +13,9 @@ describe("utils/dateFormatter.ts", () => {
     const iso = "2025-11-27T12:34:56.000Z";
 
     // Time separator varies by locale (":" vs ".").
-    expect(formatDateTime(iso)).toMatch(
-      /^\d{2}\.\d{2}\.\d{4} \d{2}[:\.]\d{2}$/
-    );
+    expect(formatDateTime(iso)).toMatch(/^\d{2}\.\d{2}\.\d{4} \d{2}[:.]\d{2}$/);
     expect(formatDate(iso)).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
-    expect(formatTime(iso)).toMatch(/^\d{2}[:\.]\d{2}$/);
+    expect(formatTime(iso)).toMatch(/^\d{2}[:.]\d{2}$/);
   });
 
   it("supports YMD helpers", () => {
@@ -30,7 +28,7 @@ describe("utils/dateFormatter.ts", () => {
     const s = toLocalOffsetIso(d);
     // Some environments may serialize zero-offset as 'Z' instead of '+00:00'.
     expect(s).toMatch(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})$/,
     );
   });
 

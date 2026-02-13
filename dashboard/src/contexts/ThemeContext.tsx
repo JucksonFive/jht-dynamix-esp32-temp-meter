@@ -45,7 +45,9 @@ function getSavedMode(): ThemeMode {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "light" || saved === "dark" || saved === "system")
       return saved;
-  } catch {}
+  } catch {
+    /* storage unavailable */
+  }
   return "system";
 }
 
@@ -69,7 +71,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       setModeState(m);
       try {
         localStorage.setItem(STORAGE_KEY, m);
-      } catch {}
+      } catch {
+        /* storage unavailable */
+      }
       applyTheme(m);
     },
     [applyTheme],
@@ -82,7 +86,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   // Apply on mount
   useEffect(() => {
     applyTheme(mode);
-  }, []);
+  }, [applyTheme, mode]);
 
   // Listen for system preference changes
   useEffect(() => {
