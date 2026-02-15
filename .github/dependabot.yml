@@ -1,0 +1,83 @@
+# Dependabot – automated dependency updates & security alerts
+# https://docs.github.com/en/code-security/dependabot
+version: 2
+updates:
+  # ── npm: dashboard ──────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /dashboard
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - dashboard
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # ── npm: backend ────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - backend
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # ── npm: root (workspace) ──────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+
+  # ── npm: homepage ──────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /homepage
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - homepage
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # ── pip: agents ─────────────────────────────────────────
+  - package-ecosystem: pip
+    directory: /agents
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - agents
+
+  # ── GitHub Actions ──────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - ci
