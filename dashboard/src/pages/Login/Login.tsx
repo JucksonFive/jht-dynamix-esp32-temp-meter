@@ -45,9 +45,10 @@ export const Login = () => {
         // Trigger re-authentication by signing out and letting context re-initialize
         window.location.reload();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Auth failed", err);
-      const msg: string = err?.message || "Authentication failed";
+      const msg: string =
+        (err instanceof Error ? err.message : null) || "Authentication failed";
       const friendly = /UserPool not configured/i.test(msg)
         ? "Authentication is not configured. Please check /config and Cognito settings."
         : msg;
@@ -102,7 +103,7 @@ export const Login = () => {
               loading={loading}
               error={error}
               disabled={loading || !email || !password}
-              onAuth={(e) => handleAuth(e as any)}
+              onAuth={(e) => handleAuth(e as unknown as React.FormEvent)}
               onToggleMode={() =>
                 setMode(mode === "signin" ? "signup" : "signin")
               }

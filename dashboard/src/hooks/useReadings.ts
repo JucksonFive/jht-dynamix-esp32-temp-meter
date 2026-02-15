@@ -1,11 +1,11 @@
 // hooks/useReadings.ts
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   fetchAllUserReadings,
   getLatestReadingPerDevice,
 } from "src/services/api";
 import type { Reading } from "src/services/types";
-import type { Nullable, Range } from "src/utils/types";
+import type { Nullable, Range, User } from "src/utils/types";
 
 export interface DeviceData {
   id: string;
@@ -14,41 +14,45 @@ export interface DeviceData {
 }
 
 export function useReadings(
-  user: any,
+  user: Nullable<User>,
   range: Range,
-  { intervalMs = 60000 } = {}
+  { intervalMs = 60000 } = {},
 ) {
   const [data, setData] = useState<DeviceData[]>([]);
   const [error, setErr] = useState<Nullable<string>>(null);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<Nullable<number>>(null);
   const [lastSeen, setLastSeen] = useState<Map<string, string>>(new Map());
-  const load = async (signal?: AbortSignal, r = range) => {
-    try {
-      setErr(null);
-      setLoading(true);
-      const items = await fetchAllUserReadings({
-        from: r.from,
-        to: r.to,
-        pageSize: 500,
-      });
-      if (signal?.aborted) return;
+  const load = useCallback(
+    async (signal?: AbortSignal, r = range) => {
+      try {
+        setErr(null);
+        setLoading(true);
+        const items = await fetchAllUserReadings({
+          from: r.from,
+          to: r.to,
+          pageSize: 500,
+        });
+        if (signal?.aborted) return;
 
-      setLastSeen(getLatestReadingPerDevice(items));
+        setLastSeen(getLatestReadingPerDevice(items));
 
-      setData(
-        items.map((x: Reading) => ({
-          id: x.deviceId,
-          temperature: x.temperature,
-          timestamp: x.timestamp,
-        }))
-      );
-    } catch (e: any) {
-      if (!signal?.aborted) setErr(e?.message ?? "Fetch failed");
-    } finally {
-      if (!signal?.aborted) setLoading(false);
-    }
-  };
+        setData(
+          items.map((x: Reading) => ({
+            id: x.deviceId,
+            temperature: x.temperature,
+            timestamp: x.timestamp,
+          })),
+        );
+      } catch (e: unknown) {
+        if (!signal?.aborted)
+          setErr(e instanceof Error ? e.message : "Fetch failed");
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [range],
+  );
 
   useEffect(() => {
     if (!user) return;
@@ -68,7 +72,7 @@ export function useReadings(
         timerRef.current = null;
       }
     };
-  }, [user, range.from, range.to, intervalMs]);
+  }, [user, range.from, range.to, intervalMs, load]);
 
   return { data, loading, error, lastSeen, reload: () => load(undefined) };
 }

@@ -68,7 +68,7 @@ describe("services/api.ts", () => {
           nextKey: "n",
         },
         headers: { Authorization: "Bearer id-token" },
-      })
+      }),
     );
   });
 
@@ -122,7 +122,7 @@ describe("services/api.ts", () => {
         method: "DELETE",
         url: "https://api.example.test/delete-user-device",
         params: { deviceId: "dev-1" },
-      })
+      }),
     );
   });
 
@@ -131,7 +131,7 @@ describe("services/api.ts", () => {
     (axios.request as unknown as Mock).mockResolvedValueOnce({ data: [] });
     await fetchUserDevices({ signal: ac.signal });
     expect(axios.request).toHaveBeenCalledWith(
-      expect.objectContaining({ signal: ac.signal })
+      expect.objectContaining({ signal: ac.signal }),
     );
   });
 
@@ -142,7 +142,7 @@ describe("services/api.ts", () => {
     const res = await fetchReadingBounds();
     expect(res).toEqual({ min: null, max: null });
     expect(axios.request).toHaveBeenCalledWith(
-      expect.objectContaining({ url: "https://api.example.test/bounds" })
+      expect.objectContaining({ url: "https://api.example.test/bounds" }),
     );
   });
 
@@ -153,8 +153,8 @@ describe("services/api.ts", () => {
       return {
         ok: true,
         json: async () => ({ VITE_BASE_API_URL: "x" }),
-      } as any;
-    }) as any;
+      } as Response;
+    }) as typeof fetch;
 
     const res = await fetchDashboardConfig();
     expect(res).toEqual({ VITE_BASE_API_URL: "x" });

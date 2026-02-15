@@ -9,14 +9,14 @@ const signIn = vi.fn();
 const signUp = vi.fn();
 const getCurrentUser = vi.fn();
 vi.mock("@aws-amplify/auth", async () => ({
-  signIn: (...args: any[]) => signIn(...args),
-  signUp: (...args: any[]) => signUp(...args),
-  getCurrentUser: (...args: any[]) => getCurrentUser(...args),
+  signIn: (...args: unknown[]) => signIn(...args),
+  signUp: (...args: unknown[]) => signUp(...args),
+  getCurrentUser: (...args: unknown[]) => getCurrentUser(...args),
 }));
 
 const getRuntimeConfig = vi.fn();
 vi.mock("../../utils/runtimeConfig", async () => ({
-  getRuntimeConfig: (...args: any[]) => getRuntimeConfig(...args),
+  getRuntimeConfig: (...args: unknown[]) => getRuntimeConfig(...args),
 }));
 
 // Mock the Three.js scene — cannot run WebGL in JSDOM
@@ -78,5 +78,128 @@ describe("pages/Login/Login.tsx", () => {
     await waitFor(() => expect(getCurrentUser).toHaveBeenCalledTimes(1));
 
     expect(reloadMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows error when auth config is missing", async () => {
+    const user = userEvent.setup();
+    getRuntimeConfig.mockReturnValueOnce({
+      VITE_COGNITO_USER_POOL_ID: "",
+      VITE_COGNITO_USER_POOL_CLIENT_ID: "",
+    });
+
+    render(<Login />);
+
+    await user.type(screen.getByPlaceholderText("Email"), "a@b.com");
+    await user.type(screen.getByPlaceholderText("Password"), "pw");
+    await user.click(screen.getByRole("button", { name: "authSignIn" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("authError")).toBeInTheDocument(),
+    );
+  });
+
+  it("shows friendly message for UserPool not configured error", async () => {
+    const user = userEvent.setup();
+    getRuntimeConfig.mockReturnValueOnce({
+      VITE_COGNITO_USER_POOL_ID: "pool",
+      VITE_COGNITO_USER_POOL_CLIENT_ID: "client",
+    });
+    signIn.mockRejectedValueOnce(new Error("UserPool not configured"));
+
+    render(<Login />);
+
+    await user.type(screen.getByPlaceholderText("Email"), "a@b.com");
+    await user.type(screen.getByPlaceholderText("Password"), "pw");
+    await user.click(screen.getByRole("button", { name: "authSignIn" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("authError")).toBeInTheDocument(),
+    );
+  });
+
+  it("handles generic auth failure", async () => {
+    const user = userEvent.setup();
+    getRuntimeConfig.mockReturnValueOnce({
+      VITE_COGNITO_USER_POOL_ID: "pool",
+      VITE_COGNITO_USER_POOL_CLIENT_ID: "client",
+    });
+    signIn.mockRejectedValueOnce(new Error("Wrong password"));
+
+    render(<Login />);
+
+    await user.type(screen.getByPlaceholderText("Email"), "a@b.com");
+    await user.type(screen.getByPlaceholderText("Password"), "pw");
+    await user.click(screen.getByRole("button", { name: "authSignIn" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("authError")).toBeInTheDocument(),
+    );
+  });
+
+  it("handles non-Error rejection gracefully", async () => {
+    const user = userEvent.setup();
+    getRuntimeConfig.mockReturnValueOnce({
+      VITE_COGNITO_USER_POOL_ID: "pool",
+      VITE_COGNITO_USER_POOL_CLIENT_ID: "client",
+    });
+    signIn.mockRejectedValueOnce("string error");
+
+    render(<Login />);
+
+    await user.type(screen.getByPlaceholderText("Email"), "a@b.com");
+    await user.type(screen.getByPlaceholderText("Password"), "pw");
+    await user.click(screen.getByRole("button", { name: "authSignIn" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("authError")).toBeInTheDocument(),
+    );
+  });
+
+  it("toggles to signup mode and calls signUp", async () => {
+    const user = userEvent.setup();
+
+    getRuntimeConfig.mockReturnValue({
+      VITE_COGNITO_USER_POOL_ID: "pool",
+      VITE_COGNITO_USER_POOL_CLIENT_ID: "client",
+    });
+    signUp.mockResolvedValueOnce({});
+    getCurrentUser.mockResolvedValueOnce(null);
+
+    render(<Login />);
+
+    // Toggle to signup mode (button text is the i18n key)
+    await user.click(screen.getByRole("button", { name: "authCreateAccount" }));
+
+    await user.type(screen.getByPlaceholderText("Email"), "new@b.com");
+    await user.type(screen.getByPlaceholderText("Password"), "pass123");
+    await user.click(screen.getByRole("button", { name: "authSignUp" }));
+
+    await waitFor(() =>
+      expect(signUp).toHaveBeenCalledWith({
+        username: "new@b.com",
+        password: "pass123",
+        options: { userAttributes: { email: "new@b.com" } },
+      }),
+    );
+  });
+
+  it("does not reload when getCurrentUser returns null after auth", async () => {
+    const user = userEvent.setup();
+
+    getRuntimeConfig.mockReturnValueOnce({
+      VITE_COGNITO_USER_POOL_ID: "pool",
+      VITE_COGNITO_USER_POOL_CLIENT_ID: "client",
+    });
+    signIn.mockResolvedValueOnce({});
+    getCurrentUser.mockRejectedValueOnce(new Error("no user"));
+
+    render(<Login />);
+
+    await user.type(screen.getByPlaceholderText("Email"), "a@b.com");
+    await user.type(screen.getByPlaceholderText("Password"), "pw");
+    await user.click(screen.getByRole("button", { name: "authSignIn" }));
+
+    await waitFor(() => expect(getCurrentUser).toHaveBeenCalledTimes(1));
+    expect(reloadMock).not.toHaveBeenCalled();
   });
 });

@@ -1,8 +1,9 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useDevices } from "src/hooks/useDevices";
 
+const stableT = (k: string) => k;
 vi.mock("react-i18next", async () => ({
-  useTranslation: () => ({ t: (k: string) => k }),
+  useTranslation: () => ({ t: stableT }),
 }));
 
 const fetchUserDevices = vi.fn();

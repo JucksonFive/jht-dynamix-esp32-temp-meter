@@ -18,12 +18,7 @@ export const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
         <div className="text-xs font-medium uppercase tracking-wider text-neutral-600 dark:text-[#a39999] mb-3">
           {t("dateRange")}
         </div>
-        <DateRangePicker
-          value={range}
-          onChange={setRange}
-          // @ts-ignore: allowed prop provided for limiting range visually
-          allowed={{ min: range.from, max: range.to }}
-        />
+        <DateRangePicker value={range} onChange={setRange} />
       </div>
     </section>
   );

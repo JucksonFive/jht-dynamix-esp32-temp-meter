@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import * as dotenv from "dotenv";
 import { AuthStack } from "../lib/auth-stack";
@@ -11,7 +12,7 @@ import { LambdaStack } from "../lib/lambda-stack";
 import { CertStack } from "../lib/cert-stack";
 import { HomepageHostingStack } from "../lib/homepage-hosting-stack";
 
-dotenv.config({ path: require("path").resolve(__dirname, "../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 const app = new cdk.App();
 
 const domainName = process.env.DOMAIN_NAME;
@@ -72,15 +73,15 @@ const backendStack = new BackendStack(app, "BackendStack", {
   userPool: authStack.userPool,
 });
 
-const espAuthStack = new EspAuthStack(app, "EspAuthStack", {
+const _espAuthStack = new EspAuthStack(app, "EspAuthStack", {
   env: { account, region },
   userPoolId: authStack.userPool.userPoolId,
   clientId: authStack.userPoolClient.userPoolClientId,
 });
 
-let dashboardHostingStack: DashboardHostingStack | undefined;
+let _dashboardHostingStack: DashboardHostingStack | undefined;
 if (domainName && siteDomain && certStack?.certificateArn) {
-  dashboardHostingStack = new DashboardHostingStack(
+  _dashboardHostingStack = new DashboardHostingStack(
     app,
     "DashboardHostingStack",
     {
@@ -89,20 +90,24 @@ if (domainName && siteDomain && certStack?.certificateArn) {
       siteDomain,
       certificateArn: certStack.certificateArn,
       crossRegionReferences: true,
-    }
+    },
   );
 }
 
 // Deploy homepage at the apex (root) domain using same certificate
-let homepageHostingStack: HomepageHostingStack | undefined;
+let _homepageHostingStack: HomepageHostingStack | undefined;
 if (domainName && certStack?.certificateArn) {
-  homepageHostingStack = new HomepageHostingStack(app, "HomepageHostingStack", {
-    env: { account, region },
-    domainName,
-    siteDomain: domainName, // apex domain
-    certificateArn: certStack.certificateArn,
-    crossRegionReferences: true,
-  });
+  _homepageHostingStack = new HomepageHostingStack(
+    app,
+    "HomepageHostingStack",
+    {
+      env: { account, region },
+      domainName,
+      siteDomain: domainName, // apex domain
+      certificateArn: certStack.certificateArn,
+      crossRegionReferences: true,
+    },
+  );
 }
 // Add dependencies
 lambdaStack.addDependency(infraStack);

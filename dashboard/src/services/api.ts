@@ -19,21 +19,17 @@ async function apiRequest<T>(opts: {
     session.tokens?.accessToken?.toString();
   if (!token) throw new Error("Auth token not available");
 
-  try {
-    const res = await axios.request<T>({
-      method: opts.method ?? "GET",
-      url: `${BASE_URL}${opts.path}`,
-      params: opts.params,
-      data: opts.data,
-      signal: opts.signal,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return res.data;
-  } catch (err: any) {
-    throw err;
-  }
+  const res = await axios.request<T>({
+    method: opts.method ?? "GET",
+    url: `${BASE_URL}${opts.path}`,
+    params: opts.params,
+    data: opts.data,
+    signal: opts.signal,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
 }
 
 export async function fetchUserReadings(params?: {
@@ -97,7 +93,7 @@ export async function fetchUserDevices(opts?: {
 }
 
 export async function deleteUserDevice(
-  deviceId: string
+  deviceId: string,
 ): Promise<{ message: string }> {
   return apiRequest<{ message: string }>({
     method: "DELETE",
@@ -117,7 +113,7 @@ export async function fetchDashboardConfig(): Promise<Record<string, string>> {
 }
 
 export const getLatestReadingPerDevice = (
-  readings: ReadingsResponse["items"]
+  readings: ReadingsResponse["items"],
 ): Map<string, string> => {
   const latest = new Map<string, string>();
   readings.forEach((reading) => {

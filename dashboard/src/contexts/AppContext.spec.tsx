@@ -26,8 +26,16 @@ function Consumer() {
       <div data-testid="boot">{String(ctx.bootLoading)}</div>
       <div data-testid="user">{ctx.user?.username ?? "none"}</div>
       <div data-testid="sel">{ctx.selectedDeviceIds.join(",")}</div>
+      <div data-testid="range-from">{ctx.range.from}</div>
+      <div data-testid="range-to">{ctx.range.to}</div>
+      <div data-testid="data-loading">{String(ctx.dataLoading)}</div>
+      <div data-testid="data-error">{ctx.dataError ?? "none"}</div>
+      <div data-testid="devices-loading">{String(ctx.devicesLoading)}</div>
       <button onClick={() => ctx.setSelectedDeviceIds(["a", "b"])}>
         setSel
+      </button>
+      <button onClick={() => ctx.setSelectedDeviceIds(["dev1"])}>
+        selDev1
       </button>
       <button onClick={() => ctx.handleDeviceDeleted("a")}>delA</button>
       <button onClick={() => ctx.handleLogout()}>logout</button>
@@ -61,13 +69,13 @@ describe("contexts/AppContext.tsx", () => {
     render(
       <AppProvider>
         <Consumer />
-      </AppProvider>
+      </AppProvider>,
     );
 
     expect(screen.getByTestId("boot").textContent).toBe("true");
 
     await waitFor(() =>
-      expect(screen.getByTestId("boot").textContent).toBe("false")
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
     );
     expect(screen.getByTestId("user").textContent).toBe("john");
   });
@@ -81,11 +89,11 @@ describe("contexts/AppContext.tsx", () => {
     render(
       <AppProvider>
         <Consumer />
-      </AppProvider>
+      </AppProvider>,
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId("boot").textContent).toBe("false")
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
     );
 
     await user.click(screen.getByRole("button", { name: "setSel" }));
@@ -103,18 +111,133 @@ describe("contexts/AppContext.tsx", () => {
     render(
       <AppProvider>
         <Consumer />
-      </AppProvider>
+      </AppProvider>,
     );
 
     await waitFor(() =>
-      expect(screen.getByTestId("boot").textContent).toBe("false")
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
     );
     expect(screen.getByTestId("user").textContent).toBe("john");
 
     await user.click(screen.getByRole("button", { name: "logout" }));
     expect(signOut).toHaveBeenCalledTimes(1);
     await waitFor(() =>
-      expect(screen.getByTestId("user").textContent).toBe("none")
+      expect(screen.getByTestId("user").textContent).toBe("none"),
     );
+  });
+
+  it("sets user to null when getCurrentUser rejects", async () => {
+    getCurrentUser.mockRejectedValueOnce(new Error("not authenticated"));
+
+    render(
+      <AppProvider>
+        <Consumer />
+      </AppProvider>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
+    );
+    expect(screen.getByTestId("user").textContent).toBe("none");
+  });
+
+  it("initializes range from device updatedAt timestamps", async () => {
+    const deviceDate = new Date("2025-06-15T12:00:00Z");
+    useDevices.mockReturnValue({
+      devices: [{ deviceId: "dev1", updatedAt: deviceDate.toISOString() }],
+      loading: false,
+      removeDevice: vi.fn(),
+    });
+    getCurrentUser.mockResolvedValueOnce({ userId: "u", username: "john" });
+
+    render(
+      <AppProvider>
+        <Consumer />
+      </AppProvider>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
+    );
+
+    // Range should have been adjusted to the device's updatedAt
+    await waitFor(() => {
+      const to = screen.getByTestId("range-to").textContent;
+      expect(to).toBeTruthy();
+    });
+  });
+
+  it("adjusts range when selectedDeviceIds change", async () => {
+    const deviceDate = new Date("2025-07-20T10:00:00Z");
+    const removeDevice = vi.fn();
+    useDevices.mockReturnValue({
+      devices: [
+        { deviceId: "dev1", updatedAt: deviceDate.toISOString() },
+        {
+          deviceId: "dev2",
+          updatedAt: new Date("2025-07-19T10:00:00Z").toISOString(),
+        },
+      ],
+      loading: false,
+      removeDevice,
+    });
+    getCurrentUser.mockResolvedValueOnce({ userId: "u", username: "john" });
+
+    const user = userEvent.setup();
+    render(
+      <AppProvider>
+        <Consumer />
+      </AppProvider>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
+    );
+
+    // Select dev1 to trigger the selectedDeviceIds range-update effect
+    await user.click(screen.getByRole("button", { name: "selDev1" }));
+    expect(screen.getByTestId("sel").textContent).toBe("dev1");
+  });
+
+  it("exposes data loading and error from useReadings", async () => {
+    useReadings.mockReturnValue({
+      data: [{ ts: 1, temp: 22 }],
+      loading: true,
+      error: "timeout",
+      lastSeen: new Map(),
+    });
+    getCurrentUser.mockResolvedValueOnce({ userId: "u", username: "john" });
+
+    render(
+      <AppProvider>
+        <Consumer />
+      </AppProvider>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
+    );
+    expect(screen.getByTestId("data-loading").textContent).toBe("true");
+    expect(screen.getByTestId("data-error").textContent).toBe("timeout");
+  });
+
+  it("exposes devicesLoading from useDevices", async () => {
+    useDevices.mockReturnValue({
+      devices: [],
+      loading: true,
+      removeDevice: vi.fn(),
+    });
+    getCurrentUser.mockResolvedValueOnce({ userId: "u", username: "john" });
+
+    render(
+      <AppProvider>
+        <Consumer />
+      </AppProvider>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("boot").textContent).toBe("false"),
+    );
+    expect(screen.getByTestId("devices-loading").textContent).toBe("true");
   });
 });

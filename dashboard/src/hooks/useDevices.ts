@@ -3,9 +3,9 @@ import { fetchUserDevices } from "src/services/api";
 import { Device } from "src/services/types";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-import { Nullable } from "src/utils/types";
+import { Nullable, User } from "src/utils/types";
 
-export function useDevices(user: any) {
+export function useDevices(user: Nullable<User>) {
   const { t } = useTranslation();
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -30,7 +30,7 @@ export function useDevices(user: any) {
           signal: controller.signal,
         });
         setDevices(userDevices);
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!axios.isCancel(err)) {
           setError(t("fetchDevicesError"));
           console.error(err);
@@ -41,7 +41,7 @@ export function useDevices(user: any) {
     };
     getDevices();
     return () => controller.abort();
-  }, [user]);
+  }, [user, t]);
 
   return { devices, loading, error, removeDevice };
 }

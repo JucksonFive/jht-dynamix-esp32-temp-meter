@@ -24,7 +24,7 @@ export const DateRangePicker = ({ value, onChange }: Readonly<Props>) => {
         <div className="relative group">
           <DatePicker
             selected={fromDate}
-            onChange={(d) =>
+            onChange={(d: Date | null) =>
               d &&
               onChange({
                 from: format(d, "yyyy-MM-dd"),
@@ -48,7 +48,7 @@ export const DateRangePicker = ({ value, onChange }: Readonly<Props>) => {
         <div className="relative group">
           <DatePicker
             selected={toDate}
-            onChange={(d) =>
+            onChange={(d: Date | null) =>
               d &&
               onChange({
                 from: value.from,

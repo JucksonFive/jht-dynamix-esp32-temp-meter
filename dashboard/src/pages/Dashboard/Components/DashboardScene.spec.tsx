@@ -8,8 +8,8 @@ vi.mock("@react-three/fiber", async () => ({
 
 vi.mock("src/contexts/ThemeContext", async () => ({
   useTheme: () => ({
-    mode: "dark",
-    resolved: "dark",
+    mode: "light",
+    resolved: "light",
     setMode: vi.fn(),
     toggle: vi.fn(),
   }),
@@ -59,11 +59,18 @@ vi.mock("three", () => {
   return { Color, Vector3, Object3D, BufferGeometry, BufferAttribute };
 });
 
-import { LoginScene } from "src/pages/Login/Components/LoginScene";
+import { DashboardScene } from "src/pages/Dashboard/Components/DashboardScene";
 
-describe("pages/Login/Components/LoginScene.tsx", () => {
+describe("pages/Dashboard/Components/DashboardScene.tsx", () => {
   it("renders the scene container", () => {
-    render(<LoginScene />);
-    expect(screen.getByTestId("login-scene")).toBeInTheDocument();
+    render(<DashboardScene />);
+    expect(screen.getByTestId("dashboard-scene")).toBeInTheDocument();
+  });
+
+  it("has pointer-events-none class for non-interactive overlay", () => {
+    render(<DashboardScene />);
+    expect(screen.getByTestId("dashboard-scene")).toHaveClass(
+      "pointer-events-none",
+    );
   });
 });

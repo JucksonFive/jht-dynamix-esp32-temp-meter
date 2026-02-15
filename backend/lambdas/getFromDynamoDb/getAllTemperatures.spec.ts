@@ -8,13 +8,14 @@ jest.mock("@aws-sdk/lib-dynamodb", () => {
     ...actual,
     DynamoDBDocumentClient: {
       from: () => ({
-        send: (cmd: any) => sendMock(cmd),
+        send: (cmd: unknown) => sendMock(cmd),
       }),
     },
   };
 });
 
 describe("getAllTemperatures handler", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { handler } = require("./getAllTemperatures");
 
   beforeEach(() => {
@@ -29,7 +30,7 @@ describe("getAllTemperatures handler", () => {
 
     const res = await handler({
       queryStringParameters: { deviceId: "a" },
-    } as any);
+    } as unknown);
 
     expect(res.statusCode).toBe(200);
     expect(sendMock).toHaveBeenCalledTimes(1);
@@ -42,14 +43,14 @@ describe("getAllTemperatures handler", () => {
       Items: [{ deviceId: "b", temperature: 2 }],
     });
 
-    const res = await handler({} as any);
+    const res = await handler({} as unknown);
     expect(res.statusCode).toBe(200);
     expect(sendMock.mock.calls[0][0]).toBeInstanceOf(ScanCommand);
   });
 
   it("returns 500 on error", async () => {
     sendMock.mockRejectedValueOnce(new Error("ddb fail"));
-    const res = await handler({} as any);
+    const res = await handler({} as unknown);
     expect(res.statusCode).toBe(500);
     expect(JSON.parse(res.body).message).toBe("Server error");
   });

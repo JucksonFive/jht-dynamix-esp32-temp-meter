@@ -8,16 +8,26 @@ const TABLE_NAME = process.env.DEVICES_TABLE!;
 
 const getUserId = (event: APIGatewayProxyEvent): string | undefined => {
   // REST API + Cognito User Pools authorizer
-  const v1 = (event.requestContext as any)?.authorizer?.claims;
-  if (v1?.sub) return v1.sub as string;
+  const v1 = (
+    event.requestContext as unknown as Record<
+      string,
+      Record<string, Record<string, string>>
+    >
+  )?.authorizer?.claims;
+  if (v1?.sub) return v1.sub;
   // HTTP API v2 (varalla, jos joskus siirryt)
-  const v2 = (event.requestContext as any)?.authorizer?.jwt?.claims;
-  if (v2?.sub) return v2.sub as string;
+  const v2 = (
+    event.requestContext as unknown as Record<
+      string,
+      Record<string, Record<string, Record<string, string>>>
+    >
+  )?.authorizer?.jwt?.claims;
+  if (v2?.sub) return v2.sub;
   return undefined;
 };
 
 export const handler = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
   const response = makeResponse(event);
 
@@ -58,11 +68,14 @@ export const handler = async (
         ConditionExpression:
           "attribute_not_exists(#u) AND attribute_not_exists(#d)",
         ExpressionAttributeNames: { "#u": "userId", "#d": "deviceId" },
-      })
+      }),
     );
     return response(201, item);
-  } catch (err: any) {
-    if (err?.name === "ConditionalCheckFailedException") {
+  } catch (err: unknown) {
+    if (
+      err instanceof Error &&
+      err.name === "ConditionalCheckFailedException"
+    ) {
       return response(409, { message: "Device already registered" });
     }
     console.error(err);

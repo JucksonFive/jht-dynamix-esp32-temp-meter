@@ -10,7 +10,7 @@ const TABLE_NAME = process.env.DEVICES_TABLE!;
 const DELETE_QUEUE_URL = process.env.DELETE_QUEUE_URL!;
 
 export const handler = async (
-  event: APIGatewayEvent
+  event: APIGatewayEvent,
 ): Promise<APIGatewayProxyResult> => {
   const response = makeResponse(event);
 
@@ -36,7 +36,7 @@ export const handler = async (
           "#u": "userId",
           "#d": "deviceId",
         },
-      })
+      }),
     );
 
     // Then, send a message to the SQS queue to purge its readings
@@ -44,14 +44,17 @@ export const handler = async (
       new SendMessageCommand({
         QueueUrl: DELETE_QUEUE_URL,
         MessageBody: JSON.stringify({ userId, deviceId }),
-      })
+      }),
     );
 
     return response(200, {
       message: `Device ${deviceId} deleted and readings purge initiated`,
     });
-  } catch (err: any) {
-    if (err?.name === "ConditionalCheckFailedException") {
+  } catch (err: unknown) {
+    if (
+      err instanceof Error &&
+      err.name === "ConditionalCheckFailedException"
+    ) {
       return response(404, { message: `Device ${deviceId} not found` });
     }
     console.error("Delete failed", { err });

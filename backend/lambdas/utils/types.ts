@@ -9,8 +9,6 @@ export type HandlerEvent = {
 };
 // --- Types ---
 export type DeviceDeleteMsg = { userId: string; deviceId: string };
-// Perusavaimet Temperatures-tauluun (säädä jos sinun skeema poikkeaa)
 export type ReadingKey = { userId: string; timestamp: string | number };
-export type Item = { [k: string]: any };
-// BatchWrite helper: anna sisään _varmasti_ olemassa oleva RequestItems
+export type Item = Record<string, unknown>;
 export type WriteReqMap = NonNullable<BatchWriteCommandInput["RequestItems"]>;
