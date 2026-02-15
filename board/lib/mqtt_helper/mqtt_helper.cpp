@@ -1,79 +1,78 @@
 #include "mqtt_helper.h"
-#include <PubSubClient.h>
-#include <WiFiClient.h>
 #include <Arduino.h>
 #include <cert_helper.h>
+#include <PubSubClient.h>
+#include <WiFiClient.h>
 
 namespace
 {
-    WiFiClientSecure secureClient;
-    PubSubClient client(secureClient);
+WiFiClientSecure secureClient;
+PubSubClient client(secureClient);
+}  // namespace
+
+void MQTT::setup(const char* server, int port)
+{
+  CertHelper::loadCerts(secureClient);
+  client.setServer(server, port);
 }
 
-void MQTT::setup(const char *server, int port)
+void MQTT::ensureConnection(const char* clientId)
 {
-    CertHelper::loadCerts(secureClient);
-    client.setServer(server, port);
+  if (client.connected())
+  {
+    return;
+  }
+
+  Serial.print("Connecting to MQTT...");
+
+  if (client.connect(clientId))
+  {
+    Serial.println(" ✅ connected");
+  }
+  else
+  {
+    Serial.printf(" ❌ failed, rc=%d try again in 5 seconds\n", client.state());
+  }
 }
 
-void MQTT::ensureConnection(const char *clientId)
+bool MQTT::publish(const char* topic, const char* payload)
 {
-    if (client.connected())
-    {
-        return;
-    }
-
-    Serial.print("Connecting to MQTT...");
-
-    if (client.connect(clientId))
-    {
-        Serial.println(" ✅ connected");
-    }
-    else
-    {
-        Serial.printf(" ❌ failed, rc=%d try again in 5 seconds\n", client.state());
-    }
-}
-
-bool MQTT::publish(const char *topic, const char *payload)
-{
-    return client.publish(topic, payload);
+  return client.publish(topic, payload);
 }
 
 void MQTT::loop()
 {
-    client.loop();
+  client.loop();
 }
 
 bool MQTT::isConnected()
 {
-    return client.connected();
+  return client.connected();
 }
 
 // Callback-funktio MQTT-lähetykselle
-bool MQTT::sendMqttMessage(const char *topic, const char *payload)
+bool MQTT::sendMqttMessage(const char* topic, const char* payload)
 {
-    if (!MQTT::isConnected())
-    {
-        return false;
-    }
-    MQTT::publish(topic, payload);
-    return true;
+  if (!MQTT::isConnected())
+  {
+    return false;
+  }
+  return MQTT::publish(topic, payload);
 }
 
-void MQTT::maintainMqttConnection(const String &clientId)
+void MQTT::maintainMqttConnection(const String& clientId)
 {
-    if (!MQTT::isConnected())
+  if (!MQTT::isConnected())
+  {
+    static unsigned long lastConnectAttempt = 0;
+    if (millis() - lastConnectAttempt > 5000)
     {
-        static unsigned long lastConnectAttempt = 0;
-        if (millis() - lastConnectAttempt > 5000)
-        {
-            MQTT::ensureConnection(clientId.c_str());
-            lastConnectAttempt = millis();
-        }
+      MQTT::ensureConnection(clientId.c_str());
+      lastConnectAttempt = millis();
     }
-    if (MQTT::isConnected())
-    {
-        MQTT::loop();
-    }
+  }
+  if (MQTT::isConnected())
+  {
+    MQTT::loop();
+  }
 }
