@@ -1,0 +1,46 @@
+# Supply-chain: SBOM generation (Syft) + vulnerability scan (Grype)
+# Runs on push to main and weekly schedule
+name: SBOM & Vulnerability Scan
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1" # Every Monday at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sbom-and-scan:
+    name: Generate SBOM & scan vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── Syft – generate SBOM (CycloneDX) ───────────────
+      - name: Generate SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+          artifact-name: sbom.cdx.json
+
+      # ── Grype – scan SBOM for vulnerabilities ──────────
+      - name: Scan SBOM with Grype
+        uses: anchore/scan-action@v4
+        id: grype
+        with:
+          sbom: sbom.cdx.json
+          fail-build: false
+          severity-cutoff: high
+
+      - name: Upload Grype SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+          category: grype

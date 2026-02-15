@@ -1,5 +1,10 @@
 # JHT-Dynamix ESP32 Temperature Meter
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Hizaguru/jht-dynamix-esp32-temp-meter/badge)](https://scorecard.dev/viewer/?uri=github.com/Hizaguru/jht-dynamix-esp32-temp-meter)
+[![CodeQL](https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter/actions/workflows/codeql.yml/badge.svg)](https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter/actions/workflows/codeql.yml)
+[![SBOM & Vulnerability Scan](https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter/actions/workflows/sbom-vuln-scan.yml/badge.svg)](https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter/actions/workflows/sbom-vuln-scan.yml)
+[![Lint](https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter/actions/workflows/lint.yml/badge.svg)](https://github.com/Hizaguru/jht-dynamix-esp32-temp-meter/actions/workflows/lint.yml)
+
 This repository contains the complete source code for the JHT-Dynamix ESP32 Temperature Meter, a comprehensive IoT solution for real-time temperature monitoring. The system is composed of three main components: an ESP32-based sensor device, a serverless AWS backend, and a React-based web dashboard (https://app.jt-dynamix.com/).
 
 ## Project Structure
