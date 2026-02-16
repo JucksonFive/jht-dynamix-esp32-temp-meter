@@ -31,7 +31,7 @@ jobs:
 
       # ── Grype – scan SBOM for vulnerabilities ──────────
       - name: Scan SBOM with Grype
-        uses: anchore/scan-action@v4
+        uses: anchore/scan-action@v7
         id: grype
         with:
           sbom: sbom.cdx.json
