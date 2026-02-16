@@ -2,5 +2,12 @@
   "name": "jht-dynamix-esp32-temp-meter",
   "version": "0.1.0",
   "private": true,
-  "license": "MIT"
+  "license": "MIT",
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "@xstate/react>react": "19"
+      }
+    }
+  }
 }
