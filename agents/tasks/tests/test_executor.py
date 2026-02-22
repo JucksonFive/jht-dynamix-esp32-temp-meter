@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from agents.tasks.src.executor import extract_diff_blocks, apply_coder_plan, _detect_conflicts  # type: ignore
+from agents.tasks.src.executor import extract_diff_blocks, apply_coder_plan  # type: ignore
 
 SIMPLE_PLAN = """### Plan\n```diff\ndiff --git a/sample.txt b/sample.txt\n--- a/sample.txt\n+++ b/sample.txt\n@@\n-Hello\n+Hello world\n```\n"""
 
