@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch
-from pathlib import Path
 from agents.tasks.src.file_utils import save_coder_output, save_ticket_to_file
 
 @pytest.fixture

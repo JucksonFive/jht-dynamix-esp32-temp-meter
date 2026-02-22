@@ -1,12 +1,9 @@
 from pathlib import Path
 import os
 
-import pytest
-
 from agents.tasks.src.ai_core import _extract_ideas, _extract_json  # type: ignore
 from agents.tasks.src.file_utils import _slugify, save_ticket_to_file  # type: ignore
 from agents.tasks.src.history import load_previous_ideas  # type: ignore
-from agents.tasks.src.config import TICKETS_DIR  # type: ignore
 
 IDEA_TEXT = """Ideas:\n1. Implement structured logging\n2. Add metrics collection\n3. Refactor data layer\n"""
 
