@@ -95,9 +95,8 @@ if (domainName && siteDomain && certStack?.certificateArn) {
 }
 
 // Deploy homepage at the apex (root) domain using same certificate
-let _homepageHostingStack: HomepageHostingStack | undefined;
 if (domainName && certStack?.certificateArn) {
-  _homepageHostingStack = new HomepageHostingStack(
+  new HomepageHostingStack(
     app,
     "HomepageHostingStack",
     {
