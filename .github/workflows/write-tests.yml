@@ -30,8 +30,8 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
-          # Check out the actual PR head branch so we can push
-          ref: ${{ github.event.pull_request.head.ref }}
+          # Use SHA instead of ref to prevent ref injection attacks
+          ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.repository }}
           fetch-depth: 0
           persist-credentials: true
@@ -104,13 +104,28 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Checkout base repo (trusted scripts)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+          path: trusted
+
       - name: Checkout fork PR head (no credentials)
         uses: actions/checkout@v4
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Use trusted scripts from base repo
+        run: |
+          # Replace agent scripts with trusted versions from the base repo
+          rm -rf agents/
+          cp -r trusted/agents/ agents/
+          rm -rf trusted/
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
