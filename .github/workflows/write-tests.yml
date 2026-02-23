@@ -63,6 +63,8 @@ jobs:
 
       - name: Commit changes if any
         id: commit
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
@@ -71,7 +73,7 @@ jobs:
             git add -A
             git commit -m "chore(tests): auto-generate missing test stubs"
             # Ensure we push to the PR head branch explicitly
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+            git push origin "HEAD:${PR_HEAD_REF}"
           else
             echo "changes=false" >> $GITHUB_OUTPUT
           fi
