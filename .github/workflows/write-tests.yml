@@ -147,7 +147,7 @@ jobs:
 
       - name: Upload patch artifact
         if: steps.patch.outputs.changes == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: auto-tests-patch
           path: tests.patch
