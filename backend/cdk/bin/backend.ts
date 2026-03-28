@@ -73,15 +73,14 @@ const backendStack = new BackendStack(app, "BackendStack", {
   userPool: authStack.userPool,
 });
 
-const _espAuthStack = new EspAuthStack(app, "EspAuthStack", {
+new EspAuthStack(app, "EspAuthStack", {
   env: { account, region },
   userPoolId: authStack.userPool.userPoolId,
   clientId: authStack.userPoolClient.userPoolClientId,
 });
 
-let _dashboardHostingStack: DashboardHostingStack | undefined;
 if (domainName && siteDomain && certStack?.certificateArn) {
-  _dashboardHostingStack = new DashboardHostingStack(
+  new DashboardHostingStack(
     app,
     "DashboardHostingStack",
     {
