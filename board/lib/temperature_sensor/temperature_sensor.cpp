@@ -13,8 +13,8 @@ namespace
     Adafruit_SHT31 sht31 = Adafruit_SHT31();
     constexpr uint8_t I2C_SDA = 8;
     constexpr uint8_t I2C_SCL = 9;
-    constexpr uint8_t SHT3X_I2C_ADDR = 0x44;                            // GY-SHT30-D default address
-    constexpr unsigned long PUBLISH_INTERVAL_MS = 60UL * 60UL * 1000UL; // 1 hour
+    constexpr uint8_t SHT3X_I2C_ADDR = 0x44;               // GY-SHT31-D default address
+    constexpr unsigned long PUBLISH_INTERVAL_MS = 3600000; // 1 hour
 }
 
 void TempSensor::setup()
@@ -28,7 +28,7 @@ void TempSensor::setup()
     }
 
     sht31.heater(false);
-    Serial.println("[OK] SHT30 initialized");
+    Serial.println("[OK] SHT31 initialized");
 }
 
 float TempSensor::readCelsius()
@@ -74,8 +74,15 @@ void TempSensor::publishTemperature(
     if (MQTT::isConnected())
     {
         Serial.printf("[MQTT] About to publish on topic=%s\n", mqttTopic.c_str());
-        MQTT::publish(mqttTopic.c_str(), payload);
-        Serial.printf("[MQTT] publish topic=%s len=%d | %s\n", mqttTopic.c_str(), strlen(payload), payload);
+        if (MQTT::publish(mqttTopic.c_str(), payload))
+        {
+            Serial.printf("[MQTT] publish topic=%s len=%d | %s\n", mqttTopic.c_str(), strlen(payload), payload);
+        }
+        else
+        {
+            Serial.println("[MQTT] Publish failed (SSL error?), queuing offline");
+            offlineSync.queueEvent(mqttTopic.c_str(), payload, millis());
+        }
     }
     else
     {
