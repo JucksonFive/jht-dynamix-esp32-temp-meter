@@ -65,7 +65,8 @@ def run_patch(patch_text: str, apply: bool) -> int:
         temp_path = tf.name
     try:
         print(f"[INFO] Invoking: {' '.join(mode_args)} < {temp_path}")
-        proc = subprocess.run(mode_args, stdin=open(temp_path, "r"), cwd=ROOT, text=True)
+        with open(temp_path, "r") as patch_file:
+            proc = subprocess.run(mode_args, stdin=patch_file, cwd=ROOT, text=True)
         return proc.returncode
     finally:
         os.unlink(temp_path)
