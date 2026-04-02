@@ -31,7 +31,7 @@ jobs:
   # ── OSV-Scanner – known vulnerability check ────────────
   osv-scanner:
     name: OSV-Scanner (vuln check)
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.3.3
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.3.5
     permissions:
       actions: read
       contents: read
