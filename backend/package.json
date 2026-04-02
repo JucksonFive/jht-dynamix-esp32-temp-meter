@@ -32,7 +32,7 @@
     "@aws-sdk/client-secrets-manager": "^3.987.0",
     "@aws-sdk/client-sqs": "^3.990.0",
     "@aws-sdk/lib-dynamodb": "^3.990.0",
-    "aws-cdk-lib": "2.238.0",
+    "aws-cdk-lib": "2.246.0",
     "constructs": "^10.0.0",
     "dotenv": "^17.2.1"
   }
