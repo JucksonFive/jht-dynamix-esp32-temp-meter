@@ -52,12 +52,20 @@ function setWifiModalLoading(isLoading) {
   const pwd = document.getElementById("wifi-password");
 
   if (connectBtn) {
-    if (!connectBtn.dataset.defaultHtml) {
-      connectBtn.dataset.defaultHtml = connectBtn.innerHTML || "Connect";
+    if (!connectBtn.dataset.defaultText) {
+      connectBtn.dataset.defaultText = connectBtn.textContent || "Connect";
     }
-    connectBtn.innerHTML = isLoading
-      ? '<img src="favicon.svg" alt="Loading" class="spinner-icon" />'
-      : connectBtn.dataset.defaultHtml;
+    // Use safe DOM APIs instead of innerHTML to prevent XSS
+    while (connectBtn.firstChild) connectBtn.removeChild(connectBtn.firstChild);
+    if (isLoading) {
+      const img = document.createElement("img");
+      img.src = "favicon.svg";
+      img.alt = "Loading";
+      img.className = "spinner-icon";
+      connectBtn.appendChild(img);
+    } else {
+      connectBtn.textContent = connectBtn.dataset.defaultText;
+    }
     connectBtn.disabled = isLoading;
     connectBtn.setAttribute("aria-disabled", isLoading.toString());
     connectBtn.setAttribute("aria-busy", isLoading.toString());
