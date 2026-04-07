@@ -145,7 +145,7 @@ const pollWifiList = async (maxAttempts = 10, interval = 1000) => {
       if (token !== scanWifiToken) return;
       if (scanSpinner) scanSpinner.classList.remove("hidden");
       const text = await res.text();
-      console.log(`📡 Attempt ${attempt + 1}:`, text);
+      console.log("📡 Attempt %d: %s", attempt + 1, text);
 
       // jos ei vielä valmis
       if (res.status === 202 || text === "Scan started") {
