@@ -78,7 +78,7 @@ jobs:
 
       - name: Comment files created
         if: steps.commit.outputs.changes == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { execSync } = require('node:child_process');
@@ -155,7 +155,7 @@ jobs:
 
       - name: Comment with instructions
         if: steps.patch.outputs.changes == 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { execSync } = require('node:child_process');
